@@ -1,0 +1,24 @@
+{
+  "name": "vitafarma-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.12.0" },
+  "packageManager": "npm@10.9.9",
+  "workspaces": ["frontend", "backend", "packages/contracts"],
+  "scripts": {
+    "build:contracts": "npm run build --workspace @vitafarma/contracts",
+    "dev": "npm run build:contracts && concurrently --kill-others --names api,web \"npm run dev --workspace @vitafarma/backend\" \"npm run dev --workspace @vitafarma/frontend\"",
+    "dev:frontend": "npm run build:contracts && npm run dev --workspace @vitafarma/frontend",
+    "dev:backend": "npm run build:contracts && npm run dev --workspace @vitafarma/backend",
+    "typecheck": "npm run build:contracts && npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "build": "npm run build:contracts && npm run build --workspace @vitafarma/backend && npm run build --workspace @vitafarma/frontend",
+    "test:backend": "npm run build:contracts && npm run test --workspace @vitafarma/backend",
+    "test:e2e": "npm run build:contracts && npm run test:e2e --workspace @vitafarma/frontend",
+    "test:architecture": "node --test backend/test/architecture.test.mjs",
+    "test": "npm run test:architecture && npm run test:backend && npm run test:e2e",
+    "check": "npm run typecheck && npm run lint && npm run build && npm test"
+  },
+  "devDependencies": { "concurrently": "10.0.6" }
+}

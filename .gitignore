@@ -1,0 +1,37 @@
+node_modules/
+dist/
+.cache/
+.browsers/
+test-results/
+playwright-report/
+coverage/
+*.tsbuildinfo
+*.local
+.env
+.env.*
+!.env.example
+
+# Configuración e instrucciones locales
+.agent/
+.agents/
+.codex/
+.claude/
+.cursor/
+.continue/
+.gemini/
+.openai/
+.windsurf/
+.aider*
+AGENTS*.md
+CLAUDE*.md
+GEMINI*.md
+skills-lock.json
+LEEME-INSTALACION.md
+/.github/copilot-instructions.md
+/.github/agents/
+/.github/prompts/
+/docs/PROMPTS-CODEX-UI.md
+/docs/VITAFARMA-IMPLEMENTACION-CODEX.md
+
+# Configuración local de servicios
+/supabase/config.toml
