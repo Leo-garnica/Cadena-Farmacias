@@ -2,19 +2,21 @@
 
 Base de desarrollo con **monolito modular NestJS + TypeScript**, frontend
 **React + Vite** y contratos de lectura compartidos. El modelo académico PostgreSQL
-se conserva. Esta base funciona localmente con datos sintéticos.
+se conserva. El login usa Supabase Auth; el inventario funciona con datos sintéticos.
 
 ## Empezar
 
 Requiere Node.js **22.12 o superior** compatible con Vite 8 y npm 10.
 Ejecutar desde la raíz, donde está este README:
 
+Preparar primero `frontend/.env.local` y una cuenta de Supabase Auth.
+
 ```sh
 npm ci
 npm run dev
 ```
 
-- Interfaz: <http://127.0.0.1:5173/inventario>
+- Inicio de sesión: <http://127.0.0.1:5173/equipo/entrar>
 - Salud de la API demo: <http://127.0.0.1:3000/api/v1/health>
 - `Ctrl+C` detiene los servidores locales.
 
@@ -42,12 +44,14 @@ La explicación completa está en [Arquitectura](docs/architecture/ARCHITECTURE.
 | Área | Estado |
 | --- | --- |
 | Frontend Inventario | Consulta navegable con 3 sucursales, 24 productos y 48 registros de stock sintéticos |
+| Inicio de sesión frontend | Correo/contraseña con Supabase Auth, sesión persistente, renovación y logout; rutas UI protegidas |
 | API Inventario | Ejemplo local de lectura con un corpus independiente de 4 productos sintéticos |
-| Sucursales, Catálogo, Proveedores, Ventas, Personal, Acceso, Auditoría y Reportes | Límites registrados y documentados; funcionalidad pendiente |
-| Supabase y operaciones reales | Desconectados; integración pendiente de contratos y autorización |
+| Módulos backend: Sucursales, Catálogo, Proveedores, Ventas, Personal, Acceso, Auditoría y Reportes | Límites registrados y documentados; funcionalidad pendiente |
+| Datos de negocio reales | Desconectados; vínculo de identidad, autorización en NestJS y consultas pendientes |
 
 El frontend sigue funcionando sin arrancar la API. No se presenta la demostración
-como una conexión operativa ni como implementación de autenticación, ventas o facturación.
+como una conexión operativa de inventario, ventas o facturación. Autenticarse no
+asigna rol ni sucursal. El backend demo sigue sin autenticación y solo sirve datos sintéticos.
 
 ## Comandos
 

@@ -2,7 +2,11 @@
 
 Frontend de consulta implementado con **React + TypeScript + Vite**. Conserva el recorrido del piloto de Inventario y ahora forma parte de la [base modular](../docs/architecture/ARCHITECTURE.md). Opción A aprobada el 28/10/2026: mesa de control con Inter e Inter Tight, manteniendo paleta, tabla y panel de detalle.
 
-**Datos simulados · Solo consulta.** No requiere una cuenta, credenciales, variables de entorno ni conexión a Supabase. Los precios, sucursales y existencias son ejemplos sintéticos. No se pueden registrar ventas ni movimientos.
+**Inventario: datos simulados · Solo consulta.** El acceso a la interfaz ahora requiere
+una cuenta de **Supabase Auth**, correo/contraseña y las variables de `frontend/.env.local`.
+El login está conectado al proveedor; los precios, sucursales y existencias siguen
+siendo ejemplos sintéticos. No se pueden registrar ventas ni movimientos.
+La autorización de empleados/roles/sucursales en el backend sigue pendiente.
 
 ## Abrir la aplicación
 
@@ -13,7 +17,9 @@ npm ci
 npm run dev:frontend
 ```
 
-Abre **http://127.0.0.1:5173/**. La ruta inicial redirige a Inventario. El servidor escucha solo en la máquina local. `Ctrl+C` lo detiene. Si el puerto ya está ocupado, Vite lo informa sin cambiar de puerto; revisa si ya hay una instancia de VitaFarma abierta.
+Abre **http://127.0.0.1:5173/equipo/entrar**. Las rutas de inventario requieren sesión.
+El servidor escucha solo en la máquina local. `Ctrl+C` lo detiene. Si el puerto ya
+está ocupado, Vite lo informa sin cambiar de puerto.
 
 Requisito: Node **22.12 o superior** compatible con Vite 8. Entorno usado para verificar este incremento: **Node 22.23.3 / npm 10.9.9**. Las versiones exactas de las dependencias están en `package.json` y `package-lock.json`; para reproducir la instalación usa `npm ci`.
 
@@ -68,7 +74,12 @@ npm exec --workspace @vitafarma/frontend -- playwright install chromium
 npm run test:e2e
 ```
 
-`playwright.config.ts` usa esa carpeta por defecto, inicia Vite cuando hace falta y permite reutilizar el servidor local. El navegador de pruebas se ejecuta sin ventana. No hay que configurar un navegador global.
+`playwright.config.ts` usa esa carpeta por defecto. Inicia servidores aislados en
+5174/5175 con configuración ficticia y Auth interceptado; no reutiliza Vite de
+desarrollo ni consulta el proyecto Supabase real. El navegador se ejecuta sin ventana.
+
+La tabla siguiente registra la entrega histórica del piloto anterior al login.
+Las comprobaciones del acceso están documentadas en la [guía actual](../docs/SUPABASE-LOGIN.md).
 
 | Comprobación ejecutada | Resultado final |
 | --- | --- |
@@ -113,6 +124,7 @@ La búsqueda se aplica con **Buscar** o Enter; los selectores se aplican al camb
 
 | Ruta | Comportamiento |
 | --- | --- |
+| `/equipo/entrar` | Inicio de sesión con correo y contraseña de Supabase Auth |
 | `/` | Redirección a `/inventario` |
 | `/inventario` | Consulta por sucursal; URL con estado normalizado |
 | `/inventario/1/1001` | Paracetamol, sucursal Central, cantidad positiva y lote vencido |
@@ -186,8 +198,14 @@ La implementación técnica se contrastó con [Motion](https://motion.dev/docs/r
 
 ## Límites y siguiente fase
 
-Inventario es el único módulo operable en la interfaz. Catálogo, Proveedores y Reportes solo aparecen como **Próximamente**, sin enlaces rotos ni acciones ficticias. Existe una API demo independiente en `backend/`; este frontend todavía no la consume. No hay autenticación, edición, ventas, compras, facturación, movimientos ni cliente Supabase.
+Inventario es el único módulo de negocio consultable en la interfaz. Catálogo,
+Proveedores y Reportes aparecen como **Próximamente**. Existe una API demo independiente
+en `backend/`; este frontend todavía no la consume. El módulo `access` usa Supabase Auth
+para login, verificación de sesión y logout. No hay autorización de negocio en NestJS,
+edición, ventas, compras, facturación ni movimientos.
 
 Para integrar datos reales deberá aprobarse primero el contrato de acceso y resolver autenticación, roles, permisos, RLS o un backend seguro. Entonces podrá reemplazarse `inventoryRepository` manteniendo las proyecciones y la semántica de nulos/fechas. Triggers, operaciones transaccionales y nuevos módulos requieren otro alcance.
 
-La comprobación histórica del piloto quedó ampliada por la [entrega de arquitectura](../docs/architecture/IMPLEMENTATION.md), que registra las verificaciones de esta fase. Supabase, Data API, SQL, triggers, RLS y credenciales siguen fuera de los cambios. No se hizo `git add`, commit, push, merge o deploy.
+La comprobación histórica del piloto quedó ampliada por la [entrega de arquitectura](../docs/architecture/IMPLEMENTATION.md).
+El incremento actual se describe en la [guía de login](../docs/SUPABASE-LOGIN.md):
+integra Auth en el frontend sin cambios de Data API, SQL, triggers, RLS o cuentas remotas.

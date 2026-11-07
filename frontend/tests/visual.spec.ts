@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, appOrigin, authStorageState, mockAuth } from './auth.mock'
 
 for (const width of [360, 768, 1280]) {
   test(`responsive ${width}px: consulta, detalle y captura`, async ({ page }, testInfo) => {
@@ -50,9 +50,10 @@ test('reduced motion elimina transiciones y conserva la interacción', async ({ 
 
 for (const timezoneId of ['America/La_Paz', 'Pacific/Kiritimati']) {
   test(`DATE no cambia de día en ${timezoneId}`, async ({ browser }) => {
-    const context = await browser.newContext({ timezoneId })
+    const context = await browser.newContext({ timezoneId, storageState: authStorageState() })
+    await mockAuth(context)
     const page = await context.newPage()
-    await page.goto('http://127.0.0.1:5173/inventario/1/1004?tab=lote')
+    await page.goto(`${appOrigin}/inventario/1/1004?tab=lote`)
     const panel = page.getByRole('tabpanel')
     await expect(panel).toContainText('25/10/2026')
     await expect(panel).toContainText('Vence en fecha demo')
