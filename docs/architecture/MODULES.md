@@ -42,7 +42,8 @@ por módulo ni un rediseño del esquema.
 | --- | --- |
 | Inventario | `/inventario` y `/inventario/:idFarmacia/:codigoProducto`, operativas en modo demo |
 | Catálogo, Proveedores, Reportes | Indicadas como Próximamente en la navegación existente |
-| Sucursales, Ventas, Personal, Acceso y Auditoría | Pantallas futuras por definir; no se agregan enlaces ficticios |
+| Acceso | Login Supabase Auth implementado en frontend; autorización de negocio en backend pendiente |
+| Sucursales, Ventas, Personal y Auditoría | Pantallas futuras por definir; no se agregan enlaces ficticios |
 
 No se agregan módulos de compras, transferencias, pagos, caja, devoluciones, pacientes
 o SIAT: el análisis disponible no acredita su soporte en el modelo actual.

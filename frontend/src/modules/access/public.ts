@@ -1,0 +1,6 @@
+export { AuthProvider } from './presentation/AuthProvider'
+export { AccessGate, SessionControls } from './presentation/AccessGate'
+export { LoginPage } from './presentation/LoginPage'
+export { LOGIN_PATH, protectLoader } from './presentation/loaders'
+export { supabaseAuthRepository } from './infrastructure/supabase-auth.repository'
+export type { AuthRepository } from './application/auth.repository'

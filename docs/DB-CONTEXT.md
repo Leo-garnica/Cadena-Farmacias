@@ -1,14 +1,15 @@
 # Cadena-Farmacias: contexto de base de datos y plan de integración
 
-> **Evolución local, 28/10/2026:** ya existe frontend React/Vite y una base backend
-> NestJS modular con datos sintéticos. Ver [arquitectura vigente](architecture/ARCHITECTURE.md).
+> **Estado local:** existe frontend React/Vite, backend NestJS modular y login frontend
+> mediante Supabase Auth. El inventario y la API siguen con datos sintéticos. Ver
+> [arquitectura vigente](architecture/ARCHITECTURE.md) y [alcance del login](SUPABASE-LOGIN.md).
 > Las secciones que describen ausencia de aplicación son el diagnóstico original.
 > Esta nota no actualiza la verificación remota del 25/10/2026 ni cambia sus hallazgos de BD.
 
 **Estado:** documento para revisión del equipo.  
 **Fecha de verificación remota:** 25 de octubre de 2026, contexto horario America/La_Paz.  
 **Referencia técnica principal:** estructura desplegada en Supabase, inspeccionada en modo lectura.  
-**Autorización vigente:** crear exclusivamente este documento. Las correcciones, migraciones y el frontend descritos aquí son propuestas pendientes de aprobación.
+**Alcance de la inspección original:** lectura de metadatos y documentación del modelo; las propuestas SQL del documento no se ejecutaron. Una autorización posterior permitió integrar Supabase Auth solo en el frontend. No autoriza cambios remotos de BD ni completa la seguridad del backend.
 
 ## 1. Resumen para tomar decisiones
 
@@ -594,7 +595,7 @@ Nada de esto queda instalado como automatización permanente. Las reglas deben c
 | Turnos: programación | turno, asignacion_turno, empleado | R/C/U; D de asignaciones según política | Periodos, nocturnidad, solapamientos y fecha_fin opcional | Ninguno |
 | Titulares por ciudad | asignacion_farmaceutico, empleado, ciudad | R/C/U administrativos | Elegibilidad y vigencias según regla confirmada | Ninguno |
 | Remuneraciones: planillas y cobro | salario, empleado, cargo | R restringida; C/U según regla aprobada | Fórmula salarial y autorización de elaboración/cobro | No existe función de nómina |
-| Acceso: roles y estado de cuenta | usuario, rol, empleado; vínculo con Auth pendiente | R mínima; administración restringida de rol/estado | Nunca devolver contrasena; no permitir escalamiento de rol por el propio cliente | No hay vínculo Auth ni función de autorización del dominio |
+| Acceso: roles y estado de cuenta | usuario, rol, empleado; vínculo de identidad a dominio pendiente | R mínima; administración restringida de rol/estado | Nunca devolver contrasena; no permitir escalamiento de rol por el propio cliente | El login frontend usa Auth; no hay mapeo a usuario/rol ni autorización backend |
 | Auditoría: consulta de eventos | auditoria, usuario con campos mínimos autorizados | R restringida; C desde servicio confiable, sin U/D ordinarios propuestos | Filtros por fecha/acción/entidad, referencias compuestas y no inclusión de secretos | No existe trigger de auditoría |
 | Reportes: ventas/inventario | Proyecciones y agregaciones de las tablas anteriores | R autorizada | Totales por periodo/sucursal/producto y vencimientos, con alcance histórico explicado | No hay vistas ni funciones de reporte |
 
@@ -646,9 +647,9 @@ No activar RLS de forma aislada: sin políticas bloquearía el acceso ordinario.
 
 El llenado define roles de ejemplo ADMINISTRADOR, REGENTE, VENDEDOR y ALMACEN; sus descripciones no implementan permisos PostgreSQL. Los estados y la correspondencia cargo/rol que genera el seed tampoco son una política de autorización aprobada.
 
-El llenado utiliza MD5 para un valor de contraseña de demostración. No se reproduce ese valor ni el hash en este documento. No se ha comprobado cómo se autenticaría una aplicación real.
+El llenado utiliza MD5 para un valor de contraseña de demostración. No se reproduce ese valor ni el hash en este documento. El frontend ahora valida la identidad con Supabase Auth, pero no autentica con `public.usuario.contrasena` ni vincula aún esa identidad a un empleado o rol.
 
-**Pendiente de decisión:** usar Supabase Auth o un mecanismo de sesión controlado por backend. Si se elige Supabase Auth y no existe otro vínculo confiable, se podría proponer una columna UUID de enlace en `usuario`, con restricciones y una estrategia de asociación de cuentas existentes. Sería una propuesta incremental independiente, sin sustituir la PK académica. No se crea ni se presupone necesaria antes de elegir arquitectura.
+**Pendiente:** verificar el token en NestJS y resolver el vínculo confiable entre Auth, `public.usuario`, empleado, rol y sucursal. El esquema inspeccionado no trae ese vínculo. Se debe revisar y aprobar la opción mínima de asociación antes de consultar datos de negocio; cualquier cambio SQL requiere una propuesta y autorización aparte. La PK académica no se reemplaza.
 
 ### 9.3. Reglas para integrar la interfaz
 
@@ -693,7 +694,7 @@ El script declara que sus contactos y operaciones son ficticios, que ciertos nom
 | ID | Prioridad | Problema | Solución mínima a evaluar |
 | --- | --- | --- | --- |
 | SEC-01 | P0 | Ausencia de RLS/políticas y CRUD efectivo para ambos roles cliente en todas las tablas. | Grants y políticas según identidad, rol y sucursal; sin rediseñar tablas. |
-| AUTH-01 | P1 antes de login y permisos personales | No hay enlace estructural verificado entre usuario de dominio y Supabase Auth, ni código de autenticación disponible. | Elegir arquitectura de sesión. Solo después evaluar un vínculo incremental si se requiere. |
+| AUTH-01 | P0 antes de acceso a datos de negocio | El login frontend usa Supabase Auth, pero NestJS aún no verifica tokens ni existe un vínculo estructural verificado entre identidad, empleado, rol y sucursal. | Verificar tokens y aprobar cómo asociar identidades existentes, denegando perfiles sin vínculo; revisar permisos por sucursal en el servidor. |
 | TX-01 | P1 antes de registrar ventas/ajustes | No existe operación atómica instalada para venta, total y stock. | Transacción en backend; RPC mínima únicamente si la arquitectura lo exige. |
 | ID-01 | P1 antes de altas concurrentes | Los IDs enteros no tienen defaults ni identity. | Distinguir códigos de negocio de IDs internos. Elegir asignación segura; no usar MAX(id)+1 sin una estrategia transaccional de concurrencia. Si se necesitan secuencias/defaults, proponer solo los de las tablas afectadas, conservando valores y PK. |
 | VAL-01 | P1 antes de escrituras del módulo | Sin CHECK ni automatismos de coherencia de importes, periodos o lote/producto. | Validación confiable en el software y transacciones. Restricciones adicionales solo si se justifican y aprueban. |

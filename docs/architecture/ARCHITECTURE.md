@@ -3,11 +3,17 @@
 Estado: implementada localmente, con datos sintéticos. Alcance aprobado por el usuario
 el 28/10/2026: monolito modular, reorganización del proyecto y opción visual A.
 
+Incremento de acceso autorizado posteriormente: el módulo `access` del frontend
+integra Supabase Auth mediante un puerto `AuthRepository` y su adaptador. El login,
+la restauración y el cierre de sesión ya tienen implementación; los datos de negocio
+siguen siendo sintéticos. Ver [alcance y pruebas].
+
 ## Vista general
 
 ```mermaid
 flowchart LR
   UI[SPA React / Vite] --> F[Puerto de consulta frontend]
+  UI --> AUTH[Supabase Auth: identidad]
   F --> FM[Mock frontend]
   API[HTTP NestJS] --> APP[Casos de uso]
   APP --> PORT[Puerto de lectura]

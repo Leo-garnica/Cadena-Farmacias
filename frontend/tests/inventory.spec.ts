@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, appOrigin, authOrigin } from './auth.mock'
 
 test('recorrido completo: sucursal, búsqueda, orden, paginación, detalle, Escape y Atrás', async ({ page }) => {
   await page.goto('/')
@@ -126,6 +126,7 @@ test('parámetros fuera de rango se normalizan en la URL sin pantalla rota', asy
 
 test('teclado: salto de contenido, foco visible, tabs, foco contenido y retorno', async ({ page }) => {
   await page.goto('/inventario')
+  await expect(page.getByRole('heading', { name: 'Inventario', exact: true })).toBeVisible()
   await page.keyboard.press('Tab')
   await expect(page.getByRole('link', { name: 'Saltar al contenido' })).toBeFocused()
   await page.keyboard.press('Enter')
@@ -148,10 +149,10 @@ test('teclado: salto de contenido, foco visible, tabs, foco contenido y retorno'
   await expect(opener).toBeFocused()
 })
 
-test('navegación local sin solicitudes externas ni errores de consola', async ({ page }) => {
+test('inventario sintético solo solicita la verificación Auth y no produce errores de consola', async ({ page }) => {
   const requests: string[] = []
   const errors: string[] = []
-  page.on('request', (request) => { if (!request.url().startsWith('http://127.0.0.1:5173')) requests.push(request.url()) })
+  page.on('request', (request) => { if (!request.url().startsWith(appOrigin) && request.url() !== `${authOrigin}/auth/v1/user`) requests.push(request.url()) })
   page.on('pageerror', (error) => errors.push(error.message))
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })
   await page.goto('/inventario')
