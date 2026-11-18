@@ -1,0 +1,60 @@
+.mostrador {
+  --paper: #fafbf6;
+  --guide: #edf3e9;
+  background: var(--paper);
+  color: var(--brand);
+  min-height: 100dvh;
+}
+.mostrador-frame { width: min(100% - 2 * clamp(22px, 5.5vw, 84px), 1344px); margin-inline: auto; }
+.mostrador-header { border-bottom: 1px solid #cdd9cf; }
+.mostrador-masthead, .mostrador-footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.mostrador-masthead { min-height: 80px; }
+.mostrador .brand { gap: 9px; font-size: 28px; letter-spacing: -1.35px; }
+.mostrador .brand__symbol { border: 0; background: var(--brand); }
+.mostrador .brand__symbol span, .mostrador .brand__symbol span::after { background: white; }
+.mostrador .brand__period { color: #518252; }
+.mostrador-masthead a, .mostrador-footer a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--brand); font-size: 14px; font-weight: 500; text-underline-offset: 4px; }
+.mostrador-masthead a { text-decoration: none; }
+.mostrador-masthead a:hover { text-decoration: underline; }
+.mostrador-hero { display: grid; grid-template-columns: minmax(0, 0.93fr) minmax(0, 1.07fr); align-items: center; column-gap: clamp(24px, 5vw, 84px); padding-block: clamp(36px, 4.9vw, 78px); }
+.mostrador h1, .mostrador h2 { font-family: var(--font-heading); font-weight: 700; }
+.mostrador h1 { font-size: clamp(58px, 6.5vw, 102px); line-height: .99; letter-spacing: -.055em; max-width: 10.5ch; text-wrap: initial; }
+.mostrador-intro p, .mostrador-guide-intro p { color: #385648; text-wrap: pretty; }
+.mostrador-intro p { font-size: clamp(16px, 1.45vw, 20px); line-height: 1.55; max-width: 37ch; margin: 24px 0 30px; }
+.mostrador-enter { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; padding: 14px 20px; min-height: 49px; border-radius: var(--radius-control); background: var(--brand); color: white; font-weight: 600; font-size: 16px; text-decoration: none; transition: background-color var(--motion-fast); }
+.mostrador-enter:hover { background: var(--brand-hover); }
+.mostrador-photo { min-width: 0; aspect-ratio: 1.22; overflow: hidden; background: var(--selection); border-radius: 4px 46px 4px 4px; }
+.mostrador-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.mostrador-guide { background: var(--guide); border-block: 1px solid #cfddce; }
+.mostrador-guide-layout { display: grid; grid-template-columns: minmax(0, .93fr) minmax(0, 1.07fr); gap: clamp(24px, 5vw, 84px); padding-block: clamp(40px, 4.7vw, 72px); }
+.mostrador h2 { scroll-margin-top: 24px; font-size: clamp(36px, 3.5vw, 58px); line-height: 1.04; letter-spacing: -.045em; max-width: 12ch; }
+.mostrador-guide-intro p { max-width: 34ch; margin-top: 16px; font-size: 16px; }
+.mostrador-topics { margin: 0; }
+.mostrador-topic { display: grid; grid-template-columns: minmax(125px, .8fr) minmax(0, 1.2fr); align-items: baseline; gap: 18px; border-top: 1px solid #b6cbb8; padding-block: 18px; }
+.mostrador-topic:last-child { border-bottom: 1px solid #b6cbb8; }
+.mostrador-topic dt { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 18px; letter-spacing: -.025em; }
+.mostrador-topic dd { margin: 0; color: #385648; line-height: 1.55; }
+.mostrador-footer { min-height: 76px; font-size: 15px; font-weight: 600; }
+@media (max-width: 850px) {
+  .mostrador-masthead { min-height: 68px; }
+  .mostrador h1 { font-size: clamp(46px, 7.2vw, 62px); }
+  .mostrador-intro p { margin-block: 18px 24px; }
+  .mostrador-photo { aspect-ratio: .95; border-top-right-radius: 28px; }
+  .mostrador-guide-layout { grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); }
+  .mostrador-topic { grid-template-columns: 1fr; gap: 5px; }
+  .mostrador-topic dd { margin-left: 35px; }
+}
+@media (max-width: 620px) {
+  .mostrador-masthead { min-height: 64px; }
+  .mostrador .brand { font-size: 24px; gap: 6px; }
+  .mostrador .brand__symbol { height: 28px; width: 28px; border-radius: 7px; }
+  .mostrador-masthead a { font-size: 13px; gap: 4px; }
+  .mostrador-hero { grid-template-columns: 1fr; gap: 24px; padding-block: 35px 26px; }
+  .mostrador h1 { font-size: clamp(46px, 10vw, 62px); max-width: 14ch; }
+  .mostrador-intro p { max-width: 38ch; margin-block: 14px 18px; }
+  .mostrador-photo { aspect-ratio: 1.6; border-top-right-radius: 24px; }
+  .mostrador-guide-layout { grid-template-columns: 1fr; gap: 23px; padding-block: 32px; }
+  .mostrador h2 { font-size: 36px; max-width: 16ch; }
+  .mostrador-guide-intro p { margin-top: 10px; }
+  .mostrador-topic { padding-block: 15px; }
+}
