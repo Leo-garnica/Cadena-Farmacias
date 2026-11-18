@@ -1,5 +1,6 @@
 import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, randomBytes, randomUUID, sign, verify } from 'node:crypto'
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { prepareManagement } from './gestion.mjs'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -18,10 +19,10 @@ const accounts = [
 ]
 
 let localEngine
-function docker(args, { env, capture = false } = {}) {
+function docker(args, { env, capture = false, input } = {}) {
   if (localEngine) args = ['--host', localEngine, ...args]
   const result = spawnSync('docker', args, {
-    cwd: local, windowsHide: true, stdio: capture ? 'pipe' : 'inherit',
+    cwd: local, windowsHide: true, stdio: capture ? 'pipe' : input ? ['pipe', 'inherit', 'inherit'] : 'inherit', input,
     encoding: 'utf8', env: { ...process.env, ...env },
   })
   if (result.error) throw result.error
@@ -185,9 +186,10 @@ async function review(config) {
 
 async function main() {
   const command = process.argv[2]
-  if (!['up', 'verify', 'stop'].includes(command)) throw new Error('Uso: node local/practica.mjs up | verify | stop')
+  if (!['up', 'verify', 'stop', 'gestion'].includes(command)) throw new Error('Uso: node local/practica.mjs up | verify | stop | gestion')
   checkDocker()
   const config = loadConfig(command)
+  if (command === 'gestion') return prepareManagement({ config, compose, schemaSql, secretFile, state })
   if (command === 'stop') return compose(config, ['stop'])
   if (command === 'up') {
     prepare(config)
