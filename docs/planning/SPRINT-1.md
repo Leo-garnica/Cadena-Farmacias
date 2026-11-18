@@ -58,7 +58,7 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 |---|---:|---|---|---|---|
 | S1-03.01 | 1 | S1-02 | Registrar decisión de persistencia y Auth, manteniendo stack, capas, módulos y lockfile actuales. | Una propuesta de driver/proveedor y sus permisos/dependencias; sin instalarlos. | Terminada |
 | S1-03.02 | 1 | S1-03.01 | Diseñar evolución de puertos asíncronos/paginados y contratos HTTP; enumerar consumidores y pruebas afectados. | Impacto de metadata(), rows(), InventoryQueries, parser, controlador y contratos revisable; aprobación requerida identificada. | Terminada |
-| S1-03.03 | 1 | S1-03.02 | Definir matriz de identidad/perfil/sucursal, fuentes administradas y procedencia del dataset; presentar las decisiones pendientes. | Matriz revisada con el propietario o bloqueada explícitamente; desconocidos denegados por defecto. | En revisión |
+| S1-03.03 | 1 | S1-03.02 | Definir matriz de identidad/perfil/sucursal, fuentes administradas y procedencia del dataset; presentar las decisiones pendientes. | Matriz revisada con el propietario o bloqueada explícitamente; desconocidos denegados por defecto. | Terminada |
 
 ### S1-04 — Revalidar y completar el arranque existente
 
@@ -97,10 +97,10 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 |---|---:|---|---|---|---|
 | S1-06.01 | 1 | S1-03; S1-04 | Leer brief/referencias y reglas de diseño; delimitar contenido, rutas y componentes existentes reutilizables. | Contenido veraz; Inter/Inter Tight y tokens vigentes identificados; ninguna UI editada aún. | Terminada |
 | S1-06.02 | 1 | S1-06.01 | Presentar tres composiciones distintas, referencias directas, secciones, motion plan, riesgos y archivos concretos. | Propuesta revisable de concepto y alcance; máximo tres patrones de movimiento y alternativa reducida. | Terminada |
-| S1-06.03 | 0 | S1-06.02 | Esperar elección y aprobación explícitas de concepto, pantalla y alcance de archivos. | Registrar la decisión del propietario; el silencio no desbloquea implementación. | En revisión |
-| S1-06.04 | 4 | S1-06.03 | Construir solo la landing aprobada, reutilizando UI/fuentes y separando el acceso público de la demo interna. | Secciones aprobadas y navegación funcional; sin cifras falsas, nuevos paquetes o alteraciones internas fuera de alcance. | Pendiente |
-| S1-06.05 | 3 | S1-06.04 | Ajustar móvil/tablet/escritorio, CTA y estados; enlazar solo destinos disponibles. | 360/768/1280 px utilizables; contacto solo validado y ningún formulario que aparente enviar. | Pendiente |
-| S1-06.06 | 1 | S1-06.05 | Revisar implementación frente a concepto y contenido aprobado; preparar evidencia para QA. | Sin cambios de negocio/Auth/SQL por una tarea de UI; lista de verificaciones y pendientes. | Pendiente |
+| S1-06.03 | 0 | S1-06.02 | Esperar elección y aprobación explícitas de concepto, pantalla y alcance de archivos. | Registrar la decisión del propietario; el silencio no desbloquea implementación. | Terminada |
+| S1-06.04 | 4 | S1-06.03 | Construir solo la landing aprobada, reutilizando UI/fuentes y separando el acceso público de la demo interna. | Secciones aprobadas y navegación funcional; sin cifras falsas, nuevos paquetes o alteraciones internas fuera de alcance. | Terminada |
+| S1-06.05 | 3 | S1-06.04 | Ajustar móvil/tablet/escritorio, CTA y estados; enlazar solo destinos disponibles. | 360/768/1280 px utilizables; contacto solo validado y ningún formulario que aparente enviar. | Terminada |
+| S1-06.06 | 1 | S1-06.05 | Revisar implementación frente a concepto y contenido aprobado; preparar evidencia para QA. | Sin cambios de negocio/Auth/SQL por una tarea de UI; lista de verificaciones y pendientes. | Terminada |
 
 ### S1-07 — Verificar landing y corregir defectos
 
@@ -110,10 +110,10 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 
 | Subtarea | h | Depende de | Trabajo ejecutable | Cierre verificable | Estado |
 |---|---:|---|---|---|---|
-| S1-07.01 | 1 | S1-06 | Probar navegación de teclado, foco, enlaces y lectura de controles. | QA-01: recorrido sin bloqueo; registrar resultados reales. | Pendiente |
-| S1-07.02 | 1 | S1-07.01 | Inspeccionar 360/768/1280 px y capturar solo las vistas efectivamente revisadas. | Sin desbordamiento global o contenido esencial recortado; evidencia con versión. | Pendiente |
-| S1-07.03 | 1 | S1-07.02 | Revisar contraste, movimiento reducido y ausencia de secretos/datos internos en la landing. | QA-11 público revisado; animación no impide acceder a contenido. | Pendiente |
-| S1-07.04 | 1 | S1-07.03 | Corregir defectos del alcance aprobado y repetir su comprobación; registrar los que excedan el bloque. | Fallos de recorrido resueltos; restantes clasificados y sin afirmar validaciones pendientes. | Pendiente |
+| S1-07.01 | 1 | S1-06 | Probar navegación de teclado, foco, enlaces y lectura de controles. | QA-01: recorrido sin bloqueo; registrar resultados reales. | Terminada |
+| S1-07.02 | 1 | S1-07.01 | Inspeccionar 360/768/1280 px y capturar solo las vistas efectivamente revisadas. | Sin desbordamiento global o contenido esencial recortado; evidencia con versión. | Terminada |
+| S1-07.03 | 1 | S1-07.02 | Revisar contraste, movimiento reducido y ausencia de secretos/datos internos en la landing. | QA-11 público revisado; animación no impide acceder a contenido. | Terminada |
+| S1-07.04 | 1 | S1-07.03 | Corregir defectos del alcance aprobado y repetir su comprobación; registrar los que excedan el bloque. | Fallos de recorrido resueltos; restantes clasificados y sin afirmar validaciones pendientes. | Terminada |
 
 ### S1-08 — Documentar, demostrar G1 y preparar S2
 
@@ -124,9 +124,9 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 | Subtarea | h | Depende de | Trabajo ejecutable | Cierre verificable | Estado |
 |---|---:|---|---|---|---|
 | S1-08.01 | 1 | S1-04; S1-05 | Actualizar guía de ejecución local y entorno/dataset, sin secretos. | Otro revisor dispone de pasos y límites; no hay SQL remoto como paso de arranque. | Terminada |
-| S1-08.02 | 1 | S1-07; S1-08.01 | Dejar handoff de base, decisiones, contratos, permisos y pruebas pendientes. | Siguiente sesión puede ubicar el trabajo sin depender del historial de chat. | Pendiente |
-| S1-08.03 | 1 | S1-08.02 | Demostrar landing y arranque según el instructivo; solicitar revisión G1 y registrar resultado. | G1 aceptado o En revisión/Bloqueado con causa; no asumir aprobación. | Pendiente |
-| S1-08.04 | 1 | S1-08.03 | Registrar horas reales, reserva, ausencias y estimación de S2; resolver dependencias listas. | Capacidad y fechas revalidadas; ninguna tarea interna empieza sin G1 y permiso correspondiente. | Pendiente |
+| S1-08.02 | 1 | S1-07; S1-08.01 | Dejar handoff de base, decisiones, contratos, permisos y pruebas pendientes. | Siguiente sesión puede ubicar el trabajo sin depender del historial de chat. | Terminada |
+| S1-08.03 | 1 | S1-08.02 | Demostrar landing y arranque según el instructivo; solicitar revisión G1 y registrar resultado. | G1 aceptado o En revisión/Bloqueado con causa; no asumir aprobación. | Terminada |
+| S1-08.04 | 1 | S1-08.03 | Registrar horas reales, reserva, ausencias y estimación de S2; resolver dependencias listas. | Capacidad y fechas revalidadas; ninguna tarea interna empieza sin G1 y permiso correspondiente. | Terminada |
 
 ## Salida y aceptación
 
@@ -166,6 +166,12 @@ La reserva cubre coordinación, bloqueos y correcciones fuera de la estimación;
 | 18/11/2026 | G1 | Bloqueada | Pendientes landing, QA y aceptación | Entorno de práctica verificado | El trabajo técnico anterior se integró como incremento parcial. La aceptación del sprint queda en manos del propietario después de revisar la portada funcionando. |
 
 Las horas de esfuerzo humano efectivo no se cronometraron. Las horas restantes indicadas proceden de las estimaciones originales y no implican consumo de toda la capacidad del día.
+
+## Aceptación G1 · 18/11/2026
+
+El propietario eligió Mostrador VitaFarma, autorizó el contrato de lectura y la matriz por sucursal y aceptó expresamente **la portada y la base local** después de revisar las capturas. El 18/11 reemplaza la fecha prevista del 06/11 como fecha efectiva de G1. La disponibilidad prevista hasta el 27/11 es de ocho jornadas de 6 h. El registro histórico anterior conserva las decisiones que estaban abiertas antes de esta aceptación.
+
+Portada de la revisión `ae84f1a`: ruta pública sin solicitudes internas con Auth caído o sin configurar, acceso al login, enlace de salto, foco de teclado y movimiento reducido. Evidencia de la misma implementación en [móvil](evidencias/portada-360.png), [tableta](evidencias/portada-768.png) y [escritorio](evidencias/portada-1280.png). La imagen editorial ilustra el mostrador. La matriz y el destino para las operaciones de la Parte II se aceptaron el mismo día: sucursales asignadas por identidad, PostgreSQL local para práctica y Supabase académico reservado a un futuro lector dedicado.
 
 ## Registro de reserva y cambios
 
