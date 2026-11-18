@@ -15,9 +15,11 @@ El primer arranque descarga las imágenes fijadas por hash, crea el volumen `vit
 
 | Servicio | Dirección accesible desde la máquina | Uso |
 | --- | --- | --- |
-| PostgreSQL, servicio `db` | `127.0.0.1:55432`, base `vitafarma_practica` | NestJS usa `vf_lector` para consultar los datos de práctica. |
+| PostgreSQL, servicio `db` | `127.0.0.1:55432`, base `vitafarma_practica` | Cuenta `vf_lector` preparada para el adaptador PostgreSQL del backend. |
 | Supabase Auth, detrás de `gateway` | `http://127.0.0.1:55433` | La web inicia sesión con la clave pública generada. |
-| Claves públicas de firma | `http://127.0.0.1:55433/auth/v1/.well-known/jwks.json` | NestJS verifica la firma, el emisor `http://127.0.0.1:55433/auth/v1` y la audiencia `authenticated`. |
+| Claves públicas de firma | `http://127.0.0.1:55433/auth/v1/.well-known/jwks.json` | El verificador de la práctica comprueba firma, emisor `http://127.0.0.1:55433/auth/v1` y audiencia `authenticated`. |
+
+La comprobación `verify` se conecta directamente a PostgreSQL y Auth. La conexión entre la interfaz, NestJS y estas mismas fuentes se contrasta por separado en el [Sprint 2](../planning/SPRINT-2.md).
 
 ### Conectar la aplicación
 
@@ -54,13 +56,13 @@ La web de desarrollo queda en `http://127.0.0.1:5173`. El gateway reconoce ese o
 | `supervisor@vitafarma.test` | Responsable | 1 y 2 |
 | `sinacceso@vitafarma.test` | Sin asignación | Ninguna |
 
-Las contraseñas aleatorias para ingresar desde el navegador están en el archivo privado `cuentas.json`. Las tres identidades se crean en el esquema local de Auth. El mapa de acceso se mantiene en el servidor y se indexa por el UUID de la identidad. El perfil sin asignación tiene sesión válida y debe recibir denegación de la API.
+Las contraseñas aleatorias para ingresar desde el navegador están en el archivo privado `cuentas.json`. Las tres identidades se crean en el esquema local de Auth. El archivo del servidor asigna permisos por UUID. La aceptación del bloque de acceso de Sprint 2 exige demostrar que la API deniega el acceso al tercer usuario aunque Auth acepte su contraseña.
 
 ## Origen y alcance de la copia
 
 `local/practica.mjs` comprueba el SHA-256 del [snapshot académico](../schema-supabase-actual.sql) normalizando finales de línea a LF. Se espera `4eb2598810690437afb9c05a66bf9d4350cffd56ffb08118ff56b686a2437f30`. Extrae 140 declaraciones de tablas, índices y restricciones, incluidas las 27 tablas, sus claves primarias y sus claves foráneas. Un hash diferente interrumpe la preparación para revisar la nueva versión. Las rutinas y los permisos de la instalación remota quedan fuera de la copia. Los datos se crean con el [dataset VF-PRACTICA-1](../../local/datos.sql).
 
-La cuenta de inicialización es distinta de la cuenta de Auth y de la cuenta de NestJS. El lector tiene conexión a esta base y lectura del catálogo, categorías, ciudades, farmacias, lotes, existencias y medicamentos. La prueba comprueba privilegios efectivos y membresías. La creación de identidades se realiza con la API administrativa local de GoTrue al preparar la práctica; el autorregistro público está desactivado.
+La cuenta de inicialización es distinta de la cuenta de Auth y del lector previsto para NestJS. El lector tiene conexión a esta base y lectura del catálogo, categorías, ciudades, farmacias, lotes, existencias y medicamentos. La prueba comprueba privilegios efectivos y membresías. La creación de identidades se realiza con la API administrativa local de GoTrue al preparar la práctica; el autorregistro público está desactivado.
 
 ## Recuentos de referencia
 
