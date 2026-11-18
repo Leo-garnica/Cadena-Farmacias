@@ -1,4 +1,5 @@
 import { test as base, expect, type BrowserContext } from '@playwright/test'
+import { mockInventoryApi } from './inventory-api.mock'
 
 export const appOrigin = 'http://127.0.0.1:5174'
 export const authOrigin = 'https://auth.vitafarma.test'
@@ -26,6 +27,7 @@ export function authStorageState(expired = false) {
 }
 
 export async function mockAuth(context: BrowserContext) {
+  await mockInventoryApi(context)
   const state = { userStatus: 200, tokenStatus: 200, logoutStatus: 204, refreshStatus: 200, tokenDelay: 0, passwordRequests: 0, refreshRequests: 0 }
   await context.route(`${authOrigin}/**`, async (route) => {
     const url = new URL(route.request().url())

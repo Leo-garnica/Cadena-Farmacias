@@ -1,5 +1,5 @@
 import { Link, Outlet, useLoaderData, useNavigation, useRouteLoaderData } from 'react-router'
-import { CalendarDays, ChevronLeft, ChevronRight, FlaskConical, Info } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, Database, Info } from 'lucide-react'
 import { m, useReducedMotion } from 'motion/react'
 import { formatDate, formatNumber } from '../../../shared/lib/formatters'
 import { AsyncState } from '../../../shared/ui/AsyncState'
@@ -19,7 +19,7 @@ export function InventoryPage() {
   const { query, rows, summary, total, pageCount, pageSize } = result
   const branch = metadata.farmacias.find((item) => item.id_farmacia === query.farmacia)
   return <>
-    <div className="inventory-heading"><div><h1 id="inventory-title" tabIndex={-1}>Inventario</h1><p>Una mirada clara a cada producto, en cada sucursal.</p></div><div className="heading-context"><div className="demo-badge"><FlaskConical size={14} aria-hidden="true" />Datos simulados · Solo consulta</div><div className="reference-date"><CalendarDays size={17} aria-hidden="true" /><div><span>Fecha de referencia demo</span><strong>{formatDate(metadata.referenceDate)}</strong></div></div></div></div>
+    <div className="inventory-heading"><div><h1 id="inventory-title" tabIndex={-1}>Inventario</h1><p>Una mirada clara a cada producto, en cada sucursal.</p></div><div className="heading-context"><div className="demo-badge"><Database size={14} aria-hidden="true" />Inventario de sucursal</div><div className="reference-date"><CalendarDays size={17} aria-hidden="true" /><div><span>Fecha de consulta</span><strong>{formatDate(metadata.referenceDate)}</strong></div></div></div></div>
     <InventorySummary summary={summary} />
     <section className="inventory-ledger" aria-labelledby="stock-title">
       <div className="ledger-heading"><div><h2 id="stock-title">Existencias de {branch?.nombre ?? 'la sucursal'}</h2><p>Consulta productos, cantidades y su lote asociado.</p></div><span className="product-count">{formatNumber(total)} productos</span></div>

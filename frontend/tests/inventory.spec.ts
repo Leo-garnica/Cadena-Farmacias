@@ -3,7 +3,7 @@ import { test, expect, appOrigin, authOrigin } from './auth.mock'
 test('recorrido completo: sucursal, búsqueda, orden, paginación, detalle, Escape y Atrás', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Inventario', exact: true })).toBeVisible()
-  await expect(page.getByText('Datos simulados · Solo consulta', { exact: true })).toBeVisible()
+  await expect(page.getByText('Inventario de sucursal', { exact: true })).toBeVisible()
   await page.getByLabel('Sucursal', { exact: true }).selectOption('2')
   await page.getByLabel('Buscar producto', { exact: true }).fill('10')
   await page.getByRole('button', { name: 'Buscar', exact: true }).click()
@@ -92,13 +92,18 @@ test('vacío recuperable, error recuperable y carga visible', async ({ page }) =
   await expect(page.getByRole('heading', { name: 'No encontramos productos' })).toBeVisible()
   await page.getByRole('status').getByRole('link', { name: 'Limpiar filtros' }).click()
   await expect(page.locator('tbody tr')).toHaveCount(8)
-  await page.goto('/inventario?farmacia=2&q=10&demo=error')
+  await page.route('**/api/v1/inventory?**', route => route.fulfill({ status: 503 }), { times: 1 })
+  await page.goto('/inventario?farmacia=2&q=10')
   await expect(page.getByRole('heading', { name: 'No pudimos cargar el inventario' })).toBeVisible()
   await page.getByRole('button', { name: 'Reintentar' }).click()
   await expect(page.getByRole('heading', { name: 'Inventario', exact: true })).toBeVisible()
   await expect(page.getByLabel('Sucursal', { exact: true })).toHaveValue('2')
   await expect(page.getByLabel('Buscar producto', { exact: true })).toHaveValue('10')
-  await page.goto('/inventario?demo=slow')
+  await page.route('**/api/v1/inventory?**', async route => {
+    await new Promise(resolve => setTimeout(resolve, 600))
+    await route.fallback()
+  }, { times: 1 })
+  await page.goto('/inventario', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: 'Preparando el inventario…' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Inventario', exact: true })).toBeVisible()
 })
@@ -115,13 +120,19 @@ test('ruta inexistente y clave compuesta inexistente permiten volver', async ({ 
 })
 
 test('parámetros fuera de rango se normalizan en la URL sin pantalla rota', async ({ page }) => {
-  await page.goto('/inventario?farmacia=999&categoria=oops&orden=invalid&pagina=999')
+  await page.goto('/inventario?farmacia=oops&categoria=oops&orden=invalid&pagina=999')
   await expect(page).toHaveURL(/farmacia=1&orden=nombre-asc&pagina=3$/)
   await expect(page.locator('tbody tr')).toHaveCount(8)
   await page.getByLabel('Estado', { exact: true }).selectOption('sin-unidades')
   await expect(page).toHaveURL(/pagina=1/)
   await expect(page.locator('tbody tr')).toHaveCount(3)
   await expect(page.getByTestId('summary-zero')).toHaveText('3')
+})
+
+test('una sucursal no asignada nunca presenta el inventario de otra farmacia', async ({ page }) => {
+  await page.goto('/inventario?farmacia=999')
+  await expect(page.getByRole('heading', { name: 'Acceso restringido' })).toBeVisible()
+  await expect(page.locator('tbody tr')).toHaveCount(0)
 })
 
 test('teclado: salto de contenido, foco visible, tabs, foco contenido y retorno', async ({ page }) => {
@@ -149,7 +160,7 @@ test('teclado: salto de contenido, foco visible, tabs, foco contenido y retorno'
   await expect(opener).toBeFocused()
 })
 
-test('inventario sintético solo solicita la verificación Auth y no produce errores de consola', async ({ page }) => {
+test('la consulta usa la API del mismo origen y el proveedor Auth sin errores de consola', async ({ page }) => {
   const requests: string[] = []
   const errors: string[] = []
   page.on('request', (request) => { if (!request.url().startsWith(appOrigin) && request.url() !== `${authOrigin}/auth/v1/user`) requests.push(request.url()) })

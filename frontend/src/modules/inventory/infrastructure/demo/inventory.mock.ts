@@ -48,7 +48,7 @@ function compareRows(a: InventoryRow, b: InventoryRow, order: InventoryQuery['or
   return result || a.producto.codigo_producto - b.producto.codigo_producto
 }
 export const mockInventoryRepository: InventoryRepository = {
-  metadata: () => ({ farmacias, categorias, ciudades, referenceDate: DEMO_REFERENCE_DATE }),
+  metadata: async () => ({ farmacias, categorias, ciudades, referenceDate: DEMO_REFERENCE_DATE }),
   async list(query, signal) {
     signal?.throwIfAborted()
     const search = normalizeSearch(query.q)

@@ -13,6 +13,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         { name: 'Catálogo', Icon: BookOpen }, { name: 'Proveedores', Icon: Truck }, { name: 'Reportes', Icon: ChartNoAxesCombined },
       ].map(({ name, Icon }) => <div className="sidebar-future" key={name}><Icon size={19} aria-hidden="true" /><span>{name}<small>Próximamente</small></span></div>)}
     </nav>
-    <div className="sidebar-bottom"><Sprout size={27} strokeWidth={1.4} aria-hidden="true" /><p>Cuidar empieza<br />por el orden.</p><span>Piloto de inventario</span><div className="sidebar-local"><span aria-hidden="true" />Entorno local de demostración</div></div>
+    <div className="sidebar-bottom"><Sprout size={27} strokeWidth={1.4} aria-hidden="true" /><p>Cuidar empieza<br />por el orden.</p><span>VitaFarma</span><div className="sidebar-local"><span aria-hidden="true" />Área del personal</div></div>
   </div>
 }

@@ -56,7 +56,7 @@ for (const timezoneId of ['America/La_Paz', 'Pacific/Kiritimati']) {
     await page.goto(`${appOrigin}/inventario/1/1004?tab=lote`)
     const panel = page.getByRole('tabpanel')
     await expect(panel).toContainText('25/10/2026')
-    await expect(panel).toContainText('Vence en fecha demo')
+    await expect(panel).toContainText('Vence en la fecha de consulta')
     await context.close()
   })
 }
