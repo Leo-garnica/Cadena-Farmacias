@@ -10,7 +10,7 @@ export interface Categoria { id_categoria: number; nombre: string | null; descri
 export interface Producto {
   codigo_producto: number; id_categoria: number | null; nombre: string | null
   descripcion: string | null; presentacion: string | null
-  precio_compra: number | null; precio_venta: number | null
+  precio_compra?: number | null; precio_venta: number | null
 }
 export interface Medicamento {
   codigo_producto: number; id_laboratorio: number | null
@@ -37,3 +37,10 @@ export interface InventoryResult {
   query: InventoryQuery; rows: InventoryRow[]; total: number; pageCount: number; pageSize: number; summary: InventorySummaryData
 }
 export interface InventoryMetadata { farmacias: Farmacia[]; categorias: Categoria[]; ciudades: Ciudad[]; referenceDate: DateOnly }
+export interface InventoryReport {
+  farmacia: number
+  referenceDate: DateOnly
+  registros: number
+  sinUnidades: number
+  vencidos: number
+}

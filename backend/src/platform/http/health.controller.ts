@@ -1,28 +1,19 @@
-import { Controller, Get, Inject, Optional, ServiceUnavailableException } from '@nestjs/common'
+import { Controller, Get, Inject } from '@nestjs/common'
 import type { HealthResponse } from '@vitafarma/contracts/health'
+import { PublicEndpoint } from '../../modules/access/public.js'
+import { ReadDatabase } from '../database/read-database.js'
 
-/** The operational read adapter supplies a bounded check that rejects on failure. */
-export abstract class ReadDatabaseProbe {
-  abstract check(): Promise<void>
-}
-
+@PublicEndpoint()
 @Controller()
 export class HealthController {
-  constructor(@Optional() @Inject(ReadDatabaseProbe) private readonly database?: ReadDatabaseProbe) {}
+  constructor(@Inject(ReadDatabase) private readonly database: ReadDatabase) {}
 
   @Get('health')
-  get(): HealthResponse {
-    return { status: 'ok', service: 'vitafarma-api', mode: 'demo', database: 'disconnected' }
-  }
+  get(): HealthResponse { return { status: 'ok', service: 'vitafarma-api', mode: 'postgresql' } }
 
   @Get('ready')
   async ready() {
-    if (!this.database) throw new ServiceUnavailableException()
-    try {
-      await this.database.check()
-    } catch {
-      throw new ServiceUnavailableException()
-    }
+    await this.database.check()
     return { status: 'ready' }
   }
 }

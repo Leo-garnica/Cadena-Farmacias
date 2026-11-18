@@ -1,5 +1,4 @@
 import type { Categoria, Farmacia, InventoryMetadata, InventoryRow } from '@vitafarma/contracts/inventory'
-import type { InventoryReadRepository } from '../../application/inventory-read.repository.js'
 
 // Small, independent synthetic corpus for the API example; not operational pharmacy data.
 const farmacia: Farmacia = { id_farmacia: 1, id_ciudad: 1, nombre: 'Sucursal demo API', direccion: null, telefono: null }
@@ -18,7 +17,8 @@ const rows: InventoryRow[] = quantities.map((cantidad, index) => {
   }
 })
 
-export class DemoInventoryRepository implements InventoryReadRepository {
+/** Legacy fixture for isolated tests; never composed into NestJS. */
+export class DemoInventoryRepository {
   metadata(): InventoryMetadata {
     return structuredClone({ farmacias: [farmacia], ciudades: [{ id_ciudad: 1, nombre: 'Ciudad demo' }], categorias: [categoria], referenceDate: '2026-10-25' })
   }
