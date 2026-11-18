@@ -1,24 +1,43 @@
-import { createBrowserRouter, redirect } from 'react-router'
+import { createBrowserRouter } from 'react-router'
+import { Brand } from './Brand'
 import { InitialLoading, NotFound } from './RouteStates'
-import { InventoryPage, createInventoryLoaders } from '../modules/inventory/public'
-import { authRepository, inventoryRepository } from './repositories'
-import { LOGIN_PATH, protectLoader } from '../modules/access/public'
-import { ProtectedShell, LoginRoute, ProtectedError } from './AccessRoutes'
+import { LandingPage } from '../modules/landing/public'
+import { LOGIN_PATH } from '../shared/lib/paths'
 
-const { detailLoader, inventoryLoader, metadataLoader } = createInventoryLoaders(inventoryRepository)
+const workspace = () => import('./AccessRoutes')
+const loaders = () => import('./workspaceLoaders')
 
 export const router = createBrowserRouter([
-  { path: LOGIN_PATH, Component: LoginRoute },
+  { path: '/', element: <LandingPage brand={<Brand />} loginPath={LOGIN_PATH} /> },
   {
-    id: 'app', path: '/', Component: ProtectedShell, loader: protectLoader(authRepository, metadataLoader),
-    HydrateFallback: InitialLoading, ErrorBoundary: ProtectedError,
+    lazy: async () => ({ Component: (await workspace()).SessionLayout }),
+    HydrateFallback: InitialLoading,
     children: [
-      { index: true, loader: () => redirect('/inventario') },
+      { path: LOGIN_PATH, lazy: async () => ({ Component: (await workspace()).LoginRoute }) },
       {
-        id: 'inventory', path: 'inventario', Component: InventoryPage, loader: protectLoader(authRepository, inventoryLoader), ErrorBoundary: ProtectedError,
-        children: [{ path: ':idFarmacia/:codigoProducto', loader: protectLoader(authRepository, detailLoader), lazy: async () => ({ Component: (await import('../modules/inventory/detail')).InventoryDetail }) }],
+        id: 'app',
+        lazy: async () => {
+          const [routes, data] = await Promise.all([workspace(), loaders()])
+          return { Component: routes.ProtectedShell, loader: data.loadMetadata, ErrorBoundary: routes.ProtectedError }
+        },
+        children: [
+          {
+            id: 'inventory', path: 'inventario',
+            lazy: async () => {
+              const [routes, data] = await Promise.all([workspace(), loaders()])
+              return { Component: routes.InventoryPage, loader: data.loadInventory, ErrorBoundary: routes.ProtectedError }
+            },
+            children: [{
+              path: ':idFarmacia/:codigoProducto',
+              lazy: async () => {
+                const [data, detail] = await Promise.all([loaders(), import('../modules/inventory/detail')])
+                return { Component: detail.InventoryDetail, loader: data.loadDetail }
+              },
+            }],
+          },
+          { path: '*', Component: NotFound },
+        ],
       },
-      { path: '*', Component: NotFound },
     ],
   },
 ])

@@ -2,11 +2,6 @@
 .sidebar { position: sticky; top: 0; height: 100dvh; background: var(--brand); color: white; padding: 34px 18px 22px; }
 .sidebar-inner { display: flex; flex-direction: column; min-height: 100%; }
 .sidebar-brand { display: block; color: white; text-decoration: none; padding: 0 10px; margin-bottom: 54px; }
-.brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-size: 25px; font-weight: 800; letter-spacing: -.7px; }
-.brand__period { color: #B8D7A9; }
-.brand__symbol { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid rgb(255 255 255 / 36%); border-radius: 10px; }
-.brand__symbol span { position: relative; width: 18px; height: 7px; background: #DCE9DC; border-radius: 1px; }
-.brand__symbol span::after { content: ''; position: absolute; width: 7px; height: 18px; top: -5.5px; left: 5.5px; background: #DCE9DC; border-radius: 1px; }
 .sidebar-label { color: #BCD0C3; font-size: 12px; padding: 0 12px; margin-bottom: 14px; }
 .sidebar-nav { display: flex; flex-direction: column; gap: 10px; }
 .sidebar-link { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 12px; text-decoration: none; color: white; border-radius: 7px; font-weight: 500; }

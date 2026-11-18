@@ -1,7 +1,7 @@
 import { test, expect, appOrigin, authOrigin } from './auth.mock'
 
 test('recorrido completo: sucursal, búsqueda, orden, paginación, detalle, Escape y Atrás', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/inventario')
   await expect(page.getByRole('heading', { name: 'Inventario', exact: true })).toBeVisible()
   await expect(page.getByText('Datos simulados · Solo consulta', { exact: true })).toBeVisible()
   await page.getByLabel('Sucursal', { exact: true }).selectOption('2')

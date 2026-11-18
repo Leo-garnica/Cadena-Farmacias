@@ -9,3 +9,11 @@ test('configuración ausente muestra ayuda y bloquea el envío sin solicitudes e
   await expect(page.getByRole('button', { name: 'Iniciar sesión', exact: true })).toBeDisabled()
   expect(external).toEqual([])
 })
+
+test('la portada pública abre sin configuración de Auth', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'El inventario, desde el mostrador.' })).toBeVisible()
+  await page.getByRole('link', { name: 'Acceso del personal' }).click()
+  await expect(page).toHaveURL(/\/equipo\/entrar/)
+  await expect(page.getByRole('button', { name: 'Iniciar sesión' })).toBeDisabled()
+})

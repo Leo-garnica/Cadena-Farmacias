@@ -1,7 +1,9 @@
 import { replace, type LoaderFunctionArgs } from 'react-router'
 import type { AuthRepository } from '../application/auth.repository'
 
-export const LOGIN_PATH = '/equipo/entrar'
+import { LOGIN_PATH } from '../../../shared/lib/paths'
+
+export { LOGIN_PATH }
 
 export function safeReturnTo(value: string | null) {
   if (!value || !value.startsWith('/') || /[\\\r\n]/.test(value)) return '/inventario'
