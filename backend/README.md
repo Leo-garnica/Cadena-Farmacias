@@ -20,14 +20,22 @@ npm run start --workspace @vitafarma/backend
 
 ## API demo
 
-Prefijo `/api/v1`. Todas las respuestas llevan `X-VitaFarma-Data: synthetic-demo`.
+Prefijo `/api/v1`. Todas las respuestas llevan `X-VitaFarma-Data: synthetic-demo`,
+`Cache-Control: no-store` y `X-Content-Type-Options: nosniff`.
 
 | Método y ruta | Resultado |
 | --- | --- |
-| `GET /health` | `status: ok`, `mode: demo`, `database: disconnected`; verifica el proceso, no una BD |
+| `GET /health` | El proceso en ejecución devuelve HTTP 200 con `status: ok`, `mode: demo` y `database: disconnected`. |
+| `GET /ready` | Comprueba si la API puede leer su base de datos. En el modo demo devuelve HTTP 503 con código `UNAVAILABLE`. |
 | `GET /inventory/metadata` | Sucursal, categoría, ciudad y fecha de referencia demo |
 | `GET /inventory` | Filas, paginación y resumen del conjunto filtrado |
 | `GET /inventory/:idFarmacia/:codigoProducto` | Detalle por clave compuesta o 404 |
+
+Al integrar PostgreSQL, el módulo que configura la conexión podrá proporcionar
+`ReadDatabaseProbe`. Su método `check()` debe verificar el acceso con la conexión
+lectora de la aplicación y un tiempo de espera acotado. Cada petición a `/ready`
+ejecuta la comprobación. Una lectura exitosa devuelve HTTP 200 con
+`{"status":"ready"}`. Una falla devuelve HTTP 503 con un mensaje genérico.
 
 Consulta de ejemplo:
 <http://127.0.0.1:3000/api/v1/inventory?farmacia=1&estado=sin-cantidad&orden=codigo-asc>

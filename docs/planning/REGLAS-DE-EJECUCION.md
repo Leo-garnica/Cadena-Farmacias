@@ -15,7 +15,7 @@ Si dos documentos se contradicen, registrar la diferencia antes de implementar y
 
 ## 2. Autorización y límites
 
-- La orden de incorporar tasks/reglas/tiempos autoriza documentación local. No autoriza ejecutar las tareas funcionales, instalar, crear BD ni conectar a remoto.
+- La orden inicial de octubre cubría documentación. El 18/11 el propietario autorizó ejecutar los sprints, integrar Supabase y fusionar los incrementos en la rama principal. Se mantiene el control de la elección visual, los contratos compartidos y la aceptación G1/G2/G3. El entorno local de práctica se mantiene aislado de la base académica.
 - Antes de implementar un bloque, explicitar objetivo, archivos/áreas, contratos afectados, dependencias nuevas, verificaciones y acciones de entorno. Solicitar el permiso que falte para ese bloque concreto.
 - Una autorización cubre sus ediciones y correcciones rutinarias dentro del alcance descrito. No pedirla de nuevo para cada archivo ya incluido.
 - Si aparece una dependencia, librería, flujo o archivo adicional fuera del alcance aprobado, detener esa parte y solicitar ampliación específica. Continuar el trabajo independiente ya autorizado.

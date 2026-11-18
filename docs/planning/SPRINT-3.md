@@ -32,7 +32,7 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 
 | Subtarea | h | Depende de | Trabajo ejecutable | Cierre verificable | Estado |
 |---|---:|---|---|---|---|
-| S3-01.01 | 1 | G2 | Definir hasta tres indicadores con fórmula, alcance, filtros, fecha de referencia y casos nulos. | Especificación sustentada: registros de stock, cantidad cero, lote asociado vencido; sin stock mínimo ni unidades por lote inventadas. | Pendiente |
+| S3-01.01 | 1 | G2 | Definir hasta tres indicadores con fórmula, alcance, filtros, fecha de referencia y casos nulos. | Especificación sustentada: registros de stock, cantidad cero, lote asociado vencido; sin stock mínimo ni unidades por lote inventadas. | Bloqueada |
 | S3-01.02 | 2 | S3-01.01 | Implementar proyecciones/agregados dentro de reports mediante interfaces públicas y SQL acotado. | Permisos de sucursal aplicados; sin tablas nuevas ni duplicación del módulo reports. | Pendiente |
 | S3-01.03 | 2 | S3-01.02 | Construir dashboard aprobado y enlaces al inventario filtrado con estados de carga/error. | Muestra datos reales de consulta; no cifra estática, gráfico innecesario ni cambio visual fuera del alcance. | Pendiente |
 | S3-01.04 | 1 | S3-01.03 | Contrastar métricas con referencia, joins duplicadores y fechas ayer/hoy/mañana. | QA-09/10: coincidencia por filtro antes de paginar; DATE sin desplazamiento de zona. | Pendiente |
@@ -148,7 +148,8 @@ La reserva cubre coordinación, bloqueos y correcciones fuera de la estimación;
 
 | Fecha | ID | Estado | Tiempo real / restante | Versión y entorno/dataset | Evidencia, decisión o bloqueo |
 |---|---|---|---|---|---|
-| Por registrar | — | Pendiente | — | — | No hay ejecución funcional acreditada por esta tabla. |
+| 18/11/2026 | S3-01 | Bloqueada | Pendiente de G2 | Inventario inicial de demostración | Se documentaron tres fórmulas en el [diccionario](INTEGRACION-Y-TRABAJO-4.md). El dashboard necesita inventario conectado y aceptado. Proveedores e historial comercial quedan condicionados a P0 y capacidad disponible. |
+| 18/11/2026 | S3-04 | Pendiente | Comprobación parcial reutilizable | Lockfile de `2a39370` | El registro de npm devolvió 0 avisos conocidos para el árbol de producción al ejecutar `npm audit --omit=dev`. Repetir sobre el candidato final junto con las verificaciones de permisos y alcance de las consultas. |
 
 ## Registro de reserva y cambios
 

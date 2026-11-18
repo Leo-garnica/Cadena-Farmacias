@@ -1,0 +1,75 @@
+name: vitafarma-practica
+services:
+  db:
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    environment:
+      POSTGRES_DB: vitafarma_practica
+      POSTGRES_PASSWORD: ${VF_PRACTICA_OWNER:?}
+      VF_PRACTICA_READ: ${VF_PRACTICA_READ:?}
+      VF_PRACTICA_AUTH_DB: ${VF_PRACTICA_AUTH_DB:?}
+      TZ: America/La_Paz
+      PGTZ: America/La_Paz
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - datos:/var/lib/postgresql/data
+      - type: bind
+        source: ${VF_PRACTICA_INIT_PATH:?}
+        target: /docker-entrypoint-initdb.d/10-init.sql
+        read_only: true
+      - ./datos.sql:/docker-entrypoint-initdb.d/20-datos.sql:ro
+      - ./verificar.sql:/opt/practica/verificar.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "vitafarma_practica"]
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  auth:
+    image: supabase/gotrue:v2.197.0@sha256:1736a63078f5922b198c4cbe50f80ab9a2d3b54fe8b7b6cfb2e9dc5dbbc12c6b
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      API_EXTERNAL_URL: http://127.0.0.1:55433/auth/v1
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${VF_PRACTICA_AUTH_DB:?}@db:5432/vitafarma_practica?sslmode=disable
+      GOTRUE_DB_NAMESPACE: auth
+      GOTRUE_SITE_URL: http://127.0.0.1:5173
+      GOTRUE_DISABLE_SIGNUP: "true"
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_JWT_ISSUER: http://127.0.0.1:55433/auth/v1
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: "3600"
+      GOTRUE_JWT_SECRET: ${VF_PRACTICA_JWT_SECRET:?}
+      GOTRUE_JWT_KEYS: ${VF_PRACTICA_JWT_KEYS:?}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9999/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  gateway:
+    image: nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236
+    depends_on:
+      auth:
+        condition: service_healthy
+    environment:
+      VF_PRACTICA_PUBLIC_KEY: ${VF_PRACTICA_PUBLIC_KEY:?}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/auth/v1/.well-known/jwks.json"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    ports:
+      - "127.0.0.1:55433:8080"
+    volumes:
+      - ./gateway.conf.template:/etc/nginx/templates/default.conf.template:ro
+
+volumes:
+  datos:

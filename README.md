@@ -9,7 +9,7 @@ se conserva. El login usa Supabase Auth; el inventario funciona con datos sinté
 Requiere Node.js **22.12 o superior** compatible con Vite 8 y npm 10.
 Ejecutar desde la raíz, donde está este README:
 
-Preparar primero `frontend/.env.local` y una cuenta de Supabase Auth.
+Para usar credenciales y datos de prueba en tu equipo, sigue la [guía del entorno local de práctica](docs/architecture/ENTORNO-LOCAL.md). Para otro proyecto de Auth, configura el navegador con la [guía de acceso del personal](docs/SUPABASE-LOGIN.md).
 
 ```sh
 npm ci
@@ -18,6 +18,7 @@ npm run dev
 
 - Inicio de sesión: <http://127.0.0.1:5173/equipo/entrar>
 - Salud de la API demo: <http://127.0.0.1:3000/api/v1/health>
+- Disponibilidad de consultas: <http://127.0.0.1:3000/api/v1/ready>. Devuelve 503 mientras NestJS carezca de una conexión de lectura verificada.
 - `Ctrl+C` detiene los servidores locales.
 
 En PowerShell, si la política bloquea `npm.ps1`, usar `npm.cmd` en lugar de `npm`.

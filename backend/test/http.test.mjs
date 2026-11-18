@@ -1,6 +1,7 @@
 import { before, after, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createApplication } from '../dist/platform/http/create-application.js'
+import { HealthController } from '../dist/platform/http/health.controller.js'
 import { localServerOptions } from '../dist/platform/config/local-server-options.js'
 
 let app
@@ -17,6 +18,33 @@ test('health identifies the local demo and disconnected database', async () => {
   assert.equal(response.status, 200)
   assert.equal(response.headers.get('x-vitafarma-data'), 'synthetic-demo')
   assert.deepEqual(await response.json(), { status: 'ok', service: 'vitafarma-api', mode: 'demo', database: 'disconnected' })
+})
+
+test('readiness reports an unavailable database in demo mode', async () => {
+  const response = await fetch(`${base}/ready`)
+  assert.equal(response.status, 503)
+  assert.deepEqual(await response.json(), { statusCode: 503, code: 'UNAVAILABLE', message: 'Consulta no disponible' })
+})
+
+test('readiness follows the current probe result and hides connection errors', async () => {
+  let available = true
+  const controller = new HealthController({
+    async check() {
+      if (!available) throw new Error('test-only connection details')
+    },
+  })
+  assert.deepEqual(await controller.ready(), { status: 'ready' })
+  available = false
+  await assert.rejects(() => controller.ready(), error => error.getStatus() === 503 && !error.message.includes('test-only'))
+})
+
+test('success and error responses prohibit caching and content sniffing', async () => {
+  for (const path of ['health', 'inventory/metadata', 'ready', 'unknown']) {
+    const response = await fetch(`${base}/${path}`)
+    assert.equal(response.headers.get('cache-control'), 'no-store', path)
+    assert.equal(response.headers.get('x-content-type-options'), 'nosniff', path)
+    await response.arrayBuffer()
+  }
 })
 
 test('metadata, list and detail expose the shared read contract', async () => {
