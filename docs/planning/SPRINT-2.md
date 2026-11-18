@@ -32,7 +32,7 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 
 | Subtarea | h | Depende de | Trabajo ejecutable | Cierre verificable | Estado |
 |---|---:|---|---|---|---|
-| S2-01.01 | 2 | G1; S1-05 | Conectar login/logout al proveedor aprobado y resolver identidad en la aplicación. | Cuenta reconocida inicia y cierra sesión; sin cuentas o contraseñas de fallback. | Pendiente |
+| S2-01.01 | 2 | G1; S1-05 | Conectar login/logout al proveedor aprobado y resolver identidad en la aplicación. | Cuenta reconocida inicia y cierra sesión; sin cuentas o contraseñas de fallback. | En revisión |
 | S2-01.02 | 2 | S2-01.01 | Verificar firma, emisor, audiencia y vigencia de token en NestJS; proteger rutas internas por defecto. | Sin token, alterado o vencido recibe rechazo real del backend; /me devuelve solo identidad permitida. | Pendiente |
 | S2-01.03 | 1 | S2-01.02; matriz S1-03 | Resolver perfil y sucursales en servidor; denegar identidades sin mapeo y alcance ajeno. | La autorización no depende del selector UI ni de metadata editable del usuario. | Pendiente |
 | S2-01.04 | 1 | S2-01.03 | Resolver expiración/renovación y limpieza de datos/cache al cambiar cuenta o cerrar sesión. | No se reutilizan datos de un usuario anterior; expiración permite recuperación clara. | Pendiente |
@@ -131,7 +131,8 @@ La reserva cubre coordinación, bloqueos y correcciones fuera de la estimación;
 
 | Fecha | ID | Estado | Tiempo real / restante | Versión y entorno/dataset | Evidencia, decisión o bloqueo |
 |---|---|---|---|---|---|
-| Por registrar | — | Pendiente | — | — | No hay ejecución funcional acreditada por esta tabla. |
+| 18/11/2026 | S2-01 | Bloqueada | Pendiente de G1 | Base `2a39370` con login publicado | Existe acceso de navegador por Supabase. Faltan aprobación de la matriz de sucursales y aceptación de la landing. La conexión de inventario de NestJS y las pruebas de alcance siguen pendientes. |
+| 18/11/2026 | S2-01.01 | En revisión | Recorrido de acceso comprobado; pendiente integración de servidor | `cb8057d`, Auth local VF-PRACTICA-1 | Chromium observó token e identidad con HTTP 200, recarga y reapertura con sesión, salida con 204 y regreso al login al solicitar la ruta protegida. [Reproducir la prueba](../SUPABASE-LOGIN.md). |
 
 ## Registro de reserva y cambios
 

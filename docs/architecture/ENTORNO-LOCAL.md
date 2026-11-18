@@ -40,12 +40,12 @@ foreach ($linea in [IO.File]::ReadAllLines($archivoPractica)) {
 Desde la raíz, inicia el proceso correspondiente en cada terminal, una vez cargado su archivo. La primera compilación de contratos es necesaria en una copia recién instalada.
 
 ```powershell
-npm.cmd run build:contracts
-npm.cmd run dev:backend
+npm run build:contracts
+npm run dev:backend
 ```
 
 ```powershell
-npm.cmd run dev:frontend
+npm run dev:frontend
 ```
 
 La web de desarrollo queda en `http://127.0.0.1:5173`. El gateway reconoce ese origen y los puertos de pruebas y previsualización del proyecto.

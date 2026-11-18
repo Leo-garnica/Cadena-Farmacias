@@ -8,6 +8,8 @@
 4. [Desarrollo](architecture/DEVELOPMENT.md): trabajo diario, pruebas y cómo ampliar módulos.
 5. [Decisiones](architecture/DECISIONS.md): elecciones y límites de esta base.
 6. [Entrega y comprobaciones](architecture/IMPLEMENTATION.md): cambios y evidencia de esta fase.
+7. [Entorno de práctica](architecture/ENTORNO-LOCAL.md) para iniciar y verificar PostgreSQL y Supabase Auth en loopback con las cuentas sintéticas.
+8. [Integración y Trabajo 4](planning/INTEGRACION-Y-TRABAJO-4.md) para consultar los datos por pantalla, las decisiones pendientes y la cobertura de la asignatura.
 
 ## Planificación vigente · 28/10–27/11/2026
 

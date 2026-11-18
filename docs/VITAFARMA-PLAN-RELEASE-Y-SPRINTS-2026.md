@@ -6,9 +6,9 @@
 **Equipo:** 1 desarrollador principal, con apoyo ocasional de otra persona  
 **Disponibilidad confirmada:** 6 horas al día, de lunes a viernes  
 **Destino previsto:** `docs/VITAFARMA-PLAN-RELEASE-Y-SPRINTS-2026.md`  
-**Estado:** documentación autorizada e incorporada; base local contrastada en modo lectura; implementación funcional y cambios de entorno pendientes de autorización por bloque.
+**Estado al 18/11:** ejecución iniciada sobre la base con login. La [bitácora de integración](planning/INTEGRACION-Y-TRABAJO-4.md) distingue la preparación local, las aprobaciones de interfaz y la cobertura académica.
 
-> El propietario autorizó incorporar el plan, las reglas y todas las tareas al repositorio. Esta entrega modifica únicamente documentación. No autoriza implementar la aplicación, ejecutar SQL, crear usuarios, cambiar permisos, instalar herramientas ni desplegar. No se ha accedido a la BD. Las tareas funcionales describen trabajo futuro sujeto al bloque que autorice el propietario.
+> La versión inicial de octubre organizó el trabajo. El 18/11 el propietario autorizó su ejecución, conexión de servicios y publicación de código en Git. Los resultados efectivos y las aceptaciones de G1, G2 y G3 se registran en los tableros. Los permisos académicos de Supabase conservan su revisión independiente.
 
 **Para ejecutar y seguir el plan:** consultar el [índice de planificación](planning/README.md), las [reglas operativas](planning/REGLAS-DE-EJECUCION.md) y los tableros completos de [Sprint 1](planning/SPRINT-1.md), [Sprint 2](planning/SPRINT-2.md) y [Sprint 3](planning/SPRINT-3.md). Sus subtareas desglosan las horas de este documento: no son trabajo adicional.
 

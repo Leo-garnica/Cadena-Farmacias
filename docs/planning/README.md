@@ -1,6 +1,6 @@
 # VitaFarma — Planificación y seguimiento
 
-Vigencia: 28/10–27/11/2026. Equipo: un desarrollador principal, 6 h al día de lunes a viernes; apoyo ocasional sin compromiso de capacidad. Estado inicial: planificación incorporada; ejecución funcional pendiente de autorización por bloque.
+Vigencia: 28/10–27/11/2026. Equipo: un desarrollador principal, 6 h al día de lunes a viernes; apoyo ocasional sin compromiso de capacidad. El 18/11 comenzó la ejecución sobre la base que incorpora el login. Consultar el [registro de integración y cobertura del Trabajo 4](INTEGRACION-Y-TRABAJO-4.md) y los estados de los tableros.
 
 ## Documentos de trabajo
 
@@ -35,7 +35,7 @@ No se cuentan fines de semana. Registrar clases, feriados y ausencias: cada día
 
 El MVP de noviembre es de **consulta**. Registrar ventas, descontar stock, facturar, gestionar personal y desarrollar triggers quedan en el backlog posterior. El [plan completo](../VITAFARMA-PLAN-RELEASE-Y-SPRINTS-2026.md) conserva el backlog de todos los módulos y la razón de cada exclusión.
 
-## Punto de partida observado
+## Punto de partida observado el 28/10
 
 - npm workspaces: `frontend`, `backend`, `packages/contracts`; un lockfile raíz.
 - React/Vite y NestJS ya existen. Se conserva `domain/application/infrastructure/presentation`, las entradas `public.ts` y los nueve módulos registrados.
@@ -70,4 +70,4 @@ Todas las subtareas comienzan `Pendiente`, incluso cuando hay componentes o prue
 | Autorizar lectura remota y credencial mínima, si se necesita | Antes de cualquier acceso a Supabase | Verificación remota acotada; no cambios de esquema. |
 | Aceptar G1, G2 y G3 | 06/11, 17/11 y 27/11 | Registrar cada incremento como aceptado. |
 
-Guardar el plan no autoriza esas operaciones ni equivale a aprobar conceptos futuros. La instrucción actual del propietario autoriza solo esta incorporación documental; no commit, push, deploy, cambios de BD o ejecución de los sprints.
+El 18/11 el propietario autorizó ejecutar el plan, integrar Supabase y publicar los incrementos comprobados mediante commits, push y merge a la rama principal. El seguimiento identifica la elección de portada, el alcance por sucursal y la aceptación de cada hito. El entorno de práctica conserva sus propios datos y credenciales. El despliegue y los cambios de estructura o permisos de la BD académica requieren una decisión específica.
