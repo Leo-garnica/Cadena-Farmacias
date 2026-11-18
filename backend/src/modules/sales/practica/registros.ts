@@ -47,13 +47,17 @@ export async function opciones(db: PoolClient, access: AccessGrant, clave: strin
   return {filas,total}
 }
 
+async function bloquearEmpleado(db: PoolClient, access: AccessGrant, id: unknown) {
+  if (!(await db.query('SELECT FROM public.empleado WHERE id_empleado=$1 AND id_farmacia=ANY($2::integer[]) FOR SHARE',
+    [id,access.sucursales])).rowCount) throw new NotFoundException()
+}
+
 export async function registrar(db: PoolClient, access: AccessGrant, clave: string, entrada: unknown, id?: number) {
   const r = recursoPorClave(clave)
   const values = datos(r,entrada,id)
   if (r.ambito === 'global') await exigirGlobal(db,access)
   if (r.ambito === 'farmacia' && !access.sucursales.includes(Number(values.id_farmacia ?? id))) throw new ForbiddenException()
-  if (r.ambito === 'empleado' && !(await db.query('SELECT FROM public.empleado WHERE id_empleado=$1 AND id_farmacia=ANY($2::integer[]) FOR SHARE',
-    [values.id_empleado,access.sucursales])).rowCount) throw new NotFoundException()
+  if (r.ambito === 'empleado') await bloquearEmpleado(db,access,values.id_empleado)
   const campos = Object.keys(values)
   const args = Object.values(values)
   const projection = r.columnas.map(k=>selectColumn(r,k)).join(',')
@@ -69,6 +73,9 @@ export async function registrar(db: PoolClient, access: AccessGrant, clave: stri
   const target = ' FROM public.'+r.tabla+' t WHERE t.'+r.id+'=$2 AND '+condicion(r)
   const old = await db.query('SELECT '+projection+target+' FOR UPDATE OF t',[access.sucursales,id])
   if (!old.rowCount) throw new NotFoundException()
+  if (r.ambito === 'empleado' && old.rows[0].id_empleado !== values.id_empleado) {
+    await bloquearEmpleado(db,access,old.rows[0].id_empleado)
+  }
   // La sucursal histórica de una venta se deduce del empleado en el modelo académico.
   if (r.clave === 'empleados' && old.rows[0].id_farmacia !== values.id_farmacia &&
       (await db.query('SELECT FROM public.venta WHERE id_empleado=$1 LIMIT 1',[id])).rowCount) throw new ConflictException()
@@ -79,6 +86,12 @@ export async function registrar(db: PoolClient, access: AccessGrant, clave: stri
 export async function eliminar(db: PoolClient, access: AccessGrant, clave: string, id: number) {
   const r = recursoPorClave(clave)
   if (r.ambito === 'global') await exigirGlobal(db,access)
+  if (r.ambito === 'empleado') {
+    const old = await db.query('SELECT t.id_empleado FROM public.'+r.tabla+' t WHERE t.'+r.id+'=$2 AND '+condicion(r)+' FOR UPDATE OF t',
+      [access.sucursales,id])
+    if (!old.rowCount) throw new NotFoundException()
+    await bloquearEmpleado(db,access,old.rows[0].id_empleado)
+  }
   const result = await db.query('DELETE FROM public.'+r.tabla+' t WHERE '+condicion(r)+' AND t.'+r.id+'=$2',[access.sucursales,id])
   if (!result.rowCount) throw new NotFoundException()
 }

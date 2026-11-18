@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common'
 import type { PoolClient } from 'pg'
 import type { AccessGrant } from '../../access/public.js'
+import { exigirGlobal } from './registros.js'
 import { entero, objeto, offsetValido } from './validacion.js'
 
 const seleccion = `SELECT v.id_venta,v.id_cliente,v.id_empleado,e.id_farmacia,v.fecha_hora::text,v.total_cobrado
@@ -46,6 +47,8 @@ export async function vender(db: PoolClient, access: AccessGrant, entrada: unkno
     if (previa.actor !== access.sub || previa.contenido !== body) throw new ConflictException()
     return detalle(db,access,previa.venta)
   }
+  // El alta referencia el catálogo global de clientes, bajo el mismo permiso que el selector.
+  await exigirGlobal(db,access)
   // La copia de pruebas demuestra las escrituras sin instalar los triggers académicos.
   // Una copia con lógica de venta distinta exige revisar quién descuenta el inventario.
   if ((await db.query(`SELECT FROM pg_trigger WHERE NOT tgisinternal AND tgenabled IN ('O','A')
