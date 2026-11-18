@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router'
-import { AccessGate, AuthProvider, LoginPage } from '../modules/access/public'
+import { AccessGate, AuthProvider, LoginPage, SessionControls } from '../modules/access/public'
 import { authRepository } from './repositories'
 import { AppShell } from './AppShell'
 import { Brand } from './Brand'
@@ -12,4 +12,4 @@ export function SessionLayout() {
 }
 export function ProtectedShell() { return <AccessGate><AppShell /></AccessGate> }
 export function LoginRoute() { return <LoginPage brand={<Brand />} /> }
-export function ProtectedError() { return <AccessGate><InventoryError /></AccessGate> }
+export function ProtectedError() { return <AccessGate><InventoryError sessionControls={<SessionControls />} /></AccessGate> }

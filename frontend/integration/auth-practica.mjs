@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import console from 'node:console'
-import { readFile } from 'node:fs/promises'
+import { mkdir, readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import process from 'node:process'
@@ -13,6 +13,10 @@ const practica = join(homedir(), '.vitafarma', 'practica-v1')
 const origenWeb = 'http://127.0.0.1:4173'
 const origenAuth = 'http://127.0.0.1:55433'
 const correo = 'operador@vitafarma.test'
+const capturas = join(frontend, 'test-results', 'practica')
+await mkdir(capturas, { recursive: true })
+const ready = await globalThis.fetch('http://127.0.0.1:3000/api/v1/ready', { signal: globalThis.AbortSignal.timeout(5000) })
+assert.equal(ready.status, 200, 'Inicia la API con npm run dev:practica antes de ejecutar el recorrido.')
 
 const publicas = parseEnv(await readFile(join(practica, 'frontend.env.local'), 'utf8'))
 assert.equal(publicas.VITE_SUPABASE_URL, origenAuth)
@@ -63,6 +67,21 @@ try {
   assert.equal(identidad.status(), 200)
   const cerrar = { name: 'Cerrar sesión', exact: true }
   await pagina.getByRole('button', cerrar).waitFor()
+  const sucursal = pagina.getByLabel('Sucursal', { exact: true })
+  assert.equal(await sucursal.locator('option').count(), 1)
+  assert.equal(await sucursal.inputValue(), '1')
+  assert.equal(await pagina.getByTestId('summary-records').textContent(), '10')
+  assert.equal(await pagina.getByTestId('summary-zero').textContent(), '2')
+  await pagina.getByText('12 productos', { exact: true }).waitFor()
+  await pagina.screenshot({ path: join(capturas, 'inventario-centro.png'), fullPage: true })
+  await pagina.getByLabel('Buscar producto', { exact: true }).fill('Paracetamol')
+  await pagina.getByRole('button', { name: 'Buscar', exact: true }).click()
+  await pagina.getByRole('link', { name: 'Ver detalle de Paracetamol', exact: true }).click()
+  await pagina.getByRole('dialog').waitFor()
+  await pagina.getByRole('tab', { name: 'Lote asociado' }).click()
+  await pagina.getByRole('tabpanel').getByText('PRACTICA-VENCIDO').waitFor()
+  await pagina.screenshot({ path: join(capturas, 'inventario-lote.png') })
+  await pagina.keyboard.press('Escape')
   await pagina.reload()
   await pagina.getByRole('button', cerrar).waitFor()
   await pagina.close()
@@ -74,8 +93,16 @@ try {
   assert.equal(await pagina.evaluate(() => Object.keys(globalThis.localStorage).some(clave => clave.endsWith('-auth-token'))), false)
   await pagina.goto(origenWeb + '/inventario')
   await pagina.waitForURL('**/equipo/entrar?**')
+  const siguienteCuenta = 'sinacceso@vitafarma.test'
+  await pagina.getByLabel('Correo electrónico').fill(siguienteCuenta)
+  await pagina.getByLabel('Contraseña', { exact: true }).fill(cuentas[siguienteCuenta])
+  await pagina.getByRole('button', { name: 'Iniciar sesión', exact: true }).click()
+  await pagina.getByRole('heading', { name: 'Acceso restringido' }).waitFor()
+  assert.equal(await pagina.locator('tbody tr').count(), 0)
+  await Promise.all([respuestaAuth('logout', 'POST'), pagina.getByRole('button', cerrar).click()])
+  await pagina.waitForURL('**/equipo/entrar?**')
   assert.equal(externas.size, 0)
-  console.log('Acceso de práctica verificado en Chromium: inicio, identidad, recarga, reapertura, cierre y ruta protegida.')
+  console.log('Chromium comprobó login, alcance, 12 productos, saldos, lote, recarga, reapertura, cierre y ruta protegida.')
 } finally {
   await navegador?.close()
   await web.close()

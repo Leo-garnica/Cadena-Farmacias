@@ -1,8 +1,23 @@
 import { createInventoryLoaders } from '../modules/inventory/public'
-import { protectLoader } from '../modules/access/public'
+import type { AccessGrant } from '@vitafarma/contracts/common'
+import { apiRequest, protectLoader } from '../modules/access/public'
 import { authRepository, inventoryRepository } from './repositories'
 
 const { metadataLoader, inventoryLoader, detailLoader } = createInventoryLoaders(inventoryRepository)
-export const loadMetadata = protectLoader(authRepository, metadataLoader)
+export const loadMetadata = protectLoader(authRepository, async args => {
+  const { signal } = args.request
+  const [metadata, access] = await Promise.all([metadataLoader(args), apiRequest<AccessGrant>('/me', { signal })])
+  let practice = false
+  if (access.perfil === 'responsable') {
+    try {
+      await apiRequest('/practica/recursos', { signal })
+      practice = true
+    } catch (error) {
+      signal.throwIfAborted()
+      if (!(error instanceof Response) || ![403, 404, 503].includes(error.status)) throw error
+    }
+  }
+  return { ...metadata, access, practice }
+})
 export const loadInventory = protectLoader(authRepository, inventoryLoader)
 export const loadDetail = protectLoader(authRepository, detailLoader)
