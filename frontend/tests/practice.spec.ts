@@ -37,7 +37,13 @@ test('una venta reintenta la misma operación tras perder la confirmación y abr
   await context.route('**/api/v1/practica/recursos', r => r.fulfill({ json: { recursos: [] } }))
   const result = { venta: { id_venta: 14, id_farmacia: 1, id_empleado: 1, id_cliente: 1, fecha_hora: '2026-11-18', total_cobrado: '6.50' }, detalles: [{ codigo_producto: 1, nombre: 'Producto de práctica', cantidad: 1, precio_historico: '6.50' }] }
   await context.route('**/api/v1/me', r => r.fulfill({ json: { sub: 'sintetico', perfil: 'responsable', sucursales: [1] } }))
-  await context.route('**/api/v1/practica/opciones/**', r => r.fulfill({ json: { filas: [{ id: 1, nombre: 'Opción de práctica' }], total: 1 } }))
+  await context.route('**/api/v1/practica/opciones/**', r => {
+    const options = [{ id: 1, nombre: 'Opción de práctica' }]
+    if (new URL(r.request().url()).pathname.endsWith('/productos')) options.push({ id: 2, nombre: 'Producto vencido' })
+    return r.fulfill({ json: { filas: options, total: options.length } })
+  })
+  await context.route('**/api/v1/inventory/metadata', r => r.fulfill({ json: { farmacias: [{id_farmacia:1,nombre:'Sucursal de práctica'}], categorias:[], ciudades:[], referenceDate:'2026-11-18' } }))
+  await context.route('**/api/v1/inventory/1/2', r => r.fulfill({ json: { producto: { codigo_producto: 2, precio_venta: 6 }, stock: {cantidad:10,id_lote:3}, lote:{codigo_producto:2,fecha_vencimiento:'2026-11-17'} } }))
   await context.route('**/api/v1/inventory/1/1', r => r.fulfill({ json: { producto: { codigo_producto: 1, nombre: 'Producto de práctica', precio_venta: 6.5 }, stock: { cantidad: 20 } } }))
   await context.route('**/api/v1/practica/ventas**', r => {
     if (r.request().method() === 'POST') {
@@ -53,6 +59,9 @@ test('una venta reintenta la misma operación tras perder la confirmación y abr
   await page.getByRole('group', {name:'Datos de la venta'}).getByRole('combobox', {name:'Sucursal'}).selectOption('1')
   await page.getByRole('combobox', {name:'Empleado'}).selectOption('1')
   await page.getByRole('combobox', {name:'Cliente'}).selectOption('1')
+  await page.getByRole('combobox', {name:'Producto'}).selectOption('2')
+  await expect(page.getByText('El lote de esta sucursal está vencido.', { exact: false })).toBeVisible()
+  await expect(page.getByRole('button',{name:'Añadir producto'})).toBeDisabled()
   await page.getByRole('combobox', {name:'Producto'}).selectOption('1')
   await page.getByRole('button', {name:'Añadir producto'}).click()
   await page.getByRole('button', {name:'Confirmar venta'}).click()

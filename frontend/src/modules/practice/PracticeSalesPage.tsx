@@ -1,7 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { ArrowLeft, Check, Plus, Trash2 } from 'lucide-react'
 import { Link } from 'react-router'
-import type { InventoryRow } from '@vitafarma/contracts/inventory'
+import type { InventoryMetadata, InventoryRow } from '@vitafarma/contracts/inventory'
 import { apiRequest } from '../access/public'
 import { Pager, ReferencePicker, Status } from './controls'
 import { civilDate, errorMessage, money, useQuery, type Entries } from './data'
@@ -38,12 +38,18 @@ function SaleForm({ complete, cancel }: { complete: (id: number) => void; cancel
   const transaction = useRef<string | null>(null)
   const sending = useRef(false)
   const detail = useQuery<InventoryRow>(branch && code ? `/inventory/${branch}/${code}` : null)
-  const units = detail.data?.stock?.cantidad ?? null
+  const metadata = useQuery<InventoryMetadata>('/inventory/metadata')
+  const stock = detail.data?.stock
+  const lot = detail.data?.lote
+  const mismatched = stock?.id_lote != null && lot?.codigo_producto !== detail.data?.producto.codigo_producto
+  const expired = !!(lot?.fecha_vencimiento && metadata.data && lot.fecha_vencimiento < metadata.data.referenceDate)
+  const pendingLotCheck = stock?.id_lote != null && !metadata.data
+  const units = stock?.cantidad ?? null
   const price = detail.data?.producto.precio_venta ?? null
   const total = lines.reduce((sum, line) => sum + line.quantity * line.cents, 0)
   function addLine() {
     const count = Number(quantity)
-    if (!detail.data || !Number.isSafeInteger(count) || count < 1 || units == null || count > units || price == null || price <= 0) {
+    if (!detail.data || mismatched || expired || pendingLotCheck || !Number.isSafeInteger(count) || count < 1 || units == null || count > units || price == null || price <= 0) {
       setError('Selecciona un producto con precio y una cantidad disponible en esta sucursal.'); return
     }
     if (lines.length >= 50 || lines.some(line => line.code === Number(code))) {
@@ -82,11 +88,14 @@ function SaleForm({ complete, cancel }: { complete: (id: number) => void; cancel
     <fieldset disabled={busy || uncertain || !branch} className="practice-sale-lines"><legend>Productos de la venta</legend>
       <div className="practice-line-form"><ReferencePicker label="Producto" reference="productos" required={false} value={code} onChange={setCode} />
         <div><label htmlFor="sale-count">Cantidad</label><input id="sale-count" type="number" min="1" step="1" max={units ?? undefined} value={quantity} onChange={e => setQuantity(e.target.value)} /></div>
-        <button type="button" className="practice-button" disabled={!detail.data || units == null || units < 1 || price == null || price <= 0} onClick={addLine}><Plus size={16} aria-hidden="true" />Añadir producto</button></div>
+        <button type="button" className="practice-button" disabled={!detail.data || mismatched || expired || pendingLotCheck || units == null || units < 1 || price == null || price <= 0} onClick={addLine}><Plus size={16} aria-hidden="true" />Añadir producto</button></div>
       {detail.error ? <Status message={detail.error} retry={detail.refresh} /> : detail.loading ? <Status message="Consultando existencias…" /> : detail.data && <p className="practice-help" role="status">Existencias: {detail.data.stock ? (units ?? 'Cantidad sin registrar') : 'Sin registro'}. Precio: {money(price)}.</p>}
+      {metadata.error && <Status message={metadata.error} retry={metadata.refresh} />}
+      {mismatched && <p className="practice-error" role="status">El lote registrado no corresponde al producto. Selecciona otro producto.</p>}
+      {expired && <p className="practice-error" role="status">El lote de esta sucursal está vencido. Selecciona otro producto.</p>}
       {lines.length > 0 && <><ul className="practice-cart">{lines.map(line => <li key={line.code}><div><strong>{line.name}</strong><span>{line.quantity} × {money(line.cents / 100)}</span></div>
         <strong>{money(line.cents * line.quantity / 100)}</strong><button className="practice-text is-danger-text" type="button" aria-label={`Quitar ${line.name}`} onClick={() => setLines(lines.filter(item => item.code !== line.code))}><Trash2 size={16} aria-hidden="true" />Quitar</button></li>)}</ul>
-        <p className="practice-total">Total estimado <strong>{money(total / 100)}</strong></p></>}
+        <p className="practice-total">Total a precio de lista <strong>{money(total / 100)}</strong></p><p className="practice-help">Al confirmar, se aplican los descuentos vigentes.</p></>}
     </fieldset>
     {error && <p className="practice-error" role="alert">{error}</p>}
     <div className="practice-actions"><button type="submit" className="practice-button is-primary" disabled={busy || !lines.length}><Check size={16} aria-hidden="true" />{busy ? 'Registrando…' : uncertain ? 'Reintentar la misma venta' : 'Confirmar venta'}</button>
