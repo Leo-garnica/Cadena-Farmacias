@@ -8,12 +8,10 @@ export async function createApplication() {
   app.setGlobalPrefix('api/v1')
   app.useGlobalFilters(new ApiExceptionFilter())
   app.use((_request: unknown, response: { setHeader(name: string, value: string): void }, next: () => void) => {
-    response.setHeader('X-VitaFarma-Data', 'synthetic-demo')
     response.setHeader('Cache-Control', 'no-store')
     response.setHeader('X-Content-Type-Options', 'nosniff')
     next()
   })
-  // No CORS, database connection, credentials, or authentication provider is configured.
   app.enableShutdownHooks()
   return app
 }

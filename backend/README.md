@@ -1,72 +1,50 @@
-# VitaFarma · Backend modular
+# VitaFarma · API de consulta
 
-NestJS + TypeScript. Un proceso, nueve módulos y un único esquema académico previsto.
-La base actual **solo sirve consultas sintéticas en local**; no carga `.env` ni se conecta a Supabase.
+NestJS ejecuta un monolito con nueve módulos. El inventario y los reportes consultan PostgreSQL a través de una cuenta de lectura. Supabase Auth identifica a cada usuario.
 
-Desde la raíz:
+## Arranque local
 
-```sh
-npm ci
-npm run dev:backend
-```
+Instala las dependencias en la raíz con `npm ci` y prepara la [práctica PostgreSQL y Auth](../docs/architecture/ENTORNO-LOCAL.md). Carga las variables de `backend.env.local` en la terminal del servidor, como indica esa guía. Ejecuta `npm run dev:backend` en la raíz. La API escucha en `127.0.0.1:3000`. Puedes cambiar el puerto mediante `PORT`.
 
-Por defecto escucha en `127.0.0.1:3000`. La variable opcional `PORT` acepta un entero
-entre 1 y 65535; el host permanece local. Para ejecutar el compilado:
-
-```sh
-npm run build
-npm run start --workspace @vitafarma/backend
-```
-
-## API demo
-
-Prefijo `/api/v1`. Todas las respuestas llevan `X-VitaFarma-Data: synthetic-demo`,
-`Cache-Control: no-store` y `X-Content-Type-Options: nosniff`.
-
-| Método y ruta | Resultado |
+| Variable de servidor | Uso |
 | --- | --- |
-| `GET /health` | El proceso en ejecución devuelve HTTP 200 con `status: ok`, `mode: demo` y `database: disconnected`. |
-| `GET /ready` | Comprueba si la API puede leer su base de datos. En el modo demo devuelve HTTP 503 con código `UNAVAILABLE`. |
-| `GET /inventory/metadata` | Sucursal, categoría, ciudad y fecha de referencia demo |
-| `GET /inventory` | Filas, paginación y resumen del conjunto filtrado |
-| `GET /inventory/:idFarmacia/:codigoProducto` | Detalle por clave compuesta o 404 |
+| `DATABASE_URL` | Conexión de la cuenta lectora a PostgreSQL. El lector requiere SELECT sobre farmacia, ciudad, categoria, producto, stock, lote y medicamento. La comprobación de permisos descarta lectura de otras tablas públicas y escritura efectiva en ellas. |
+| `SUPABASE_URL` | Origen del proyecto Auth, sin ruta. La API obtiene las claves públicas desde `/auth/v1/.well-known/jwks.json`. Los destinos externos requieren HTTPS. |
+| `VITAFARMA_ACCESS_MAP` | Objeto JSON administrado en el servidor. Cada clave es el UUID del sujeto verificado. Su valor contiene `perfil` (`consulta` o `responsable`) y `sucursales` (lista explícita de IDs). |
 
-Al integrar PostgreSQL, el módulo que configura la conexión podrá proporcionar
-`ReadDatabaseProbe`. Su método `check()` debe verificar el acceso con la conexión
-lectora de la aplicación y un tiempo de espera acotado. Cada petición a `/ready`
-ejecuta la comprobación. Una lectura exitosa devuelve HTTP 200 con
-`{"status":"ready"}`. Una falla devuelve HTTP 503 con un mensaje genérico.
+Una conexión SQL externa requiere TLS con verificación del certificado. Si el emisor usa una CA privada, configúrala en el entorno de Node antes de iniciar el servicio. En la práctica local se utiliza la dirección de loopback. La cuenta lectora dispone de un pool de hasta seis conexiones, espera máxima de conexión de tres segundos y límite de ejecución SQL de cuatro segundos por sentencia. Las lecturas se efectúan en transacciones de solo lectura y snapshot repetible.
 
-Consulta de ejemplo:
-<http://127.0.0.1:3000/api/v1/inventory?farmacia=1&estado=sin-cantidad&orden=codigo-asc>
+## Contrato HTTP
 
-Parámetros: `farmacia`, `q` (hasta 100 caracteres), `categoria`, `estado`, `orden`,
-`pagina`. Identificadores y página son enteros positivos seguros. Opciones inválidas,
-parámetros repetidos o desconocidos devuelven 400. Una página fuera del resultado se
-ajusta a la última; un resultado vacío conserva una página válida.
+Prefijo `/api/v1`. Las respuestas llevan `Cache-Control: no-store` y `X-Content-Type-Options: nosniff`. El navegador utiliza el proxy del mismo origen de la aplicación. El encabezado `Authorization: Bearer <access_token>` protege todas las rutas salvo los dos indicadores técnicos.
 
-Estados: `todos`, `con-existencias`, `sin-unidades`, `sin-cantidad`, `sin-registro`,
-`sin-lote`, `vencido`. Órdenes: `nombre-asc`, `nombre-desc`, `codigo-asc`, `cantidad-desc`,
-`vencimiento-asc`. El resumen se calcula antes de paginar.
+| GET | Respuesta |
+| --- | --- |
+| `/health` | 200 si el proceso responde. Incluye `status`, `service` y `mode: postgresql`. |
+| `/ready` | 200 tras comprobar el rol lector y ejecutar una lectura. Una dependencia sin configurar o caída devuelve 503. |
+| `/me` | `sub`, `perfil`, `sucursales` de la identidad verificada y reconocida por el servidor. |
+| `/inventory/metadata` | Sucursales autorizadas, ciudades asociadas, categorías y fecha civil de referencia de Bolivia en formato ISO. |
+| `/inventory` | `query`, `rows`, `total`, `pageCount`, `pageSize` (8) y `summary`. |
+| `/inventory/:idFarmacia/:codigoProducto` | Producto en el catálogo y su saldo en la farmacia autorizada. Producto existente sin saldo contiene `stock: null`. |
+| `/reports/inventory` | `farmacia`, `referenceDate`, `registros`, `sinUnidades` y `vencidos`. Comparte alcance y filtros con inventario. |
 
-La API usa cuatro productos demo (`4001`–`4004`), una sucursal (`1`) y fecha fija
-`2026-10-25`. Representan cantidad positiva, cero, nula y ausencia de stock. Es un
-corpus independiente del frontend: no esperar encontrar aquí sus códigos `1001`–`1024`.
+El listado y el reporte aceptan `farmacia`, `q` (máximo 100 caracteres), `categoria`, `estado`, `orden` y `pagina`. El detalle utiliza la clave compuesta farmacia/producto. Los IDs deben ser enteros positivos del rango de PostgreSQL `integer`. El servidor limita la página a las existentes. Un resultado vacío conserva la página 1.
 
-Los errores siguen `{ statusCode, code, message }` y no devuelven trazas o excepciones
-internas. No existen endpoints de escritura ni endpoints de los módulos pendientes.
-No se configura autenticación, CORS o permisos de datos reales.
+| Parámetro | Valores |
+| --- | --- |
+| `estado` | `todos`, `con-existencias`, `sin-unidades`, `sin-cantidad`, `sin-registro`, `sin-lote`, `vencido` |
+| `orden` | `nombre-asc`, `nombre-desc`, `codigo-asc`, `cantidad-desc`, `vencimiento-asc` |
 
-## Extensión y pruebas
+La búsqueda encuentra texto literal en el nombre normalizado o en el código. Los empates se ordenan por código de producto. El total cuenta productos del catálogo tras aplicar los filtros. Los indicadores se calculan sobre todo el conjunto filtrado antes de paginar. `registros` cuenta filas de stock, `sinUnidades` cantidades exactamente cero y `vencidos` lotes del mismo producto cuya fecha es anterior a la fecha civil en `America/La_Paz`. Cuando un stock tiene una referencia a un lote de otro producto, se conserva `stock.id_lote` y el detalle devuelve `lote: null`.
 
-La composición está en `src/app.module.ts`. Inventario demuestra dominio, aplicación,
-puerto de lectura, adaptador demo y presentación. Su `public.ts` exporta el módulo y
-las consultas; no el repositorio.
+Los errores tienen forma `{ statusCode, code, message }`. El servidor devuelve 400 por parámetros inválidos, 401 por sesión inválida, 403 por perfil sin asignación o acceso a una sucursal ajena, 404 por detalle inexistente o ajeno y 503 por fallos de configuración, conexión, permisos SQL o disponibilidad del proveedor de claves. El correo y la metadata modificable del usuario quedan fuera de las decisiones de autorización. Los tokens válidos se comprueban localmente contra las claves públicas en caché hasta su caducidad.
+
+## Verificación
+
+Desde la raíz, ejecuta `npm run test:architecture` y `npm run test:backend`. Estas pruebas usan un emisor de claves efímero en loopback. Para verificar las consultas reales, con la práctica activa y la API compilada, ejecuta:
 
 ```sh
-npm run test:architecture
-npm run test:backend
+node backend/integration/inventory-practica.mjs
 ```
 
-Consultar [Arquitectura](../docs/architecture/ARCHITECTURE.md),
-[Módulos](../docs/architecture/MODULES.md) y [Desarrollo](../docs/architecture/DEVELOPMENT.md).
+El segundo recorrido inicia sesión con tres cuentas de prueba, verifica los permisos por ruta y contrasta listado, detalle e indicadores con una consulta independiente a PostgreSQL. Añade `--rendimiento` para medir 50 solicitudes por operación en grupos de cinco, después del calentamiento. Los datos y contraseñas de la práctica permanecen en la máquina.

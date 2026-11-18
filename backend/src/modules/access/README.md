@@ -1,14 +1,3 @@
 # Acceso
 
-Estado: límite registrado en el monolito, funcionalidad pendiente.
-
-Tablas bajo responsabilidad lógica: rol, usuario.
-
-Identidad de dominio y roles. Proveedor de autenticación, sesiones y permisos aún sin definir; nunca exportar contrasena.
-
-Al desarrollar un caso aprobado, usar `domain/`, `application/`, `infrastructure/`
-y `presentation/`, como en Inventario. No se crean servicios ni CRUD ficticios para
-rellenar carpetas. Exponer integraciones en `public.ts`; no importar repositorios
-ni clases internas de otro módulo. La propiedad lógica no altera esquemas o claves.
-
-La reserva de este módulo no habilita escrituras, datos sensibles ni funciones de BD.
+El guard global verifica los tokens de Supabase Auth con JWKS, emisor del proyecto, audiencia `authenticated`, caducidad y sujeto. El mapa privado del servidor asigna a cada sujeto reconocido un perfil y sus sucursales. El módulo expone `CurrentAccess`, el tipo `AccessGrant` y la ruta `GET /api/v1/me`. El login utiliza Supabase Auth. Las consultas de acceso no leen contraseñas de tablas académicas. [Configuración de servidor](../../../README.md)
