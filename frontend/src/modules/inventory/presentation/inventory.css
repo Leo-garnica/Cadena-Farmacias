@@ -153,6 +153,7 @@
   .category-cell { font-size: 12px; }
   .lot-cell, .expiry-cell { font-size: 12px; white-space: normal; }
   .quantity-cell { grid-row: 2; grid-column: 2; }
+  .inventory-table .status-badge { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
   .quantity-absent { max-width: none; }
   .inventory-table .detail-cell { grid-column: 1 / -1; padding: 0; display: flex; justify-content: flex-end; }
   .detail-link { font-size: 12px; min-height: 44px; padding: 8px 12px; background: var(--background); }

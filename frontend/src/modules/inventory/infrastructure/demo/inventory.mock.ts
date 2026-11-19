@@ -15,6 +15,7 @@ export function isExpired(row: InventoryRow) {
 }
 function matchesStatus(row: InventoryRow, status: InventoryStatus) {
   switch (status) {
+    case 'con-registro': return row.stock !== null
     case 'con-existencias': return row.stock?.cantidad != null && row.stock.cantidad > 0
     case 'sin-unidades': return row.stock?.cantidad === 0
     case 'sin-cantidad': return row.stock !== null && row.stock.cantidad === null

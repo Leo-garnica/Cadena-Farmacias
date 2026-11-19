@@ -1,5 +1,6 @@
 import { createInventoryLoaders } from '../modules/inventory/public'
 import type { AccessGrant } from '@vitafarma/contracts/common'
+import type { InventoryReport } from '@vitafarma/contracts/inventory'
 import { apiRequest, protectLoader } from '../modules/access/public'
 import { authRepository, inventoryRepository } from './repositories'
 
@@ -21,3 +22,12 @@ export const loadMetadata = protectLoader(authRepository, async args => {
 })
 export const loadInventory = protectLoader(authRepository, inventoryLoader)
 export const loadDetail = protectLoader(authRepository, detailLoader)
+export const loadReport = protectLoader(authRepository, ({ request }) => {
+  const filters = new URLSearchParams()
+  const url = new URL(request.url)
+  for (const key of ['farmacia', 'q', 'categoria']) {
+    const value = url.searchParams.get(key)
+    if (value) filters.set(key, value)
+  }
+  return apiRequest<InventoryReport>('/reports/inventory?' + filters, { signal: request.signal })
+})

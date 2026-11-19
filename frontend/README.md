@@ -1,211 +1,34 @@
-# VitaFarma · Frontend de Inventario
+# VitaFarma · Interfaz del equipo
 
-Frontend de consulta implementado con **React + TypeScript + Vite**. Conserva el recorrido del piloto de Inventario y ahora forma parte de la [base modular](../docs/architecture/ARCHITECTURE.md). Opción A aprobada el 28/10/2026: mesa de control con Inter e Inter Tight, manteniendo paleta, tabla y panel de detalle.
+## Entrar
 
-**Inventario: datos simulados · Solo consulta.** El acceso a la interfaz ahora requiere
-una cuenta de **Supabase Auth**, correo/contraseña y las variables de `frontend/.env.local`.
-El login está conectado al proveedor; los precios, sucursales y existencias siguen
-siendo ejemplos sintéticos. No se pueden registrar ventas ni movimientos.
-La autorización de empleados/roles/sucursales en el backend sigue pendiente.
+Con Node.js 22.12 o superior y Docker local, abre una terminal en la raíz del repositorio. Ejecuta `npm ci` y uno de estos comandos.
 
-## Abrir la aplicación
-
-Desde la raíz del repositorio, en CMD o PowerShell:
-
-```text
-npm ci
-npm run dev:frontend
-```
-
-Abre **http://127.0.0.1:5173/equipo/entrar**. Las rutas de inventario requieren sesión.
-El servidor escucha solo en la máquina local. `Ctrl+C` lo detiene. Si el puerto ya
-está ocupado, Vite lo informa sin cambiar de puerto.
-
-Requisito: Node **22.12 o superior** compatible con Vite 8. Entorno usado para verificar este incremento: **Node 22.23.3 / npm 10.9.9**. Las versiones exactas de las dependencias están en `package.json` y `package-lock.json`; para reproducir la instalación usa `npm ci`.
-
-### Si esta terminal dice “No active Node.js version is configured”
-
-En este equipo existe una instalación de Node 22.23.3, aunque el ejecutable intermediario de nvm no tiene una versión activa. Se comprobó el ejecutable directamente. Puedes anteponer su carpeta **solo al PATH de esta terminal**, sin instalar ni activar globalmente otra versión.
-
-PowerShell, antes de los comandos de npm:
-
-```powershell
-$env:Path = 'C:\Users\Leo\AppData\Local\Author Software\nvm\installs\v22.23.3;' + $env:Path
-node --version
-npm --version
-```
-
-CMD:
-
-```bat
-set "PATH=C:\Users\Leo\AppData\Local\Author Software\nvm\installs\v22.23.3;%PATH%"
-node --version
-npm --version
-```
-
-Esta ruta corresponde al equipo donde se verificó el piloto; en otro equipo utiliza su propia instalación de Node. En PowerShell usar `npm.cmd` si se bloquea `npm.ps1`. `.npmrc` de la raíz mantiene la caché en `.cache/npm`. La instalación y el lockfile ahora son únicos en la raíz. Las fuentes se sirven desde el proyecto, sin consultas a Google Fonts.
-
-## Comprobaciones
-
-Desde la raíz del repositorio:
-
-```text
-npm run typecheck
-npm run lint
-npm run build
-npm run test:e2e
-```
-
-Chromium ya se descargó en `frontend/.browsers/` en este equipo. Para instalarlo en otra copia del proyecto:
-
-PowerShell:
-
-```powershell
-$env:PLAYWRIGHT_BROWSERS_PATH = Join-Path (Get-Location) 'frontend/.browsers'
-npm.cmd exec --workspace @vitafarma/frontend -- playwright install chromium
-npm run test:e2e
-```
-
-CMD:
-
-```bat
-set "PLAYWRIGHT_BROWSERS_PATH=%CD%\frontend\.browsers"
-npm exec --workspace @vitafarma/frontend -- playwright install chromium
-npm run test:e2e
-```
-
-`playwright.config.ts` usa esa carpeta por defecto. Inicia servidores aislados en
-5174/5175 con configuración ficticia y Auth interceptado; no reutiliza Vite de
-desarrollo ni consulta el proyecto Supabase real. El navegador se ejecuta sin ventana.
-
-La tabla siguiente registra la entrega histórica del piloto anterior al login.
-Las comprobaciones del acceso están documentadas en la [guía actual](../docs/SUPABASE-LOGIN.md).
-
-| Comprobación ejecutada | Resultado final |
+| Comando | Recorrido |
 | --- | --- |
-| `npm run typecheck` | Pasó, sin errores de TypeScript |
-| `npm run lint` | Pasó, sin errores ni advertencias de ESLint |
-| `npm run build` | Pasó; artefactos locales en `dist/` |
-| `npm run test:e2e` | **25 pruebas aprobadas**, Chromium, sin reintentos |
+| `npm run dev:practica` | Portada, acceso, inventario e indicadores sobre el dataset de referencia. |
+| `npm run dev:gestion` | Añade los formularios académicos y las ventas. El inventario muestra el stock de esta copia de gestión. |
 
-La suite verifica integridad de fixtures, cantidades cero/nulas/ausentes, búsqueda por nombre/código y sin tildes, filtros, orden, paginación, resumen consistente, historial, enlaces directos, recarga, pestañas, recuperación de errores, rutas inexistentes y ausencia de solicitudes externas/errores de consola en el recorrido normal.
+Abre la portada y selecciona el acceso del personal. En las cuentas de práctica, el operador consulta Centro y el supervisor puede cambiar de sucursal. En modo gestión el supervisor también ve **Gestión** y **Ventas**. Las contraseñas de estas identidades ficticias se generan en la carpeta personal del equipo. [Portada local](http://127.0.0.1:5173/) · [Acceso y perfiles](../docs/SUPABASE-LOGIN.md)
 
-También comprueba teclado, foco visible y retorno al disparador, Escape, contención del foco en el panel, cierre visible al desplazar el panel, movimiento reducido, ausencia de desbordamiento general a **360 / 768 / 1280 px**, contraste de los principales textos/controles/estados (mínimo 4,5:1) y fechas en **America/La_Paz** y **Pacific/Kiritimati**. Esto no equivale a una auditoría completa con lectores de pantalla ni a pruebas en todos los navegadores; Firefox, WebKit y lectores de pantalla no se probaron.
+## Recorrer las pantallas
 
-Se corrigieron un valor esperado incorrecto en una prueba de resumen y dos selectores/comparaciones de prueba. La revisión visual corrigió la visibilidad del menú de escritorio, una etiqueta duplicada y la cabecera desplazable del detalle. Las 25 pruebas volvieron a pasar después de esas correcciones.
-
-```text
-npm run test:report --workspace @vitafarma/frontend
-```
-
-Abre el informe local de Playwright. Las capturas están en `test-results/visual-responsive-*/inventario-*.png` y `detalle-*.png`; se generan de nuevo al ejecutar la suite. Se inspeccionaron realmente capturas de listado en móvil/tablet/escritorio y de detalle en móvil/escritorio. Los reportes, cachés, navegadores y `dist/` están excluidos mediante `.gitignore`.
-
-Para servir el build local:
-
-```text
-npm run preview --workspace @vitafarma/frontend
-```
-
-Dirección del preview: `http://127.0.0.1:4173/`. `build` y `preview` no publican el proyecto.
-
-## Recorrido manual
-
-1. Abre Inventario y comprueba la etiqueta de datos simulados y la referencia **25/10/2026**.
-2. Elige **Norte**, busca `10` y ordena por **Código: menor a mayor**.
-3. Avanza a la segunda página. El resumen sigue describiendo el conjunto filtrado completo.
-4. Abre **Ver detalle** de Omeprazol. Cambia entre **Producto** y **Lote asociado**.
-5. Cierra con el botón, **Escape** o **Atrás**. Se conservan sucursal, búsqueda, categoría, estado, orden y página. El foco vuelve al enlace que abrió el panel.
-6. Filtra **Primeros auxilios**, prueba **Sin unidades (0)** y **Cantidad no registrada**, y limpia los filtros.
-7. Prueba una búsqueda sin coincidencias. El estado vacío ofrece limpiar filtros.
-
-La búsqueda se aplica con **Buscar** o Enter; los selectores se aplican al cambiar. Los cambios de filtros/orden reinician la página. La categoría se consulta en el detalle en las anchuras intermedias donde se oculta esa columna; en móvil las filas se organizan verticalmente conservando sus etiquetas.
-
-## Rutas y ejemplos
-
-| Ruta | Comportamiento |
+| Ruta | Qué comprobar |
 | --- | --- |
-| `/equipo/entrar` | Inicio de sesión con correo y contraseña de Supabase Auth |
-| `/` | Redirección a `/inventario` |
-| `/inventario` | Consulta por sucursal; URL con estado normalizado |
-| `/inventario/1/1001` | Paracetamol, sucursal Central, cantidad positiva y lote vencido |
-| `/inventario/1/1002` | Registro con cantidad **0** |
-| `/inventario/1/1003` | Registro con cantidad **NULL** y sin lote |
-| `/inventario/1/1004?tab=lote` | Lote que vence el día de referencia demo |
-| `/inventario/1/1009?tab=lote` | Lote asociado con fecha de vencimiento no registrada |
-| `/inventario/1/1020` | Producto conocido, **sin registro de stock** en Central |
-| `/inventario/2/1024` | Producto no medicamento, con campos no registrados |
-| `/inventario/999/1001` | Estado de registro no encontrado |
-| `/no-existe` | Página no encontrada con enlace de retorno |
+| `/` | La portada Mostrador VitaFarma se abre sin sesión. |
+| `/equipo/entrar` | El formulario acepta correo y contraseña de Supabase Auth. Al entrar se recupera la ruta interna solicitada. |
+| `/inventario?farmacia=1` | El dataset de control presenta 12 productos, 10 registros y 2 saldos en cero. Una consulta vacía ofrece limpiar filtros. |
+| `/inventario/1/101?tab=lote` | El detalle de Paracetamol muestra su saldo en Centro y el lote asociado. Escape cierra el panel. |
+| `/indicadores?farmacia=1` | Cada cifra enlaza con los registros correspondientes. La búsqueda y la categoría se conservan al abrir el inventario. |
+| `/practica/farmacias` | En gestión, el supervisor puede abrir los formularios de sucursales, empleados, productos, medicamentos, clientes, descuentos, planillas y usuarios. |
+| `/practica/ventas` | El supervisor elige sucursal, empleado y cliente, añade productos, confirma la venta y consulta el detalle con el precio cobrado. |
 
-Parámetros persistidos: `farmacia`, `q`, `categoria`, `estado`, `orden`, `pagina` y `tab=lote` para el detalle. La clave de la ruta de detalle es `(idFarmacia, codigoProducto)`; prevalece sobre una sucursal contradictoria en el query string. Los parámetros desconocidos, opciones inválidas y páginas fuera de rango se normalizan mediante reemplazo de URL. Cambiar de pestaña reemplaza la entrada actual del historial para que Atrás cierre el detalle.
+En inventario se distinguen saldo cero, cantidad desconocida y producto sin fila de stock. El vencimiento se compara con la fecha civil del servidor en Bolivia. La consulta, la sucursal y la página se pueden compartir mediante la URL. La autorización se vuelve a comprobar en el servidor cuando otra cuenta abre el enlace. [Datos y casos de referencia](../docs/architecture/ENTORNO-LOCAL.md)
 
-Accesos para reproducir estados de consulta, sin controles técnicos en la pantalla:
+## Desarrollo y comprobación
 
-- `/inventario?farmacia=2&q=10&demo=error`: error recuperable. **Reintentar** retira la simulación y conserva los filtros.
-- `/inventario?demo=slow`: demora sintética de 1,5 s por carga del loader para observar el estado de carga. La primera normalización de URL puede producir una segunda carga. Retira `demo=slow` para volver a respuesta inmediata.
+El frontend usa React, TypeScript, React Router y Vite. La portada y el acceso son módulos independientes. El inventario consume la API NestJS mediante el adaptador HTTP compuesto en `src/app/repositories.ts`. Los formularios y la venta usan `/api/v1/practica`. El navegador recibe la URL de Auth y la clave pública. Las conexiones a PostgreSQL y el mapa de sucursales viven en el servidor.
 
-## Datos y fidelidad al esquema
+Los filtros y el detalle de inventario conservan su estado en la URL. La interfaz utiliza Inter e Inter Tight locales, controles con foco visible y movimiento reducido. En pantallas estrechas el menú se abre desde la cabecera.
 
-El contrato se basa en [DB-CONTEXT.md](../docs/DB-CONTEXT.md) y la [exportación verificada](../docs/schema-supabase-actual.sql), con contraste del SQL académico y de la lógica de llenado, sin ejecutar esos scripts.
-
-- **3 sucursales / 24 productos / 48 registros de stock**; 16 registros por sucursal, 6 categorías y 24 lotes de catálogo. Los 12 primeros productos tienen especialización `medicamento`. Los demás no la tienen.
-- Cada sucursal permite consultar los 24 productos; 8 carecen de registro en ella. Es una proyección de catálogo con stock opcional, no 72 filas de stock inventadas.
-- PK de stock única por `(id_farmacia, codigo_producto)`, con un único lote opcional. Toda asociación de lote pertenece al producto correspondiente.
-- El resumen cuenta registros del conjunto filtrado completo. Nunca suma unidades de presentaciones diferentes. Central sin filtros tiene **16 registros**, **11 con existencias**, **3 con cero**, **2 con cantidad nula**, **8 productos sin registro** y **2 registros con lote vencido**.
-- Se conserva `cantidad = NULL` como **No registrado**; no se sustituye por cero. Una fila ausente y un lote no asociado tienen explicaciones diferentes.
-- Las fechas PostgreSQL `DATE` se conservan como cadenas ISO sin hora. El formateo usa construcción y zona UTC explícitas para evitar cambios de día por zona del navegador.
-- La referencia fija es **2026-10-25**. Fechas anteriores: **Vencido**; fecha igual: **Vence en fecha demo**; posteriores: **Vigente**. No se infiere una regla de bloqueo de venta ni se sincroniza con el vencimiento general de medicamento.
-- No se inventaron mínimos de stock ni alertas de reposición. No hay datos de usuarios, pacientes, empleados o clientes en los fixtures.
-
-## Organización y decisiones de implementación
-
-```text
-frontend/
-├── package.json, .gitignore     # Lockfile e instalación en la raíz
-├── index.html, vite.config.ts, tsconfig*.json, eslint.config.js
-├── playwright.config.ts, README.md
-├── public/favicon.svg
-├── src/
-│   ├── main.tsx
-│   ├── app/                    # Shell, marca, sidebar, router y estados de ruta
-│   ├── shared/                 # ui/, motion/, styles/ y lib/
-│   └── modules/inventory/
-│       ├── domain/             # Tipos y estados
-│       ├── application/        # Puerto de lectura y parámetros de consulta
-│       ├── infrastructure/demo/ # Fixtures y repositorio sintético
-│       ├── presentation/       # Vistas, loaders y CSS
-│       ├── public.ts           # Integración pública con shell y router
-│       ├── demo.ts             # Adaptador para composición
-│       └── detail.ts           # Entrada del detalle diferido
-└── tests/                      # Datos, recorrido de consulta, responsive y accesibilidad
-```
-
-`app/repositories.ts` compone el repositorio y lo entrega a la fábrica de loaders. Los contratos están en `packages/contracts`; no dependen de los mocks. El módulo no importa `app/` y `shared/` no importa módulos. Los imports se actualizaron junto con las pruebas; no cambian las props de los componentes compartidos.
-
-React Router en **Data Mode** resuelve loaders, parámetros, errores y acceso directo. El detalle se importa cuando se necesita. Los filtros viven en la URL; no se añadió un gestor de estado global ni almacenamiento persistente. Resumen, filas y estados derivan de los datos; no hay copias de esos valores en estados React que puedan desincronizarse. Las consultas del mock aceptan cancelación y usan mapas para relacionar claves. El repositorio tiene únicamente métodos de lectura.
-
-Sistema visual: verde bosque `#0B4937`, fondo `#F6F8F5`, texto `#19362D`, selección `#DCE9DC`, advertencia `#805714`, error `#A52A32` y foco `#345AB4`. Inter 400/500/600 para interfaz e Inter Tight 700/800 para títulos y marca, siguiendo la tipografía inspeccionada de UMSSY. CSS propio; sin librería de gráficos ni componentes de una tienda pública.
-
-Los tres patrones compartidos de motion son: apertura de panel/navegación móvil (**220 ms**), continuidad del indicador de pestaña (**160 ms**) y feedback de controles/resultados (**120 ms**). No se animan filas ni contadores. Motion y CSS respetan `prefers-reduced-motion`; los controles permanecen disponibles durante las transiciones. Radix Dialog y Tabs gestionan semántica y teclado.
-
-### Referencias de diseño y desarrollo
-
-La aprobación de base modular y opción A está registrada en [decisiones](../docs/architecture/DECISIONS.md). La revisión técnica y de interfaz contempla rendimiento React, navegación, accesibilidad y movimiento reducido.
-
-Se consultaron las páginas de referencia aprobadas: [Oripio](https://dribbble.com/shots/26765569-Pharmacy-Website), [Pulse Clinic](https://dribbble.com/shots/27699617-Pulse-Clinic-Counter-to-Supplier-Pharmacy-Dashboard-Animation), [UGEM](https://dribbble.com/shots/15688426-Pharmacy-App-Landing-Page-Animation) y [Rixlab](https://dribbble.com/shots/27528928-Healthcare-Dashboard-Animation). Se usaron los principios de identidad verde, jerarquía y continuidad definidos en el plan; no se copiaron marcas, imágenes o pantallas. La lectura de esas páginas no acredita reproducción de sus videos.
-
-La implementación técnica se contrastó con [Motion](https://motion.dev/docs/react-layout-animations), [React Router Data Mode](https://reactrouter.com/start/data/routing), [Vite](https://vite.dev/guide/) y las [Web Interface Guidelines](https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md). La revisión final atendió etiquetas, semántica, foco, estados, responsive, contraste, enlaces reales y movimiento reducido; la evidencia de navegador está en las pruebas y capturas locales.
-
-## Límites y siguiente fase
-
-Inventario es el único módulo de negocio consultable en la interfaz. Catálogo,
-Proveedores y Reportes aparecen como **Próximamente**. Existe una API demo independiente
-en `backend/`; este frontend todavía no la consume. El módulo `access` usa Supabase Auth
-para login, verificación de sesión y logout. No hay autorización de negocio en NestJS,
-edición, ventas, compras, facturación ni movimientos.
-
-Para integrar datos reales deberá aprobarse primero el contrato de acceso y resolver autenticación, roles, permisos, RLS o un backend seguro. Entonces podrá reemplazarse `inventoryRepository` manteniendo las proyecciones y la semántica de nulos/fechas. Triggers, operaciones transaccionales y nuevos módulos requieren otro alcance.
-
-La comprobación histórica del piloto quedó ampliada por la [entrega de arquitectura](../docs/architecture/IMPLEMENTATION.md).
-El incremento actual se describe en la [guía de login](../docs/SUPABASE-LOGIN.md):
-integra Auth en el frontend sin cambios de Data API, SQL, triggers, RLS o cuentas remotas.
+Desde la raíz, `npm run test:e2e` ejecuta Chromium en dos servidores aislados con servicios controlados. Con `npm run dev:practica` activo, `npm run test:auth:practica --workspace @vitafarma/frontend` recorre el acceso con Auth local e inventario desde PostgreSQL. Los reportes regenerables se guardan en `frontend/playwright-report/` y `frontend/test-results/`. [Instalación de Chromium y comandos](../docs/architecture/DEVELOPMENT.md)

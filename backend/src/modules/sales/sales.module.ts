@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
+import { ConexionPractica } from './practica/conexion.js'
+import { PracticaController } from './practica/practica.controller.js'
 
-/** Reserved boundary. No operational endpoints or permissions are implemented. */
-@Module({})
+@Module({ controllers: [PracticaController], providers: [ConexionPractica] })
 export class SalesModule {}

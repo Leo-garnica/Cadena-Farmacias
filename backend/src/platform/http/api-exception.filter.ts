@@ -6,6 +6,7 @@ const responses: Partial<Record<number, Pick<ApiError, 'code' | 'message'>>> = {
   401: { code: 'UNAUTHORIZED', message: 'Inicia sesión de nuevo' },
   403: { code: 'FORBIDDEN', message: 'Acceso no autorizado' },
   404: { code: 'NOT_FOUND', message: 'Recurso no encontrado' },
+  409: { code: 'CONFLICT', message: 'Los datos han cambiado o tienen registros relacionados. Revisa la operación antes de continuar.' },
   503: { code: 'UNAVAILABLE', message: 'Consulta no disponible' },
 }
 

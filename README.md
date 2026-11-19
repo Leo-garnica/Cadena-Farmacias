@@ -1,95 +1,53 @@
 # VitaFarma · Cadena-Farmacias
 
-Base de desarrollo con **monolito modular NestJS + TypeScript**, frontend
-**React + Vite** y contratos de lectura compartidos. El modelo académico PostgreSQL
-se conserva. El login usa Supabase Auth; el inventario funciona con datos sintéticos.
+VitaFarma permite consultar existencias por sucursal y registrar operaciones de una cadena de farmacias en una copia académica local. La aplicación usa React, Vite y TypeScript, una API NestJS organizada en nueve módulos, PostgreSQL y Supabase Auth.
 
-## Empezar
+## Abrir VitaFarma
 
-Requiere Node.js **22.12 o superior** compatible con Vite 8 y npm 10.
-Ejecutar desde la raíz, donde está este README:
-
-Para usar credenciales y datos de prueba en tu equipo, sigue la [guía del entorno local de práctica](docs/architecture/ENTORNO-LOCAL.md). Para otro proyecto de Auth, configura el navegador con la [guía de acceso del personal](docs/SUPABASE-LOGIN.md).
+Instala Node.js 22.12 o superior y usa npm 10. Para los entornos de práctica se requiere Docker con contenedores Linux y Compose v2. Desde la raíz del repositorio instala los workspaces con el único lockfile:
 
 ```sh
 npm ci
-npm run dev
 ```
 
-- Inicio de sesión: <http://127.0.0.1:5173/equipo/entrar>
-- Salud de la API demo: <http://127.0.0.1:3000/api/v1/health>
-- Disponibilidad de consultas: <http://127.0.0.1:3000/api/v1/ready>. Devuelve 503 mientras NestJS carezca de una conexión de lectura verificada.
-- `Ctrl+C` detiene los servidores locales.
+Arranca **uno** de los dos modos. Cada comando prepara sus servicios, carga la configuración local de cada proceso e inicia la web y la API.
 
-En PowerShell, si la política bloquea `npm.ps1`, usar `npm.cmd` en lugar de `npm`.
-Si el intermediario de nvm informa que no hay una versión activa, consultar la
-[guía de desarrollo](docs/architecture/DEVELOPMENT.md), sin cambiar políticas del sistema.
+| Comando | Base PostgreSQL local | Qué permite |
+| --- | --- | --- |
+| `npm run dev:practica` | `vitafarma_practica` | Consultar el dataset de control VF-PRACTICA-1 y contrastar sus indicadores. |
+| `npm run dev:gestion` | `vitafarma_gestion` | Consultar y administrar datos sintéticos persistentes para el Trabajo 4. El inventario refleja las ventas de esta copia. |
+
+Abre [VitaFarma en tu equipo](http://127.0.0.1:5173/). Desde la portada entra al espacio del equipo. Para consultar usa `operador@vitafarma.test`; para las operaciones de gestión usa `supervisor@vitafarma.test`. El arranque guarda las contraseñas aleatorias en `.vitafarma/practica-v1/cuentas.json`, dentro de tu carpeta personal. [Acceso y perfiles](docs/SUPABASE-LOGIN.md)
+
+Para cambiar de modo, detén primero la web y la API con **Ctrl+C**. Comprueba los servicios y el dataset de control con `node local/practica.mjs verify`. Para detener también PostgreSQL y Auth usa `node local/practica.mjs stop`. La parada conserva el volumen. [Entorno local](docs/architecture/ENTORNO-LOCAL.md)
+
+## Pantallas
+
+Para preparar la defensa, el [informe del Trabajo 4](docs/trabajo-4/VitaFarma-interfaces.pdf) reúne las pantallas y sus filas en PostgreSQL. El [acta de entrega](docs/planning/CIERRE-RELEASE-2026.md) enlaza las pruebas y las decisiones de los tres sprints.
+
+| Ruta | Función |
+| --- | --- |
+| `/` y `/equipo/entrar` | Portada pública e ingreso del personal con Supabase Auth. |
+| `/inventario` | Listado paginado, búsqueda, filtros y detalle por farmacia y producto. |
+| `/indicadores` | Registros de stock, registros con cero unidades y lotes vencidos dentro de los filtros de la sucursal. Cada indicador abre su lista de inventario. |
+| `/practica/:recurso` | Sucursales, empleados, productos, medicamentos, clientes, descuentos, planillas y fichas de usuarios académicos en modo gestión. |
+| `/practica/ventas` | Selección de productos, registro de la venta y consulta de su detalle en la copia de gestión. |
+
+NestJS valida la identidad, el perfil y las sucursales en cada consulta protegida. Las dos prácticas usan PostgreSQL real con datos sintéticos. La integración de lectura con el Supabase académico remoto queda pendiente de una cuenta lectora mínima y su comprobación. [Arquitectura](docs/architecture/ARCHITECTURE.md)
+
+## Desarrollo y pruebas
+
+Los procesos de desarrollo usan web en `127.0.0.1:5173` y API en `127.0.0.1:3000`. `GET /api/v1/health` indica que la API responde. `GET /api/v1/ready` verifica la conexión lectora y sus permisos; devuelve 503 si falla. Para compilar y verificar código usa `npm run check`. La guía incluye Chromium, los ensayos con PostgreSQL y los comandos por workspace. [Guía de desarrollo](docs/architecture/DEVELOPMENT.md)
 
 ## Estructura
 
-```text
-backend/             Monolito: módulos, infraestructura técnica y pruebas
-frontend/            SPA: composición, módulo Inventario y UI compartida
-packages/contracts/  Contratos públicos TypeScript sin framework
-docs/                Índice, arquitectura, decisiones y antecedentes
-Scripts/             SQL académico y llenado masivo originales
-supabase/            Recursos locales; config.toml no se versiona
-```
-
-Hay un solo backend y una sola base de datos prevista. Los módulos se comunican
-mediante interfaces públicas dentro del proceso. No hay servicios independientes.
-La explicación completa está en [Arquitectura](docs/architecture/ARCHITECTURE.md).
-
-## Qué está disponible
-
-| Área | Estado |
+| Directorio | Contenido |
 | --- | --- |
-| Frontend Inventario | Consulta navegable con 3 sucursales, 24 productos y 48 registros de stock sintéticos |
-| Inicio de sesión frontend | Correo/contraseña con Supabase Auth, sesión persistente, renovación y logout; rutas UI protegidas |
-| API Inventario | Ejemplo local de lectura con un corpus independiente de 4 productos sintéticos |
-| Módulos backend: Sucursales, Catálogo, Proveedores, Ventas, Personal, Acceso, Auditoría y Reportes | Límites registrados y documentados; funcionalidad pendiente |
-| Datos de negocio reales | Desconectados; vínculo de identidad, autorización en NestJS y consultas pendientes |
+| `frontend/` | Portada, acceso, inventario, indicadores y gestión académica. |
+| `backend/` | Monolito NestJS, acceso a PostgreSQL, API y pruebas. |
+| `packages/contracts/` | Contratos compartidos de TypeScript independientes del framework. |
+| `local/` | Servicios, datos ficticios y comprobaciones de los entornos de práctica. |
+| `Scripts/`, `supabase/` | Referencias académicas y recursos de Supabase. |
+| `docs/` | Arquitectura, decisiones, planificación y evidencia de entrega. |
 
-El frontend sigue funcionando sin arrancar la API. No se presenta la demostración
-como una conexión operativa de inventario, ventas o facturación. Autenticarse no
-asigna rol ni sucursal. El backend demo sigue sin autenticación y solo sirve datos sintéticos.
-
-## Comandos
-
-| Comando desde la raíz | Propósito |
-| --- | --- |
-| `npm run dev` | Arrancar API y frontend con recarga |
-| `npm run dev:frontend` | Trabajar solo en la interfaz |
-| `npm run dev:backend` | Trabajar solo en la API |
-| `npm run typecheck` | Compilar contratos y comprobar tipos de los workspaces |
-| `npm run lint` | Revisar código frontend y backend |
-| `npm run build` | Compilar contratos, backend y frontend; no publica nada |
-| `npm run test:architecture` | Verificar dependencias y ciclos entre módulos |
-| `npm run test:backend` | Probar HTTP y semántica de consulta, sin BD |
-| `npm run test:e2e` | Ejecutar el recorrido y revisión responsive en Chromium |
-| `npm run check` | Ejecutar todas las comprobaciones anteriores |
-
-Usar el **único `package-lock.json` de la raíz**. Las dependencias de cada workspace
-se declaran en su propio `package.json`. Chromium es un requisito adicional para las
-pruebas de navegador; ver [instalación y pruebas](docs/architecture/DEVELOPMENT.md).
-
-## Documentación y reglas
-
-Leer primero el [índice de documentos](docs/README.md), la
-[matriz de módulos y tablas](docs/architecture/MODULES.md) y las
-[decisiones](docs/architecture/DECISIONS.md).
-
-Para el trabajo siguiente, consultar la [planificación de noviembre](docs/planning/README.md):
-plan de release, reglas y todas las tareas/subtareas de los tres sprints, con fechas,
-horas, dependencias y criterios de cierre. El plan comienza con landing y conduce
-a inventario conectado y dashboard verificable; no convierte las demos actuales
-en integración real ni autoriza ejecutar esos cambios por sí solo.
-
-La tipografía aprobada es **Inter para interfaz e Inter Tight para títulos**,
-tomando UMSSY como referencia y conservando la paleta y composición de VitaFarma.
-Las fuentes se sirven localmente.
-
-Las [reglas de ejecución](docs/planning/REGLAS-DE-EJECUCION.md) rigen los cambios.
-Los SQL y el snapshot de Supabase son fuentes
-de consulta, no scripts de inicio. No ejecutar llenados, migraciones o reinicios de BD
-para abrir esta aplicación. El estado remoto no se verificó nuevamente en esta fase.
+El plan de noviembre conserva las fechas, las prioridades y la aceptación de cada sprint. Para priorizar la entrega se retiraron los dos P1 opcionales de consulta de proveedores e historial comercial. La gestión de ventas del Trabajo 4 tiene su propio alcance local. [Índice de documentación](docs/README.md) · [Plan y tableros](docs/planning/README.md)

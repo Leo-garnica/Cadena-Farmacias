@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<title>VitaFarma · Interfaces de la cadena de farmacias</title>
+<style>
+@page {
+  size:A4;
+  margin:0;
+}
+* {
+  box-sizing:border-box;
+}
+body {
+  margin:0;
+  font-family:'Segoe UI',Arial,sans-serif;
+  color:#20372e;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
+}
+.sheet {
+  width:210mm;
+  height:297mm;
+  padding:12mm 13mm 10mm;
+  page-break-after:always;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.sheet:last-child {
+  page-break-after:auto;
+}
+.sheet>header,.sheet>footer {
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+}
+.sheet>header {
+  font-size:8.5pt;
+  letter-spacing:.02em;
+  padding-bottom:3.2mm;
+  border-bottom:1pt solid #adc7b8;
+  color:#385d4c;
+}
+.sheet>header strong {
+  font-size:13pt;
+  letter-spacing:-.035em;
+  color:#174936;
+}
+.sheet>footer {
+  border-top:.6pt solid #cddbd2;
+  margin-top:auto;
+  padding-top:3mm;
+  color:#476151;
+  font-size:8pt;
+}
+.sheet main {
+  padding-top:6mm;
+}
+.overline,.eyebrow {
+  font-size:9pt;
+  color:#32624a;
+  letter-spacing:.055em;
+  font-weight:650;
+}
+.sheet h1 {
+  font-size:27pt;
+  letter-spacing:-.045em;
+  line-height:1.08;
+  margin:2mm 0;
+}
+.sheet p {
+  font-size:10.5pt;
+  line-height:1.38;
+  margin:2.4mm 0;
+  color:#32443b;
+}
+.sheet .lead {
+  font-size:12pt;
+  line-height:1.4;
+  color:#20372e;
+}
+.sheet .route {
+  font-size:8.6pt;
+  color:#526c5b;
+  font-family:Consolas,monospace;
+  margin:1.5mm 0 3mm;
+}
+.figs {
+  margin-top:4mm;
+}
+.figs figure {
+  margin:0 0 4mm;
+}
+.figs img {
+  display:block;
+  max-width:100%;
+  max-height:115mm;
+  object-fit:contain;
+  object-position:left top;
+}
+.figs figure:not(:first-child) img {
+  max-height:54mm;
+}
+.figs figcaption {
+  color:#475e51;
+  font-size:8.1pt;
+  line-height:1.25;
+  margin-top:1.4mm;
+}
+.dense .figs figure {
+  margin-bottom:3mm;
+}
+.dense .figs img {
+  max-height:90mm;
+}
+.dense .figs figure:not(:first-child) img {
+  max-height:39mm;
+}
+.cover main {
+  padding:14mm 0 0;
+}
+.cover .eyebrow {
+  margin:12mm 0 4mm;
+  font-size:11pt;
+}
+.cover h1 {
+  font-size:42pt;
+  line-height:1.05;
+  margin-bottom:6mm;
+}
+.cover .lead {
+  font-size:15pt;
+  line-height:1.44;
+  margin-bottom:13mm;
+}
+.covercols {
+  display:grid;
+  grid-template-columns:1.05fr 1fr;
+  gap:10mm;
+  border-top:2pt solid #296047;
+  padding-top:4mm;
+}
+.covercols h2 {
+  font-size:15pt;
+  letter-spacing:-.025em;
+  margin:1mm 0 3mm;
+}
+.covercols p {
+  font-size:10.1pt;
+  line-height:1.48;
+}
+.cover .commit {
+  font-size:9pt;
+  color:#42614f;
+  margin-top:5mm;
+}
+.cover ol {
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.cover li {
+  display:flex;
+  justify-content:space-between;
+  gap:2mm;
+  align-items:baseline;
+  padding:1.2mm 0;
+  border-bottom:.5pt solid #d9e2dc;
+  font-size:9.6pt;
+}
+.cover li b {
+  font-weight:600;
+  color:#597562;
+}
+</style>
+<body>
+<article class="sheet cover">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Universidad Mayor de San Simón · Facultad de Ciencias y Tecnología</div>
+<p class="eyebrow">Trabajo 4 · Parte II</p>
+<h1>Interfaces de la cadena<br>de farmacias</h1>
+<p class="lead">La demostración sigue una farmacia y un empleado nuevos, un producto y su especialización, y una venta que se puede rastrear hasta el saldo de la sucursal. Cada ficha empareja una captura del navegador con los resultados obtenidos al leer directamente PostgreSQL.</p>
+<div class="covercols">
+<div>
+<h2>Demostración</h2>
+<p>La práctica utiliza la copia local vitafarma_gestion en PostgreSQL 17. Las tablas, claves y relaciones provienen de la instantánea del modelo académico. La carga identificable y los registros del informe son ficticios. El backend NestJS valida la sesión de Supabase Auth y el alcance de sucursales en cada petición. Las consultas de evidencia se ejecutaron en sesiones de solo lectura de psql.</p>
+<p>Entrar con la cuenta responsable de la práctica, abrir Gestión, buscar un registro por su ID y cotejar la pantalla con la consulta de la ficha. Para enseñar la conservación del saldo, localizar la venta 100060 en el historial y abrir su detalle. En una instalación nueva los identificadores se asignan al crear los ejemplos; se sustituyen en las consultas por los de esa instalación.</p>
+<p class="commit">Revisión del formulario de venta <b>126a3da</b><br>Entorno local · Noviembre de 2026</p>
+</div>
+<div>
+<h2>Recorrido</h2>
+<ol>
+<li><span>Sucursales</span><b>2</b>
+</li>
+<li><span>Empleados</span><b>3</b>
+</li>
+<li><span>Productos</span><b>4</b>
+</li>
+<li><span>Medicamentos</span><b>5</b>
+</li>
+<li><span>Existencias por sucursal</span><b>6</b>
+</li>
+<li><span>Selección y registro de una venta</span><b>7</b>
+</li>
+<li><span>Detalle y movimiento de existencias</span><b>8</b>
+</li>
+<li><span>Clientes</span><b>9</b>
+</li>
+<li><span>Descuentos</span><b>10</b>
+</li>
+<li><span>Planillas salariales</span><b>11</b>
+</li>
+<li><span>Usuarios del sistema</span><b>12</b>
+</li>
+</ol>
+</div>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>01 / 12</span>
+</footer>
+</article>
+<article class="sheet ">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Farmacias y empleados</div>
+<h1>Sucursales</h1>
+<p class="route">/practica/farmacias</p>
+<p class="lead">Cada farmacia tiene un identificador y puede vincularse con una ciudad. El responsable busca la sucursal, registra su dirección y puede corregirla desde el mismo formulario. El alta requiere un ID dentro de su alcance.</p>
+<p>El registro 3 identifica Farmacia Alameda · Informe T4 y la vincula con Sucre. La referencia de ciudad utiliza su ID para que dos nombres parecidos no introduzcan una relación ambigua.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-farmacias.png" alt="Formulario de la farmacia 3 con la ciudad seleccionada.">
+<figcaption>Formulario de la farmacia 3 con la ciudad seleccionada.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-farmacias.png" alt="La fila de farmacia y su coincidencia con ciudad.">
+<figcaption>La fila de farmacia y su coincidencia con ciudad.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>02 / 12</span>
+</footer>
+</article>
+<article class="sheet ">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Farmacias y empleados</div>
+<h1>Empleados</h1>
+<p class="route">/practica/empleados</p>
+<p class="lead">El responsable registra al empleado y selecciona su cargo y farmacia. El vínculo con la sucursal determina dónde puede intervenir y qué registros de personal se muestran al supervisor.</p>
+<p>El empleado 100011 quedó en la farmacia 3 con el cargo Atención de práctica. Este empleado se reutiliza en las fichas de planilla y usuario.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-empleados.png" alt="Edición del empleado de prueba y sus referencias.">
+<figcaption>Edición del empleado de prueba y sus referencias.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-empleados.png" alt="El ID de empleado, la sucursal y el cargo quedan vinculados en PostgreSQL.">
+<figcaption>El ID de empleado, la sucursal y el cargo quedan vinculados en PostgreSQL.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>03 / 12</span>
+</footer>
+</article>
+<article class="sheet ">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Productos e inventario</div>
+<h1>Productos</h1>
+<p class="route">/practica/productos</p>
+<p class="lead">El catálogo conserva nombre, presentación, categoría y precios. El registro comercial existe con independencia de que una farmacia ya tenga unidades cargadas.</p>
+<p>Se registró el producto 100012 con categoría Medicamentos, precio de compra de Bs 4,00 y precio de venta de Bs 7,50. El mismo código identifica después su especialización.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-productos.png" alt="Ficha comercial del producto del informe.">
+<figcaption>Ficha comercial del producto del informe.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-productos.png" alt="Producto y categoría, con importes persistidos a dos decimales.">
+<figcaption>Producto y categoría, con importes persistidos a dos decimales.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>04 / 12</span>
+</footer>
+</article>
+<article class="sheet ">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Productos e inventario</div>
+<h1>Medicamentos</h1>
+<p class="route">/practica/medicamentos</p>
+<p class="lead">La ficha especializa un producto ya registrado. El formulario conserva su código y asocia laboratorio, fecha de vencimiento de la ficha y un texto descriptivo.</p>
+<p>El código 100012 enlaza la especialización con el producto de la página anterior. El lote que tiene existencias en una farmacia dispone de su propia fecha de vencimiento.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-medicamentos.png" alt="Producto y laboratorio seleccionados en la ficha.">
+<figcaption>Producto y laboratorio seleccionados en la ficha.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-medicamentos.png" alt="La PK de medicamento coincide con la del producto, y la FK identifica el laboratorio.">
+<figcaption>La PK de medicamento coincide con la del producto, y la FK identifica el laboratorio.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>05 / 12</span>
+</footer>
+</article>
+<article class="sheet ">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Productos e inventario</div>
+<h1>Existencias por sucursal</h1>
+<p class="route">/inventario?farmacia=2&amp;q=101</p>
+<p class="lead">El operador elige la sucursal y busca por nombre o código. La tabla presenta el saldo asociado al producto en esa farmacia. Un cero, una cantidad sin registrar y un producto sin fila son estados distintos.</p>
+<p>La consulta muestra el producto 101 en Sucursal Norte después de la venta del informe. La comparación incluye Centro para demostrar que la cantidad y el lote dependen de farmacia y producto.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-inventario.png" alt="Búsqueda por el código 101 en la farmacia 2.">
+<figcaption>Búsqueda por el código 101 en la farmacia 2.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-inventario.png" alt="Una fila por sucursal para el mismo producto, con sus lotes.">
+<figcaption>Una fila por sucursal para el mismo producto, con sus lotes.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>06 / 12</span>
+</footer>
+</article>
+<article class="sheet ">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Ventas</div>
+<h1>Selección y registro de una venta</h1>
+<p class="route">/practica/ventas</p>
+<p class="lead">El formulario reúne sucursal, empleado, cliente y líneas. Cada línea exige seleccionar un producto y una cantidad. Antes de confirmar, el responsable puede revisar el importe estimado y quitar líneas.</p>
+<p>Se seleccionó una unidad del producto 101 en la farmacia 2 para el cliente 100013. La captura de stock se tomó antes de confirmar el cobro desde esta pantalla.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-venta-nueva.png" alt="Carrito con una unidad, empleado y cliente de práctica.">
+<figcaption>Carrito con una unidad, empleado y cliente de práctica.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-stock-antes.png" alt="Saldo confirmado en la base inmediatamente antes del cobro.">
+<figcaption>Saldo confirmado en la base inmediatamente antes del cobro.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>07 / 12</span>
+</footer>
+</article>
+<article class="sheet dense">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Ventas</div>
+<h1>Detalle y movimiento de existencias</h1>
+<p class="route">/practica/ventas</p>
+<p class="lead">El historial permite abrir el comprobante interno y consultar la fecha, la sucursal, el cliente y las líneas con su precio histórico. El servidor registra la cabecera y las líneas y descuenta la existencia dentro de una transacción.</p>
+<p>La venta 100060 cobró Bs 6,00. La misma referencia aparece en venta y detalle_venta. El stock del producto 101 en Norte pasó de 23 a 22 unidades.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-ventas.png" alt="Detalle de la venta confirmada desde Chromium.">
+<figcaption>Detalle de la venta confirmada desde Chromium.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-ventas.png" alt="Cabecera y línea de la misma venta en PostgreSQL.">
+<figcaption>Cabecera y línea de la misma venta en PostgreSQL.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-stock-despues.png" alt="Saldo del producto después de la misma transacción.">
+<figcaption>Saldo del producto después de la misma transacción.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>08 / 12</span>
+</footer>
+</article>
+<article class="sheet ">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Administración</div>
+<h1>Clientes</h1>
+<p class="route">/practica/clientes</p>
+<p class="lead">La ficha permite registrar y localizar clientes. Los campos de contacto son opcionales en este ejemplo. Para asociar una operación comercial se selecciona el cliente por su ficha.</p>
+<p>Se utilizó exclusivamente el cliente ficticio 100013. Su identificador figura también en la cabecera de la venta.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-clientes.png" alt="Ficha del cliente utilizado en el registro de venta.">
+<figcaption>Ficha del cliente utilizado en el registro de venta.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-clientes.png" alt="La consulta recupera los campos de identificación ficticios.">
+<figcaption>La consulta recupera los campos de identificación ficticios.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>09 / 12</span>
+</footer>
+</article>
+<article class="sheet ">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Administración</div>
+<h1>Descuentos</h1>
+<p class="route">/practica/descuentos</p>
+<p class="lead">El descuento se asocia a un producto y a un intervalo de fechas. El porcentaje y las fechas se validan al guardar. La vigencia sirve al cálculo del precio aplicado por el servidor cuando se vende el producto.</p>
+<p>La fila 100014 asigna el 10 % al producto 100012 durante noviembre de 2026. La venta ilustrada usa el producto 101.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-descuentos.png" alt="Edición del porcentaje y de su periodo de vigencia.">
+<figcaption>Edición del porcentaje y de su periodo de vigencia.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-descuentos.png" alt="Porcentaje y vigencia referenciados al producto del informe.">
+<figcaption>Porcentaje y vigencia referenciados al producto del informe.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>10 / 12</span>
+</footer>
+</article>
+<article class="sheet dense">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Administración</div>
+<h1>Planillas salariales</h1>
+<p class="route">/practica/planillas</p>
+<p class="lead">El responsable selecciona al empleado y carga sueldo base, antigüedad, bonos y descuentos. El servidor calcula el importe final y lo persiste con la fecha de elaboración.</p>
+<p>Se modificaron los bonos de Bs 30,00 a Bs 45,00 y se guardaron desde la interfaz. La base pasó de Bs 540,00 a Bs 555,00 para la planilla 100015 del empleado 100011.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-planillas.png" alt="Formulario reabierto tras guardar los bonos de Bs 45,00.">
+<figcaption>Formulario reabierto tras guardar los bonos de Bs 45,00.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-planillas-antes.png" alt="Antes de la modificación, bonos de Bs 30,00 y total de Bs 540,00.">
+<figcaption>Antes de la modificación, bonos de Bs 30,00 y total de Bs 540,00.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-planillas.png" alt="Después, Bs 500,00 + 20,00 + 45,00 − 10,00 = Bs 555,00.">
+<figcaption>Después, Bs 500,00 + 20,00 + 45,00 − 10,00 = Bs 555,00.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>11 / 12</span>
+</footer>
+</article>
+<article class="sheet ">
+<header><strong>VitaFarma</strong><span>Taller de Base de Datos · II/2026</span>
+</header>
+<main>
+<div class="overline">Administración</div>
+<h1>Usuarios del sistema</h1>
+<p class="route">/practica/usuarios</p>
+<p class="lead">La cuenta académica vincula nombre de usuario, empleado, rol y estado. Supabase Auth verifica por separado la sesión del personal que ingresa a VitaFarma.</p>
+<p>La cuenta 100016 vincula el empleado 100011 con el rol Consulta y el estado ACTIVO. La consulta de evidencia se limita a esos campos.</p>
+<div class="figs">
+<figure>
+<img src="evidencias/ui-usuarios.png" alt="Ficha del usuario académico del informe.">
+<figcaption>Ficha del usuario académico del informe.</figcaption>
+</figure>
+<figure>
+<img src="evidencias/sql-usuarios.png" alt="Usuario y rol recuperados mediante sus claves.">
+<figcaption>Usuario y rol recuperados mediante sus claves.</figcaption>
+</figure>
+</div>
+</main>
+<footer><span>Universidad Mayor de San Simón · Trabajo 4 · Parte II</span><span>12 / 12</span>
+</footer>
+</article>
+</body>
+</html>

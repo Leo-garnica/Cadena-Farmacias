@@ -1,4 +1,6 @@
 import { test, expect, appOrigin, authOrigin } from './auth.mock'
+import { mockInventoryRepository } from '../src/modules/inventory/infrastructure/demo/inventory.mock'
+import { parseQuery } from '../src/modules/inventory/application/query'
 
 test('recorrido completo: sucursal, búsqueda, orden, paginación, detalle, Escape y Atrás', async ({ page }) => {
   await page.goto('/inventario')
@@ -100,8 +102,10 @@ test('vacío recuperable, error recuperable y carga visible', async ({ page }) =
   await expect(page.getByLabel('Sucursal', { exact: true })).toHaveValue('2')
   await expect(page.getByLabel('Buscar producto', { exact: true })).toHaveValue('10')
   await page.route('**/api/v1/inventory?**', async route => {
+    const metadata = await mockInventoryRepository.metadata()
+    const query = parseQuery(new URL(route.request().url()).searchParams, metadata.farmacias.map(f => f.id_farmacia), metadata.categorias.map(c => c.id_categoria))
     await new Promise(resolve => setTimeout(resolve, 600))
-    await route.fallback()
+    await route.fulfill({ json: await mockInventoryRepository.list(query) })
   }, { times: 1 })
   await page.goto('/inventario', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { name: 'Preparando el inventario…' })).toBeVisible()

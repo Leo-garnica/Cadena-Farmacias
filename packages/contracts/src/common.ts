@@ -9,6 +9,6 @@ export interface AccessGrant {
 
 export interface ApiError {
   statusCode: number
-  code: 'BAD_REQUEST' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'NOT_FOUND' | 'UNAVAILABLE' | 'INTERNAL_ERROR'
+  code: 'BAD_REQUEST' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT' | 'UNAVAILABLE' | 'INTERNAL_ERROR'
   message: string
 }

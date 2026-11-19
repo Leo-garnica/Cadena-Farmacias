@@ -6,7 +6,7 @@ export const orders: { value: InventoryOrder; label: string }[] = [
   { value: 'vencimiento-asc', label: 'Vencimiento: más cercano' },
 ]
 export const statuses: { value: InventoryStatus; label: string }[] = [
-  { value: 'todos', label: 'Todos los estados' }, { value: 'con-existencias', label: 'Con existencias' },
+  { value: 'todos', label: 'Todos los estados' }, { value: 'con-registro', label: 'Con registro de stock' }, { value: 'con-existencias', label: 'Con existencias' },
   { value: 'sin-unidades', label: 'Sin unidades (0)' }, { value: 'sin-cantidad', label: 'Cantidad no registrada' },
   { value: 'sin-registro', label: 'Sin registro de stock' }, { value: 'sin-lote', label: 'Sin lote asociado' },
   { value: 'vencido', label: 'Lote vencido' },

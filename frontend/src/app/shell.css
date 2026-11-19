@@ -33,7 +33,7 @@
 .branch-control > svg { color: var(--brand); }
 .branch-control > div { display: grid; grid-template-columns: auto auto; align-items: center; gap: 14px; }
 .branch-control label { color: var(--muted); font-size: 12px; font-weight: 400; }
-.branch-control select { background: var(--background); width: 150px; font-weight: 500; }
+.branch-control select { background: var(--background); width: 200px; font-weight: 500; }
 #main-content { max-width: 1600px; margin-inline: auto; padding: 28px 36px 24px; }
 .navigation-status { height: 0; position: relative; top: 6px; text-align: center; color: var(--brand); font-size: 12px; }
 .workspace-header .mobile-menu { display: none; }
@@ -56,7 +56,7 @@
   .branch-control { gap: 6px; }
   .branch-control > svg { display: none; }
   .branch-control > div { display: flex; gap: 0; flex-direction: column; align-items: flex-start; }
-  .branch-control select { width: 116px; min-height: 36px; padding: 5px 8px; border: 0; background: transparent; }
+  .branch-control select { width: min(46vw, 180px); min-height: 36px; padding: 5px 8px; border: 0; background: transparent; }
   .branch-control label { padding-left: 8px; font-size: 11px; }
   #main-content { padding: 24px 16px; }
 }
