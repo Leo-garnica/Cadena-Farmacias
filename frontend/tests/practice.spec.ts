@@ -34,6 +34,7 @@ test('gestión de clientes permite alta, edición y borrado confirmado', async (
 
 test('una venta reintenta la misma operación tras perder la confirmación y abre su detalle', async ({ page, context }) => {
   const keys: string[] = []
+  await context.route('**/api/v1/practica/recursos', r => r.fulfill({ json: { recursos: [] } }))
   const result = { venta: { id_venta: 14, id_farmacia: 1, id_empleado: 1, id_cliente: 1, fecha_hora: '2026-11-18', total_cobrado: '6.50' }, detalles: [{ codigo_producto: 1, nombre: 'Producto de práctica', cantidad: 1, precio_historico: '6.50' }] }
   await context.route('**/api/v1/me', r => r.fulfill({ json: { sub: 'sintetico', perfil: 'responsable', sucursales: [1] } }))
   await context.route('**/api/v1/practica/opciones/**', r => r.fulfill({ json: { filas: [{ id: 1, nombre: 'Opción de práctica' }], total: 1 } }))
