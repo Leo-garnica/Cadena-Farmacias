@@ -3,7 +3,7 @@ import type { InventoryOrder, InventoryQuery, InventoryStatus } from '@vitafarma
 import type { InventoryQueries } from '../application/inventory.queries.js'
 
 const orders: InventoryOrder[] = ['nombre-asc', 'nombre-desc', 'codigo-asc', 'cantidad-desc', 'vencimiento-asc']
-const statuses: InventoryStatus[] = ['todos', 'con-existencias', 'sin-unidades', 'sin-cantidad', 'sin-registro', 'sin-lote', 'vencido']
+const statuses: InventoryStatus[] = ['todos', 'con-registro', 'con-existencias', 'sin-unidades', 'sin-cantidad', 'sin-registro', 'sin-lote', 'vencido']
 const keys = new Set(['farmacia', 'q', 'categoria', 'estado', 'orden', 'pagina'])
 
 export function parsePositiveId(value: string): number {

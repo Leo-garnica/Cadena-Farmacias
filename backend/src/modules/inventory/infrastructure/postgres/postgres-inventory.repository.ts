@@ -14,6 +14,7 @@ const nameOrder = `CASE WHEN p.nombre IS NOT NULL THEN ARRAY(
 const expired = 'l.fecha_vencimiento < ' + referenceDate
 const statusFilter: Record<InventoryStatus, string> = {
   todos: 'TRUE',
+  'con-registro': 's.codigo_producto IS NOT NULL',
   'con-existencias': 's.cantidad > 0',
   'sin-unidades': 's.cantidad = 0',
   'sin-cantidad': 's.codigo_producto IS NOT NULL AND s.cantidad IS NULL',

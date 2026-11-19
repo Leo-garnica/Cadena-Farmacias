@@ -26,7 +26,7 @@ export interface Stock {
 
 
 export type InventoryOrder = 'nombre-asc' | 'nombre-desc' | 'codigo-asc' | 'cantidad-desc' | 'vencimiento-asc'
-export type InventoryStatus = 'todos' | 'con-existencias' | 'sin-unidades' | 'sin-cantidad' | 'sin-registro' | 'sin-lote' | 'vencido'
+export type InventoryStatus = 'todos' | 'con-registro' | 'con-existencias' | 'sin-unidades' | 'sin-cantidad' | 'sin-registro' | 'sin-lote' | 'vencido'
 export interface InventoryQuery { farmacia: number; q: string; categoria: number | null; estado: InventoryStatus; orden: InventoryOrder; pagina: number }
 export interface InventoryRow {
   producto: Producto; categoria: Categoria | null; farmacia: Farmacia

@@ -71,6 +71,10 @@ try {
       WHERE s.id_farmacia = $1`, [branch])
     assert.deepEqual(indicators, { farmacia: branch, referenceDate: meta.referenceDate, ...reference })
     for (const [key, count] of Object.entries(reference)) assert.equal(list.summary[key], count)
+    for (const [field, status] of [['registros', 'con-registro'], ['sinUnidades', 'sin-unidades'], ['vencidos', 'vencido']]) {
+      const matching = await request('inventory' + where + '&estado=' + status, 200, account)
+      assert.equal(matching.total, reference[field], status)
+    }
     const onlyZero = await request('reports/inventory' + where + '&estado=sin-unidades', 200, account)
     assert.equal(onlyZero.registros, reference.sinUnidades)
     assert.equal(onlyZero.sinUnidades, reference.sinUnidades)

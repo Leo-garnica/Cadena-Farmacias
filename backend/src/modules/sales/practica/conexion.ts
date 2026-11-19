@@ -20,10 +20,14 @@ export class ConexionPractica implements OnModuleDestroy {
     const url = destino(process.env.VITAFARMA_PRACTICA_WRITE_URL, 'vf_gestion')
     if (!url || !destino(process.env.DATABASE_URL,'vf_lector') ||
         process.env.SUPABASE_URL !== 'http://127.0.0.1:55433') throw new ForbiddenException('Gestión exclusiva de la práctica local')
-    this.pool ??= new Pool({ host: '127.0.0.1', port: 55432, database: 'vitafarma_gestion', user: 'vf_gestion',
-      password: decodeURIComponent(url.password), ssl: false, max: 4, connectionTimeoutMillis: 3000,
-      options: '-c search_path=pg_catalog -c statement_timeout=5000 -c lock_timeout=3500 -c TimeZone=America/La_Paz',
-    })
+    if (!this.pool) {
+      this.pool = new Pool({ host: '127.0.0.1', port: 55432, database: 'vitafarma_gestion', user: 'vf_gestion',
+        password: decodeURIComponent(url.password), ssl: false, max: 4, connectionTimeoutMillis: 3000,
+        options: '-c search_path=pg_catalog -c statement_timeout=5000 -c lock_timeout=3500 -c TimeZone=America/La_Paz',
+      })
+      // pg discards idle clients on disconnect. The next request can reconnect.
+      this.pool.on('error', () => {})
+    }
     const client = await this.pool.connect().catch(() => { throw new ServiceUnavailableException() })
     let broken = false
     try {
