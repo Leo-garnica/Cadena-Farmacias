@@ -6,7 +6,7 @@
 **Equipo:** 1 desarrollador principal, con apoyo ocasional de otra persona  
 **Disponibilidad confirmada:** 6 horas al día, de lunes a viernes  
 **Destino previsto:** `docs/VITAFARMA-PLAN-RELEASE-Y-SPRINTS-2026.md`  
-**Estado al 18/11:** ejecución iniciada sobre la base con login. La [bitácora de integración](planning/INTEGRACION-Y-TRABAJO-4.md) distingue la preparación local, las aprobaciones de interfaz y la cobertura académica.
+**Cierre efectivo del 18/11/2026.** El propietario aceptó G1, G2 y G3. La planificación original que sigue conserva sus fechas y estimaciones. El [acta de entrega](planning/CIERRE-RELEASE-2026.md) registra el alcance ejecutado, el retiro de las dos ampliaciones P1 y las interfaces de escritura del Trabajo 4 en la práctica local.
 
 > La versión inicial de octubre organizó el trabajo. El 18/11 el propietario autorizó su ejecución, conexión de servicios y publicación de código en Git. Los resultados efectivos y las aceptaciones de G1, G2 y G3 se registran en los tableros. Los permisos académicos de Supabase conservan su revisión independiente.
 

@@ -23,6 +23,8 @@ Para cambiar de modo, detén primero la web y la API con **Ctrl+C**. Comprueba l
 
 ## Pantallas
 
+Para preparar la defensa, el [informe del Trabajo 4](docs/trabajo-4/VitaFarma-interfaces.pdf) reúne las pantallas y sus filas en PostgreSQL. El [acta de entrega](docs/planning/CIERRE-RELEASE-2026.md) enlaza las pruebas y las decisiones de los tres sprints.
+
 | Ruta | Función |
 | --- | --- |
 | `/` y `/equipo/entrar` | Portada pública e ingreso del personal con Supabase Auth. |

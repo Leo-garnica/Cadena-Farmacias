@@ -1,6 +1,6 @@
 # VitaFarma — Planificación y seguimiento
 
-Vigencia: 28/10–27/11/2026. Equipo: un desarrollador principal, 6 h al día de lunes a viernes; apoyo ocasional sin compromiso de capacidad. El 18/11 comenzó la ejecución sobre la base que incorpora el login. Consultar el [registro de integración y cobertura del Trabajo 4](INTEGRACION-Y-TRABAJO-4.md) y los estados de los tableros.
+El periodo planificado abarca el 28/10–27/11/2026, con un desarrollador a 6 h diarias de lunes a viernes y apoyo ocasional. El propietario aceptó los tres incrementos el 18/11. El [acta de entrega](CIERRE-RELEASE-2026.md) reúne resultados, límites y pasos de demostración.
 
 ## Documentos de trabajo
 
@@ -33,7 +33,7 @@ No se cuentan fines de semana. Registrar clases, feriados y ausencias: cada día
 4. Aceptar inventario antes de construir el dashboard de indicadores.
 5. Consolidar pruebas, seguridad, documentación y aceptación; añadir proveedores/comercial solo si P0 está encaminado.
 
-El MVP de noviembre es de **consulta**. Registrar ventas, descontar stock, facturar, gestionar personal y desarrollar triggers quedan en el backlog posterior. El [plan completo](../VITAFARMA-PLAN-RELEASE-Y-SPRINTS-2026.md) conserva el backlog de todos los módulos y la razón de cada exclusión.
+La aplicación consulta inventario e indicadores por sucursal. En la copia local autorizada para el Trabajo 4 también registra ventas, aplica su efecto en stock y gestiona ocho recursos. La facturación y el desarrollo de triggers siguen fuera del alcance. El [informe académico](../trabajo-4/README.md) documenta las operaciones ejecutadas.
 
 ## Punto de partida observado el 28/10
 
@@ -58,7 +58,7 @@ La [entrega de arquitectura](../architecture/IMPLEMENTATION.md) registra pruebas
 
 Todas las subtareas comienzan `Pendiente`, incluso cuando hay componentes o pruebas previas reutilizables: sus criterios de aceptación para esta release aún deben verificarse. El trabajo de redactar estos documentos no completa tareas funcionales.
 
-## Decisiones y permisos aún necesarios
+## Decisiones previstas en el plan original
 
 | Decisión | Momento | Qué habilita |
 |---|---|---|

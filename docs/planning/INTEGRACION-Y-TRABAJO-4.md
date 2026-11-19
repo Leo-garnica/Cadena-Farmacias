@@ -1,5 +1,7 @@
 # VitaFarma · Decisiones de integración y cobertura del Trabajo 4
 
+El 18/11/2026 el propietario aceptó la portada, el inventario por sucursal y el dashboard con las interfaces académicas locales. El [informe de la Parte II](../trabajo-4/README.md) conserva las pantallas y la verificación SQL. El [acta de la release](CIERRE-RELEASE-2026.md) identifica los casos ejecutados y el estado del acceso académico remoto.
+
 ## Punto de partida del 18 de noviembre
 
 La revisión de partida es `2a39370`, que incorpora el login del PR #1. El usuario autorizó implementar los sprints, conectar servicios, hacer commits y fusionar a la rama principal. Se conserva el monolito y su lockfile. La base de DevOps está publicada en `main`. El frontend autentica con Supabase y ambos inventarios, el del navegador y el de NestJS, aún usan conjuntos de demostración independientes en esa revisión.

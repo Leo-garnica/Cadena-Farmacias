@@ -3,6 +3,8 @@
 | Para qué | Documento |
 | --- | --- |
 | Abrir la aplicación en el equipo | [Inicio y modos de práctica](../README.md) |
+| Preparar la defensa del Trabajo 4, Parte II | [Informe con capturas y consultas](trabajo-4/README.md) · [PDF para imprimir](trabajo-4/VitaFarma-interfaces.pdf) |
+| Ver qué se aceptó y cómo repetir las pruebas | [Cierre de los tres sprints](planning/CIERRE-RELEASE-2026.md) |
 | Entrar con un perfil y revisar sus sucursales | [Acceso del personal](SUPABASE-LOGIN.md) |
 | Recorrer la portada, el inventario, los indicadores y los formularios | [Guía del frontend](../frontend/README.md) |
 | Preparar PostgreSQL y Auth locales, verificar los datos de control y recuperar los servicios | [Entorno local](architecture/ENTORNO-LOCAL.md) |
