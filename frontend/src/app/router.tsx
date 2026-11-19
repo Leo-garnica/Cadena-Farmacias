@@ -35,6 +35,12 @@ export const router = createBrowserRouter([
               },
             }],
           },
+          { path: 'indicadores', lazy: async () => {
+            const [page, data, routes] = await Promise.all([import('../modules/reports/public'), loaders(), workspace()])
+            return { Component: page.ReportsPage, loader: data.loadReport, ErrorBoundary: routes.ProtectedError }
+          } },
+          { path: 'practica/ventas', lazy: async () => ({ Component: (await import('../modules/practice/public')).PracticeSalesPage }) },
+          { path: 'practica/:recurso?', lazy: async () => ({ Component: (await import('../modules/practice/public')).PracticePage }) },
           { path: '*', Component: NotFound },
         ],
       },

@@ -1,0 +1,14 @@
+.reports-page { padding-block: 12px 36px; max-width: 1150px; margin-inline: auto; }
+.reports-page h1 { font: 730 clamp(30px,4vw,48px)/1.12 var(--font-heading, 'Inter Tight'), sans-serif; letter-spacing: -.045em; margin: 0; }
+.reports-page > p, .report-row p { color: var(--muted); }
+.report-filter { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; margin-block: 30px 22px; }
+.report-filter label { flex: 1 1 170px; display: grid; gap: 6px; font-size: .8rem; }
+.report-filter input, .report-filter select { font: inherit; color: var(--text); border: 1px solid var(--border); border-radius: 6px; background: var(--surface); padding: 11px; min-width: 0; }
+.report-ledger { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.report-row { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; column-gap: clamp(12px,2vw,28px); padding: clamp(17px,3vw,36px); color: var(--brand); text-decoration: none; }
+.report-row + .report-row { border-top: 1px solid var(--border); }
+.report-row:hover { background: var(--background); }
+.report-row:focus-visible { outline-offset: -3px; }
+.report-row h2 { margin: 0; font-size: clamp(16px,2vw,23px); }
+.report-row p { margin: 5px 0 0; font-size: .85rem; line-height: 1.5; }
+.report-row strong { font: 650 clamp(28px,4vw,46px)/1 'Inter Tight', sans-serif; font-variant-numeric: tabular-nums; }

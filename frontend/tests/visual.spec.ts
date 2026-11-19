@@ -14,7 +14,7 @@ for (const width of [360, 768, 1280]) {
     if (width < 1024) {
       const menuButton = page.getByRole('button', { name: 'Abrir navegación' })
       await menuButton.click()
-      await expect(page.getByRole('dialog')).toContainText('Próximamente')
+      await expect(page.getByRole('dialog').getByRole('link', { name: 'Indicadores' })).toBeVisible()
       await page.keyboard.press('Escape')
       await expect(menuButton).toBeFocused()
     }
@@ -67,7 +67,7 @@ test('contraste de texto, controles y estados en los estilos renderizados', asyn
   const results = await page.evaluate(() => {
     const rgb = (value: string) => (value.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number)
     const luminance = (color: number[]) => color.map((channel) => channel / 255).map((channel) => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0)
-    return ['.product-name', '.product-presentation', '.product-code', '.demo-badge', '.status-badge--success', '.status-badge--warning', '.status-badge--danger', '.button--primary', '.sidebar-future', '.summary-footnote', '.detail-link'].map((selector) => {
+    return ['.product-name', '.product-presentation', '.product-code', '.demo-badge', '.status-badge--success', '.status-badge--warning', '.status-badge--danger', '.button--primary', '.sidebar-link--active', '.summary-footnote', '.detail-link'].map((selector) => {
       const element = document.querySelector(selector)!
       const foreground = rgb(getComputedStyle(element).color)
       let parent: Element | null = element
