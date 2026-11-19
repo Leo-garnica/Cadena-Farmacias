@@ -7,6 +7,7 @@ export interface AuthIdentity {
 export interface AuthRepository {
   readonly configured: boolean
   currentUser(): Promise<AuthIdentity | null>
+  accessToken(): Promise<string | null>
   signIn(email: string, password: string): Promise<AuthIdentity>
   signOut(): Promise<'complete' | 'local-only'>
   subscribe(listener: (userId: string | null) => void): () => void

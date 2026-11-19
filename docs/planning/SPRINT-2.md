@@ -32,10 +32,10 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 
 | Subtarea | h | Depende de | Trabajo ejecutable | Cierre verificable | Estado |
 |---|---:|---|---|---|---|
-| S2-01.01 | 2 | G1; S1-05 | Conectar login/logout al proveedor aprobado y resolver identidad en la aplicación. | Cuenta reconocida inicia y cierra sesión; sin cuentas o contraseñas de fallback. | En revisión |
-| S2-01.02 | 2 | S2-01.01 | Verificar firma, emisor, audiencia y vigencia de token en NestJS; proteger rutas internas por defecto. | Sin token, alterado o vencido recibe rechazo real del backend; /me devuelve solo identidad permitida. | Pendiente |
-| S2-01.03 | 1 | S2-01.02; matriz S1-03 | Resolver perfil y sucursales en servidor; denegar identidades sin mapeo y alcance ajeno. | La autorización no depende del selector UI ni de metadata editable del usuario. | Pendiente |
-| S2-01.04 | 1 | S2-01.03 | Resolver expiración/renovación y limpieza de datos/cache al cambiar cuenta o cerrar sesión. | No se reutilizan datos de un usuario anterior; expiración permite recuperación clara. | Pendiente |
+| S2-01.01 | 2 | G1; S1-05 | Conectar login/logout al proveedor aprobado y resolver identidad en la aplicación. | Cuenta reconocida inicia y cierra sesión; sin cuentas o contraseñas de fallback. | Terminada |
+| S2-01.02 | 2 | S2-01.01 | Verificar firma, emisor, audiencia y vigencia de token en NestJS; proteger rutas internas por defecto. | Sin token, alterado o vencido recibe rechazo real del backend; /me devuelve solo identidad permitida. | Terminada |
+| S2-01.03 | 1 | S2-01.02; matriz S1-03 | Resolver perfil y sucursales en servidor; denegar identidades sin mapeo y alcance ajeno. | La autorización no depende del selector UI ni de metadata editable del usuario. | Terminada |
+| S2-01.04 | 1 | S2-01.03 | Resolver expiración/renovación y limpieza de datos/cache al cambiar cuenta o cerrar sesión. | No se reutilizan datos de un usuario anterior; expiración permite recuperación clara. | Terminada |
 
 ### S2-02 — Consultar sucursales y catálogo mínimo
 
@@ -45,9 +45,9 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 
 | Subtarea | h | Depende de | Trabajo ejecutable | Cierre verificable | Estado |
 |---|---:|---|---|---|---|
-| S2-02.01 | 2 | S2-01 | Implementar consulta de sucursales/metadatos desde persistencia, aplicando alcance también a opciones. | Solo devuelve sucursales permitidas; datos globales innecesarios no se filtran al cliente. | Pendiente |
-| S2-02.02 | 2 | S2-02.01 | Implementar categorías y proyección mínima de producto; conservar la API actual donde cubra el caso. | Datos salen de BD, con nulos y relaciones correctos; no se crea un CRUD por tabla. | Pendiente |
-| S2-02.03 | 1 | S2-02.02 | Mapear DTO y comprobar integración y ausencia de columnas privadas. | Respuesta contrastada con dataset; sin contraseñas, salarios u otros campos no necesarios. | Pendiente |
+| S2-02.01 | 2 | S2-01 | Implementar consulta de sucursales/metadatos desde persistencia, aplicando alcance también a opciones. | Solo devuelve sucursales permitidas; datos globales innecesarios no se filtran al cliente. | Terminada |
+| S2-02.02 | 2 | S2-02.01 | Implementar categorías y proyección mínima de producto; conservar la API actual donde cubra el caso. | Datos salen de BD, con nulos y relaciones correctos; no se crea un CRUD por tabla. | Terminada |
+| S2-02.03 | 1 | S2-02.02 | Mapear DTO y comprobar integración y ausencia de columnas privadas. | Respuesta contrastada con dataset; sin contraseñas, salarios u otros campos no necesarios. | Terminada |
 
 ### S2-03 — Migrar consulta de inventario a PostgreSQL paginado
 
@@ -57,11 +57,11 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 
 | Subtarea | h | Depende de | Trabajo ejecutable | Cierre verificable | Estado |
 |---|---:|---|---|---|---|
-| S2-03.01 | 1 | S1-03; S2-02 | Precisar y aprobar impacto del puerto paginado/asíncrono y sus consumidores; ajustar contrato autorizado. | No se adapta rows() cargando todo; metadatos ya no suponen acceso síncrono o irrestricto. Si falta aprobación, bloquear implementación dependiente. | Pendiente |
-| S2-03.02 | 2 | S2-03.01 | Implementar filtros, orden estable, paginación y totales en SQL parametrizado con alcance de servidor. | Conserva límite/contrato de página y semántica aprobada; no se pagina una carga completa en memoria. | Pendiente |
-| S2-03.03 | 1 | S2-03.02 | Implementar detalle por farmacia/producto y joins que preservan producto sin fila de stock. | Stock nulo se conserva donde el producto existe; inexistente/fuera de alcance no filtra información. | Pendiente |
-| S2-03.04 | 1 | S2-03.03 | Resolver cero, nulos, sin lote, sin registro, fecha civil y errores de entrada/dependencia. | No hay equivalencia falsa con cero, lote adicional o stock mínimo; errores del contrato correctos. | Pendiente |
-| S2-03.05 | 1 | S2-03.04 | Contrastar página, total, summary y detalle con consultas/recuentos de referencia. | Datos coinciden; total de productos y número de registros stock se distinguen; sin doble conteo. | Pendiente |
+| S2-03.01 | 1 | S1-03; S2-02 | Precisar y aprobar impacto del puerto paginado/asíncrono y sus consumidores; ajustar contrato autorizado. | No se adapta rows() cargando todo; metadatos ya no suponen acceso síncrono o irrestricto. Si falta aprobación, bloquear implementación dependiente. | Terminada |
+| S2-03.02 | 2 | S2-03.01 | Implementar filtros, orden estable, paginación y totales en SQL parametrizado con alcance de servidor. | Conserva límite/contrato de página y semántica aprobada; no se pagina una carga completa en memoria. | Terminada |
+| S2-03.03 | 1 | S2-03.02 | Implementar detalle por farmacia/producto y joins que preservan producto sin fila de stock. | Stock nulo se conserva donde el producto existe; inexistente/fuera de alcance no filtra información. | Terminada |
+| S2-03.04 | 1 | S2-03.03 | Resolver cero, nulos, sin lote, sin registro, fecha civil y errores de entrada/dependencia. | No hay equivalencia falsa con cero, lote adicional o stock mínimo; errores del contrato correctos. | Terminada |
+| S2-03.05 | 1 | S2-03.04 | Contrastar página, total, summary y detalle con consultas/recuentos de referencia. | Datos coinciden; total de productos y número de registros stock se distinguen; sin doble conteo. | Terminada |
 
 ### S2-04 — Conectar la UI interna al backend real
 
@@ -71,10 +71,10 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 
 | Subtarea | h | Depende de | Trabajo ejecutable | Cierre verificable | Estado |
 |---|---:|---|---|---|---|
-| S2-04.01 | 2 | S2-01; S2-03 | Integrar rutas internas/guards de experiencia, shell y acceso desde la landing; mantener guard efectivo en backend. | Landing sigue pública y UI interna requiere sesión; no renombra rutas por accidente. | Pendiente |
-| S2-04.02 | 2 | S2-04.01 | Componer proveedor HTTP sobre InventoryRepository, con cancelación y manejo de errores. | El recorrido final consulta NestJS; el mock deja de ser el proveedor de esa composición, sin fallback automático. | Pendiente |
-| S2-04.03 | 2 | S2-04.02 | Integrar filtros, paginación y detalle conservando URL, atrás y contexto/foco. | Las rutas actuales abren detalle directo y vuelven al listado correcto; permisos repetidos en API. | Pendiente |
-| S2-04.04 | 2 | S2-04.03 | Completar carga/vacío/error/sin permiso/expiración y limpiar resultados al cambiar cuenta o sucursal. | Caída de API/BD no muestra datos sintéticos; no quedan respuestas viejas de otro alcance. | Pendiente |
+| S2-04.01 | 2 | S2-01; S2-03 | Integrar rutas internas/guards de experiencia, shell y acceso desde la landing; mantener guard efectivo en backend. | Landing sigue pública y UI interna requiere sesión; no renombra rutas por accidente. | Terminada |
+| S2-04.02 | 2 | S2-04.01 | Componer proveedor HTTP sobre InventoryRepository, con cancelación y manejo de errores. | El recorrido final consulta NestJS; el mock deja de ser el proveedor de esa composición, sin fallback automático. | Terminada |
+| S2-04.03 | 2 | S2-04.02 | Integrar filtros, paginación y detalle conservando URL, atrás y contexto/foco. | Las rutas actuales abren detalle directo y vuelven al listado correcto; permisos repetidos en API. | Terminada |
+| S2-04.04 | 2 | S2-04.03 | Completar carga/vacío/error/sin permiso/expiración y limpiar resultados al cambiar cuenta o sucursal. | Caída de API/BD no muestra datos sintéticos; no quedan respuestas viejas de otro alcance. | Terminada |
 
 ### S2-05 — Verificar integración y límites de acceso
 
@@ -84,11 +84,11 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 
 | Subtarea | h | Depende de | Trabajo ejecutable | Cierre verificable | Estado |
 |---|---:|---|---|---|---|
-| S2-05.01 | 2 | S2-04 | Probar consultas y contrato contra PostgreSQL de prueba; comparar claves, filas y agregados. | QA-05/06 con dataset identificable y origen persistido; mocks no acreditan integración. | Pendiente |
-| S2-05.02 | 1 | S2-05.01 | Manipular token, sucursal e IDs por llamada directa, incluyendo detalle y metadatos. | QA-02/03/04: ninguna lectura de sucursal ajena ni identidad desconocida habilitada. | Pendiente |
-| S2-05.03 | 1 | S2-05.02 | Probar filtros inválidos/extremos, orden, ausencia de datos y rechazo de escritura en entorno local. | QA-08/12: límites efectivos, SQL parametrizado y credencial habitual sin escritura de negocio. | Pendiente |
-| S2-05.04 | 1 | S2-05.03 | Ejecutar recorrido de navegador, error de conexión, expiración y cambio de usuario/sucursal. | QA-07/08: estados claros, foco/contexto y cache aislados; no fallback a demo. | Pendiente |
-| S2-05.05 | 1 | S2-05.04 | Corregir defectos dentro del alcance, repetir casos afectados y clasificar pendientes. | Sin defectos bloqueantes/altos del recorrido; evidencia de corrección, no solo de primera ejecución. | Pendiente |
+| S2-05.01 | 2 | S2-04 | Probar consultas y contrato contra PostgreSQL de prueba; comparar claves, filas y agregados. | QA-05/06 con dataset identificable y origen persistido; mocks no acreditan integración. | Terminada |
+| S2-05.02 | 1 | S2-05.01 | Manipular token, sucursal e IDs por llamada directa, incluyendo detalle y metadatos. | QA-02/03/04: ninguna lectura de sucursal ajena ni identidad desconocida habilitada. | Terminada |
+| S2-05.03 | 1 | S2-05.02 | Probar filtros inválidos/extremos, orden, ausencia de datos y rechazo de escritura en entorno local. | QA-08/12: límites efectivos, SQL parametrizado y credencial habitual sin escritura de negocio. | Terminada |
+| S2-05.04 | 1 | S2-05.03 | Ejecutar recorrido de navegador, error de conexión, expiración y cambio de usuario/sucursal. | QA-07/08: estados claros, foco/contexto y cache aislados; no fallback a demo. | Terminada |
+| S2-05.05 | 1 | S2-05.04 | Corregir defectos dentro del alcance, repetir casos afectados y clasificar pendientes. | Sin defectos bloqueantes/altos del recorrido; evidencia de corrección, no solo de primera ejecución. | Terminada |
 
 ### S2-06 — Aceptar inventario y cerrar alcance de S3
 
@@ -98,9 +98,9 @@ Estado inicial de cada fila: **Pendiente**. Cambiar la última columna al trabaj
 
 | Subtarea | h | Depende de | Trabajo ejecutable | Cierre verificable | Estado |
 |---|---:|---|---|---|---|
-| S2-06.01 | 1 | S2-05 | Demostrar acceso/inventario y contrastar datos; solicitar revisión y registrar G2. | G2 aceptado o En revisión/Bloqueado con causa; demo declara origen local/remoto real. | Pendiente |
-| S2-06.02 | 1 | S2-06.01 | Actualizar contrato, guía y handoff con casos de uso, permisos y resultados propios. | Otro desarrollador puede reproducir el recorrido y distinguir pruebas pasadas de pendientes. | Pendiente |
-| S2-06.03 | 1 | S2-06.02 | Recalcular reserva/restante y fijar P1 incluidos o retirados antes de S3. | Alcance del 17/11 registrado; P0 tiene prioridad sobre los 11 h de ampliaciones. | Pendiente |
+| S2-06.01 | 1 | S2-05 | Demostrar acceso/inventario y contrastar datos; solicitar revisión y registrar G2. | G2 aceptado o En revisión/Bloqueado con causa; demo declara origen local/remoto real. | Terminada |
+| S2-06.02 | 1 | S2-06.01 | Actualizar contrato, guía y handoff con casos de uso, permisos y resultados propios. | Otro desarrollador puede reproducir el recorrido y distinguir pruebas pasadas de pendientes. | Terminada |
+| S2-06.03 | 1 | S2-06.02 | Recalcular reserva/restante y fijar P1 incluidos o retirados antes de S3. | Alcance del 17/11 registrado; P0 tiene prioridad sobre los 11 h de ampliaciones. | Terminada |
 
 ## Salida y aceptación
 
@@ -133,6 +133,12 @@ La reserva cubre coordinación, bloqueos y correcciones fuera de la estimación;
 |---|---|---|---|---|---|
 | 18/11/2026 | S2-01 | Bloqueada | Pendiente de G1 | Base `2a39370` con login publicado | Existe acceso de navegador por Supabase. Faltan aprobación de la matriz de sucursales y aceptación de la landing. La conexión de inventario de NestJS y las pruebas de alcance siguen pendientes. |
 | 18/11/2026 | S2-01.01 | En revisión | Recorrido de acceso comprobado; pendiente integración de servidor | `cb8057d`, Auth local VF-PRACTICA-1 | Chromium observó token e identidad con HTTP 200, recarga y reapertura con sesión, salida con 204 y regreso al login al solicitar la ruta protegida. [Reproducir la prueba](../SUPABASE-LOGIN.md). |
+
+## Aceptación G2 · 18/11/2026
+
+El propietario aceptó el inventario conectado y el alcance por sucursal el 18/11, después de revisar el [listado](evidencias/inventario-centro.png) y el [detalle del lote](evidencias/inventario-lote.png). API de lectura en `2a94e9a`, QA con las tres identidades de VF-PRACTICA-1 y comparación con una conexión PostgreSQL independiente. En Centro se observaron 12 productos, 10 registros de stock, dos saldos igual a cero y un saldo nulo. Chromium comprobó la sesión del operador y la denegación de la cuenta sin asignación después de salir de la primera.
+
+El contrato vigente está en la [guía de la API](../../backend/README.md). Con el entorno local levantado se puede repetir la consulta; la prueba de rendimiento está en `backend/integration/inventory-practica.mjs --rendimiento`. La prueba del navegador se ejecuta con `npm run test:auth:practica --workspace @vitafarma/frontend` y la API de lectura en marcha. La fecha objetivo era 17/11 y la fecha efectiva de aceptación es 18/11. Las 11 h P1 de proveedores e historial comercial se retiran del MVP por decisión del propietario para priorizar dashboard y Trabajo 4. El esfuerzo humano efectivo no se cronometró.
 
 ## Registro de reserva y cambios
 

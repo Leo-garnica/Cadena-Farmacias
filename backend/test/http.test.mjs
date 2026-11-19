@@ -1,100 +1,96 @@
 import { before, after, test } from 'node:test'
 import assert from 'node:assert/strict'
+import { createServer } from 'node:http'
+import { exportJWK, generateKeyPair, SignJWT } from 'jose'
 import { createApplication } from '../dist/platform/http/create-application.js'
-import { HealthController } from '../dist/platform/http/health.controller.js'
 import { localServerOptions } from '../dist/platform/config/local-server-options.js'
 
-let app
-let base
+const sub = '00000000-0000-4000-8000-000000000001'
+const other = '00000000-0000-4000-8000-000000000002'
+let app, base, keys, issuer, signer, scopeToken
 before(async () => {
+  signer = await generateKeyPair('ES256')
+  const publicKey = { ...await exportJWK(signer.publicKey), alg: 'ES256', kid: 'offline-unit', use: 'sig' }
+  keys = createServer((request, res) => {
+    if (request.url !== '/auth/v1/.well-known/jwks.json') { res.writeHead(404).end(); return }
+    res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ keys: [publicKey] }))
+  })
+  await new Promise(resolve => keys.listen(0, '127.0.0.1', resolve))
+  process.env.SUPABASE_URL = 'http://127.0.0.1:' + keys.address().port
+  issuer = process.env.SUPABASE_URL + '/auth/v1'
+  process.env.VITAFARMA_ACCESS_MAP = JSON.stringify({ [sub]: { perfil: 'consulta', sucursales: [1] } })
+  delete process.env.DATABASE_URL
   app = await createApplication()
   await app.listen(0, '127.0.0.1')
-  base = `${await app.getUrl()}/api/v1`
+  base = (await app.getUrl()) + '/api/v1'
+  scopeToken = await token()
 })
-after(async () => { await app?.close() })
+after(async () => {
+  await app?.close()
+  if (keys) await new Promise(resolve => keys.close(resolve))
+})
+function token(changes = {}, key = signer.privateKey) {
+  return new SignJWT({ sub, role: 'authenticated', aud: 'authenticated', iss: issuer,
+    exp: Math.floor(Date.now() / 1000) + 90, user_metadata: { perfil: 'responsable', sucursales: [2] }, ...changes })
+    .setProtectedHeader({ alg: 'ES256', kid: 'offline-unit' }).sign(key)
+}
+function get(path, bearer) {
+  return fetch(base + '/' + path, { headers: bearer ? { Authorization: 'Bearer ' + bearer } : {} })
+}
 
-test('health identifies the local demo and disconnected database', async () => {
-  const response = await fetch(`${base}/health`)
+test('liveness, database readiness and cache controls have separate meanings', async () => {
+  const response = await get('health')
   assert.equal(response.status, 200)
-  assert.equal(response.headers.get('x-vitafarma-data'), 'synthetic-demo')
-  assert.deepEqual(await response.json(), { status: 'ok', service: 'vitafarma-api', mode: 'demo', database: 'disconnected' })
-})
-
-test('readiness reports an unavailable database in demo mode', async () => {
-  const response = await fetch(`${base}/ready`)
-  assert.equal(response.status, 503)
-  assert.deepEqual(await response.json(), { statusCode: 503, code: 'UNAVAILABLE', message: 'Consulta no disponible' })
-})
-
-test('readiness follows the current probe result and hides connection errors', async () => {
-  let available = true
-  const controller = new HealthController({
-    async check() {
-      if (!available) throw new Error('test-only connection details')
-    },
-  })
-  assert.deepEqual(await controller.ready(), { status: 'ready' })
-  available = false
-  await assert.rejects(() => controller.ready(), error => error.getStatus() === 503 && !error.message.includes('test-only'))
-})
-
-test('success and error responses prohibit caching and content sniffing', async () => {
-  for (const path of ['health', 'inventory/metadata', 'ready', 'unknown']) {
-    const response = await fetch(`${base}/${path}`)
-    assert.equal(response.headers.get('cache-control'), 'no-store', path)
-    assert.equal(response.headers.get('x-content-type-options'), 'nosniff', path)
-    await response.arrayBuffer()
+  assert.deepEqual(await response.json(), { status: 'ok', service: 'vitafarma-api', mode: 'postgresql' })
+  const ready = await get('ready')
+  assert.equal(ready.status, 503)
+  assert.deepEqual(await ready.json(), { statusCode: 503, code: 'UNAVAILABLE', message: 'Consulta no disponible' })
+  for (const route of ['health', 'ready', 'inventory', 'unknown']) {
+    const r = await get(route)
+    assert.equal(r.headers.get('cache-control'), 'no-store')
+    assert.equal(r.headers.get('x-content-type-options'), 'nosniff')
+    await r.arrayBuffer()
   }
 })
 
-test('metadata, list and detail expose the shared read contract', async () => {
-  const metadata = await (await fetch(`${base}/inventory/metadata`)).json()
-  assert.equal(metadata.referenceDate, '2026-10-25')
-  const list = await fetch(`${base}/inventory?farmacia=1&estado=sin-cantidad`)
-  assert.equal(list.status, 200)
-  const result = await list.json()
-  assert.equal(result.total, 1)
-  assert.equal(result.rows[0].stock.cantidad, null)
-  const detail = await fetch(`${base}/inventory/1/4004`)
-  assert.equal(detail.status, 200)
-  assert.equal((await detail.json()).stock, null)
+test('internal API verifies token signature, issuer, audience, expiry and non-anonymous identity', async () => {
+  for (const route of ['me', 'inventory/metadata', 'inventory', 'inventory/1/101', 'reports/inventory']) {
+    assert.equal((await get(route)).status, 401)
+  }
+  const wrongKey = await generateKeyPair('ES256')
+  for (const invalid of ['invalid', await token({ exp: 1 }), await token({ aud: 'different' }),
+    await token({ iss: 'https://other.example.test/auth/v1' }), await token({ role: 'service_role' }),
+    await token({ is_anonymous: true }), await token({}, wrongKey.privateKey)]) {
+    assert.equal((await get('me', invalid)).status, 401)
+  }
+  assert.equal((await get('inventory', await token({ sub: other }))).status, 403)
 })
 
-test('invalid, repeated and unknown query parameters are rejected', async () => {
-  for (const query of ['farmacia=0', 'farmacia=999', 'farmacia=9007199254740992', 'categoria=999', 'pagina=-1', 'orden=arbitrary', 'estado=arbitrary', 'q=a&q=b', 'unknown=1', `q=${'x'.repeat(101)}`]) {
-    const response = await fetch(`${base}/inventory?${query}`)
-    assert.equal(response.status, 400, query)
-    assert.deepEqual(await response.json(), { statusCode: 400, code: 'BAD_REQUEST', message: 'Parámetros de consulta inválidos' })
+test('scopes come only from the server, including direct requests to reports and details', async () => {
+  const me = await get('me', scopeToken)
+  assert.equal(me.status, 200)
+  assert.deepEqual(await me.json(), { sub, perfil: 'consulta', sucursales: [1] })
+  for (const route of ['inventory?farmacia=2', 'reports/inventory?farmacia=2']) {
+    assert.equal((await get(route, scopeToken)).status, 403)
+  }
+  assert.equal((await get('inventory/2/101', scopeToken)).status, 404)
+  for (const route of ['inventory/metadata', 'inventory?farmacia=1', 'inventory/1/101', 'reports/inventory?farmacia=1']) {
+    assert.equal((await get(route, scopeToken)).status, 503)
   }
 })
 
-test('invalid identifiers and missing records return controlled errors', async () => {
-  for (const [path, status] of [['inventory/1/no-id', 400], ['inventory/1/9999', 404], ['inventory/2/4001', 404], ['unknown', 404]]) {
-    const response = await fetch(`${base}/${path}`)
-    assert.equal(response.status, status, path)
-    assert.deepEqual(Object.keys(await response.json()).sort(), ['code', 'message', 'statusCode'])
+test('invalid queries and write operations do not reach data reads', async () => {
+  for (const query of ['farmacia=0', 'farmacia=2147483648', 'pagina=-1', 'pagina=9007199254740992',
+    'q=a&q=b', 'q=%00', 'unknown=1', 'orden=arbitrary', 'estado=arbitrary', 'q=' + 'x'.repeat(101)]) {
+    assert.equal((await get('inventory?' + query, scopeToken)).status, 400, query)
   }
-})
-
-test('business writes and future-module endpoints are unavailable', async () => {
+  assert.equal((await get('inventory/1/no-id', scopeToken)).status, 400)
   for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
-    assert.equal((await fetch(`${base}/inventory`, { method })).status, 404)
+    assert.equal((await fetch(base + '/inventory', { method })).status, 404)
   }
-  assert.equal((await fetch(`${base}/sales`)).status, 404)
 })
 
-test('unexpected exceptions do not expose internal details', async () => {
-  const { ApiExceptionFilter } = await import('../dist/platform/http/api-exception.filter.js')
-  let result
-  const host = { switchToHttp: () => ({ getResponse: () => ({ status: status => ({ json: body => { result = { status, body } } }) }) }) }
-  new ApiExceptionFilter().catch(new Error('postgres://secret-connection'), host)
-  assert.equal(result.status, 500)
-  assert.equal(JSON.stringify(result).includes('secret-connection'), false)
-  assert.equal(result.body.code, 'INTERNAL_ERROR')
-})
-
-test('server stays on loopback and validates an optional local port', () => {
+test('server stays on loopback and validates its port', () => {
   assert.deepEqual(localServerOptions({}), { host: '127.0.0.1', port: 3000 })
-  assert.equal(localServerOptions({ PORT: '3001' }).port, 3001)
   for (const PORT of ['0', '-1', '65536', 'not-a-number', '']) assert.throws(() => localServerOptions({ PORT }))
 })

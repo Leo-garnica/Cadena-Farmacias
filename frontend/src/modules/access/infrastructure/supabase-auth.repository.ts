@@ -43,6 +43,12 @@ class SupabaseAuthRepository implements AuthRepository {
     return this.verification
   }
 
+  async accessToken(): Promise<string | null> {
+    const { data, error } = await this.requireClient().auth.getSession()
+    if (error) throw new AccessError('unavailable')
+    return data.session?.access_token ?? null
+  }
+
   private async verifyUser(): Promise<AuthIdentity | null> {
     const client = this.requireClient()
     try {

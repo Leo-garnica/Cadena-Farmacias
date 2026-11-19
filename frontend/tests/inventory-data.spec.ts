@@ -79,7 +79,7 @@ test('fechas DATE: día demo, vencido y sin fecha se distinguen', async () => {
   const undated = await mockInventoryRepository.detail(1, 1009)
   expect(formatDate(DEMO_REFERENCE_DATE)).toBe('25/10/2026')
   expect(lotStatus(past!, DEMO_REFERENCE_DATE).label).toBe('Vencido')
-  expect(lotStatus(today!, DEMO_REFERENCE_DATE).label).toBe('Vence en fecha demo')
+  expect(lotStatus(today!, DEMO_REFERENCE_DATE).label).toBe('Vence en la fecha de consulta')
   expect(lotStatus(undated!, DEMO_REFERENCE_DATE).label).toBe('Fecha no registrada')
   expect(await mockInventoryRepository.detail(999, 1001)).toBeNull()
   expect(await mockInventoryRepository.detail(1, 9999)).toBeNull()

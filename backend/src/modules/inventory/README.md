@@ -1,18 +1,5 @@
 # Inventario
 
-Propietario lógico de `stock` y `lote`. La BD sigue compartida y no se modifica.
+Inventario consulta las proyecciones de farmacia, catálogo, medicamento, stock y lote mediante su puerto de lectura asíncrono. `inventory.module.ts` compone el repositorio PostgreSQL. El adaptador histórico de `infrastructure/demo` se utiliza en pruebas aisladas.
 
-- `domain/`: semántica de nulos, existencias, lote y fecha de referencia; sin framework.
-- `application/`: consultas y puerto de lectura; sin NestJS ni SQL.
-- `infrastructure/demo/`: adaptador sintético independiente del corpus del frontend.
-- `presentation/`: controlador HTTP y validación de parámetros.
-- `inventory.module.ts`: composición y selección explícita del adaptador demo.
-- `public.ts`: única superficie de integración para otros módulos.
-
-Exporta consultas, nunca el repositorio. Catálogo y sucursales aparecen como proyecciones
-de lectura; esto no concede a Inventario propiedad de sus tablas ni capacidad de escribirlas.
-El adaptador actual trabaja con un corpus pequeño en memoria. Una integración SQL futura
-deberá consultar, filtrar y paginar en la BD, no cargar todo el inventario de producción.
-
-No hay métodos de escritura, conexión a Supabase, alertas de stock mínimo ni inventario
-multilote. El vencimiento indica una fecha, no una prohibición automática de venta.
+El listado, el detalle y los contadores limitan las lecturas a las sucursales del perfil. Se preservan la clave compuesta de stock, la ausencia de registro, las cantidades nulas y los lotes válidos por producto. El módulo Reportes consume las consultas públicas de Inventario. [Contrato de la API](../../../README.md)

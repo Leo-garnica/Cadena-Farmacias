@@ -37,6 +37,11 @@ export function AuthProvider({ repository, children }: { repository: AuthReposit
       if (nextUserId !== userId.current) {
         revision.current++
         setState({ ready: false, user: null, error: null })
+        if (userId.current !== null) {
+          // A different account must start with a fresh router and empty loader data.
+          window.location.reload()
+          return
+        }
       }
       timer = setTimeout(() => void refresh(), 0)
     })

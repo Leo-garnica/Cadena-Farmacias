@@ -12,6 +12,6 @@ export function lotStatus(row: InventoryRow, referenceDate: DateOnly) {
   if (row.lote === null) return { label: 'Sin lote asociado', tone: 'neutral' as const }
   if (row.lote.fecha_vencimiento === null) return { label: 'Fecha no registrada', tone: 'neutral' as const }
   if (row.lote.fecha_vencimiento < referenceDate) return { label: 'Vencido', tone: 'danger' as const }
-  if (row.lote.fecha_vencimiento === referenceDate) return { label: 'Vence en fecha demo', tone: 'warning' as const }
+  if (row.lote.fecha_vencimiento === referenceDate) return { label: 'Vence en la fecha de consulta', tone: 'warning' as const }
   return { label: 'Vigente', tone: 'success' as const }
 }

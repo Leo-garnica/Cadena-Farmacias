@@ -65,7 +65,7 @@ export function LoginPage({ brand }: { brand: ReactNode }) {
           <span className="sr-only" role="status">{busy ? 'Verificando correo y contraseña…' : ''}</span>
         </form>}
         <p className="login-help">Si necesitas una cuenta o recuperar tu acceso, contacta a administración.</p>
-        <p className="login-note">El inventario disponible en esta versión contiene datos de demostración.</p>
+        <p className="login-note">Cada cuenta puede consultar las sucursales que tiene asignadas.</p>
       </div>
     </section>
   </main>
