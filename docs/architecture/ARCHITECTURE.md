@@ -1,102 +1,38 @@
-# Arquitectura base
+# Arquitectura de VitaFarma
 
-Estado: implementada localmente, con datos sintéticos. Alcance aprobado por el usuario
-el 28/10/2026: monolito modular, reorganización del proyecto y opción visual A.
+La base adoptada el 28/10/2026 es un monolito modular en NestJS y TypeScript, con una aplicación React/Vite y un paquete de contratos compartidos. El prototipo inicial utilizaba fixtures independientes en frontend y backend. La composición vigente conecta la web con NestJS y consulta los datos persistidos de PostgreSQL. [Decisiones de la base](DECISIONS.md)
 
-Incremento de acceso autorizado posteriormente: el módulo `access` del frontend
-integra Supabase Auth mediante un puerto `AuthRepository` y su adaptador. El login,
-la restauración y el cierre de sesión ya tienen implementación; los datos de negocio
-siguen siendo sintéticos. Ver [alcance y pruebas].
-
-## Vista general
+## Componentes y entornos
 
 ```mermaid
 flowchart LR
-  UI[SPA React / Vite] --> F[Puerto de consulta frontend]
-  UI --> AUTH[Supabase Auth: identidad]
-  F --> FM[Mock frontend]
-  API[HTTP NestJS] --> APP[Casos de uso]
-  APP --> PORT[Puerto de lectura]
-  PORT --> DEMO[Adaptador demo backend]
-  C[Contratos TypeScript] -.-> UI
-  C -.-> API
-  FUT[Futuro adaptador PostgreSQL] -. pendiente .-> DB[(Supabase existente)]
+    Web[React y Vite] -->|Inicio de sesión| Auth[Supabase Auth]
+    Web -->|HTTP con token| Api[NestJS]
+    Auth -->|JWKS| Api
+    Api -->|Lector| Pg[(PostgreSQL del modo elegido)]
+    Api -->|Escritor exclusivo del modo gestión| Pg
+    Contratos[Contratos TypeScript] -.-> Web
+    Contratos -.-> Api
 ```
 
-La interfaz y la API demo son ejecutables independientes en desarrollo. La SPA todavía
-no consume la API. El contrato compartido permite preparar esa integración sin acoplar
-la vista al esquema de persistencia. La integración real y el alojamiento de producción
-son decisiones posteriores.
+Vite reenvía `/api/v1` a la API local. Las claves públicas del emisor permiten a NestJS comprobar tokens. El mapa privado de identidades asigna perfil y sucursales. El servidor valida ese alcance para los datos solicitados, con independencia de los controles visibles en la interfaz. Las rutas públicas de salud distinguen proceso disponible de conexión lectora válida. [Guía de API](../../backend/README.md)
 
-El backend es **una aplicación y un proceso**. Sus nueve límites de dominio no tienen
-servidores, colas, despliegues ni bases de datos independientes. PostgreSQL conservará
-el esquema académico compartido; la propiedad de tablas es una regla del código.
+El entorno de consulta utiliza `vitafarma_practica`. El modo del Trabajo 4 utiliza `vitafarma_gestion` para sus dos conexiones, separadas por rol. Ambos comparten la instancia PostgreSQL de desarrollo y el proveedor Auth local. El monolito se ejecuta en un solo proceso. [Servicios y cuentas](ENTORNO-LOCAL.md)
 
-## Capas de cada módulo
+## Dependencias y módulos
 
-```text
-inventory/
-├── domain/           Reglas puras: cantidades, fechas y estados
-├── application/      Casos de uso y puertos requeridos
-├── infrastructure/   Adaptadores que implementan los puertos
-├── presentation/     Entrada HTTP o vistas y loaders
-├── inventory.module.ts  Composición NestJS, solo en backend
-└── public.ts         Integración explícita con otros módulos
-```
+Inventario organiza sus reglas de cantidades y fechas en `domain/`, sus consultas y puertos en `application/`, el adaptador PostgreSQL en `infrastructure/` y los controladores o vistas en `presentation/`. La composición elige el adaptador. Dominio y aplicación permanecen independientes de React, NestJS y los drivers. La infraestructura transversal de lectura y HTTP se encuentra en `backend/src/platform/`. La interfaz reutiliza estilos y controles desde `frontend/src/shared/`.
 
-- Dominio no importa React, NestJS, drivers, HTTP o infraestructura.
-- Aplicación depende de dominio y puertos, no de adaptadores ni controladores.
-- Infraestructura implementa puertos. Presentación valida entradas y llama a aplicación.
-- La composición elige adaptadores. Cambiar demo por persistencia no requiere reescribir vistas.
-- `platform/` contiene asuntos técnicos del backend, no reglas comerciales.
-- `shared/` contiene UI y utilidades reutilizables del frontend; no importa módulos o `app/`.
+En backend, `reports` usa la interfaz pública de `inventory` para calcular indicadores con la misma sucursal, filtros y fecha civil. `access` registra el guard y la comprobación de identidad. `sales` registra la API acotada de la práctica. Los nueve módulos conservan su propiedad lógica sobre las 27 tablas del modelo. [Módulos y tablas](MODULES.md)
 
-Los módulos pendientes tienen registro NestJS y README con su responsabilidad.
-Las capas se crean cuando existe un caso de uso: no hay CRUD o clases vacías que simulen
-una implementación terminada.
+En frontend, `app/repositories.ts` compone el repositorio HTTP de inventario. React Router mantiene los filtros en la URL y carga el detalle cuando se necesita. Las rutas de gestión comprueban la disponibilidad del servicio para el responsable. Los fixtures se conservan para pruebas aisladas. Las pantallas conectadas muestran el error si falla la consulta.
 
-## Integración entre módulos
+Los consumidores externos a un módulo usan sus entradas públicas. `packages/contracts` contiene los tipos de lectura, identidad y reportes. Las pruebas de arquitectura verifican imports y ciclos entre módulos. [Flujo de desarrollo](DEVELOPMENT.md)
 
-Cada módulo tiene `public.ts`. Fuera de él, no se importan sus repositorios, fixtures
-o controladores. `InventoryQueries` es la API interna actual de Inventario. Los futuros
-consumidores usarán consultas públicas o puertos específicos, nunca acceso directo a
-clases internas. Evitar dependencias circulares y resolver orquestación en aplicación.
+## Lectura, dinero y transacciones
 
-En frontend, `public.ts` expone la integración de Inventario con el shell y el router.
-`demo.ts` se usa exclusivamente en composición; `detail.ts` mantiene el detalle como
-importación diferida. Los loaders reciben el repositorio por fábrica y no importan `app/`.
-No se alteraron las props de Drawer, Tabs, Button, StatusBadge o AsyncState.
+La dupla farmacia/producto identifica el stock. Un producto sin registro, una cantidad nula y cero unidades siguen siendo casos distintos. El lote asociado puede faltar. Las fechas de negocio se representan como fechas civiles. El adaptador PostgreSQL aplica filtros, totales, orden estable y paginación en el servidor con consultas parametrizadas y transacciones de solo lectura.
 
-`packages/contracts` contiene únicamente contratos y proyecciones públicas de lectura,
-sin framework, secretos, SDK de Supabase ni filas de usuario. Cada workspace lo declara
-como dependencia local. No importar código fuente del backend desde la SPA.
+En la práctica de gestión, una venta conserva el precio histórico, calcula los centavos en el servidor y confirma la cabecera, los detalles y el descuento de inventario en una transacción. Se bloquean las filas de stock y el identificador de operación controla reintentos. La escritura requiere destinos y roles locales específicos y el perfil autorizado. La ficha académica de usuario y la identidad de Supabase Auth cumplen funciones independientes. [Reglas y contrato de gestión](../../backend/src/modules/sales/README.md)
 
-La comprobación `npm run test:architecture` analiza imports y exports estáticos y
-dinámicos con TypeScript, verifica dirección de dependencias y busca ciclos entre módulos.
-Es una protección de estructura, no un sustituto de revisión de negocio ni un análisis
-de toda posible dependencia construida dinámicamente.
-
-## Datos y transacciones futuras
-
-Se conserva la clave de stock `(id_farmacia, codigo_producto)`, un lote opcional por fila,
-la diferencia entre cero, nulo y ausencia, y `DATE` como cadena de fecha sin hora.
-No se calcula stock mínimo ni se interpreta vencimiento como bloqueo automático de venta.
-
-No hay conexión de BD, ORM, driver, migraciones o generación automática de esquema.
-Al aprobar PostgreSQL, un adaptador por módulo deberá usar consultas parametrizadas,
-campos mínimos y paginación en servidor. El adaptador demo en memoria es un ejemplo
-de integración y no una estrategia para cargar todo el inventario real.
-
-Una futura venta coordinará sus cambios en una transacción del backend y una misma
-conexión. Se deben definir actor, permisos, concurrencia, identificadores e idempotencia
-antes de escribir. No se crea ahora una función SQL ni una política de autorización.
-
-Los importes `number` de las proyecciones actuales sirven al piloto sintético. Antes de
-operaciones monetarias reales debe aprobarse la representación exacta de `numeric`,
-su redondeo y serialización; no se propone calcular ventas con coma flotante.
-
-## Límites de ejecución
-
-La API escucha en loopback, no lee `.env` y declara `mode: demo`, `database: disconnected`.
-El frontend no contiene credenciales ni usa la Data API. No se configura CORS ni se
-presentan roles de los scripts de llenado como permisos de aplicación aprobados.
+La conexión del lector al proyecto académico remoto sigue pendiente de credencial mínima verificada y conexión TLS. El arranque de práctica comprueba la huella del snapshot y extrae tablas, restricciones e índices para las copias locales. El proceso conserva el modelo y los triggers del proyecto académico. [Diagnóstico de la base](../DB-CONTEXT.md)

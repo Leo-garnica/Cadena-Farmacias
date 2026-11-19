@@ -11,7 +11,7 @@ node local/practica.mjs up
 node local/practica.mjs gestion
 ```
 
-El segundo comando crea `vitafarma_gestion` en el mismo PostgreSQL local y carga el modelo académico, el catálogo de prueba, dos empleados y un cliente ficticio. Se puede repetir. Para trabajar con la UI carga `backend.gestion.env.local` en la terminal del backend en lugar de `backend.env.local`. Carga `frontend.env.local` en la terminal de Vite como indica la [guía de entorno](../../../../docs/architecture/ENTORNO-LOCAL.md). Las ventas se reflejan en la consulta de inventario de esa misma base. El dataset de control de los sprints está en otra base.
+El segundo comando crea `vitafarma_gestion` en el mismo PostgreSQL local y carga el modelo académico, el catálogo de prueba, dos empleados y un cliente ficticio. Se puede repetir. Para trabajar con la aplicación completa, ejecuta `npm run dev:gestion` desde la raíz. Prepara los servicios y carga `backend.gestion.env.local` en NestJS y `frontend.env.local` en Vite. [Guía del entorno](../../../../docs/architecture/ENTORNO-LOCAL.md) Las ventas se reflejan en la consulta de inventario de esa misma base. El dataset de control de los sprints está en otra base.
 
 La identidad `supervisor@vitafarma.test` tiene el perfil responsable y las sucursales 1 y 2. En la práctica de gestión también tiene preasignada la sucursal 3 para demostrar su alta. El servicio comprueba la firma del token mediante el guard del monolito, el perfil y el ámbito de la operación. También comprueba el emisor local configurado, las dos conexiones a `127.0.0.1:55432/vitafarma_gestion`, la identidad efectiva del escritor y la marca de instalación. El entorno de consulta conserva su cuenta de solo lectura.
 

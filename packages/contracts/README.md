@@ -5,9 +5,9 @@ npm workspaces. No tiene dependencias de ejecución ni importa React, NestJS o d
 
 | Entrada | Contenido |
 | --- | --- |
-| `@vitafarma/contracts/common` | `DateOnly` y error público de API |
-| `@vitafarma/contracts/inventory` | Consulta, resultado, metadatos y proyecciones de lectura necesarias |
-| `@vitafarma/contracts/health` | Estado del proceso demo |
+| `@vitafarma/contracts/common` | `DateOnly`, identidad con perfil y sucursales, y error público de API |
+| `@vitafarma/contracts/inventory` | Consulta, resultado, metadatos, proyecciones de lectura e indicadores de inventario |
+| `@vitafarma/contracts/health` | Estado del proceso de la API PostgreSQL |
 
 Importar con `import type` cuando solo se necesita un tipo. Las entradas resuelven
 `dist/`; antes de iniciar o verificar consumidores, `npm run build:contracts` desde
