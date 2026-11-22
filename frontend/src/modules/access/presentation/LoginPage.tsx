@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
-import { Navigate, useSearchParams } from 'react-router'
+import { Link, Navigate, useSearchParams } from 'react-router'
 import { ArrowRight, Eye, EyeOff, ShieldCheck, Sprout } from 'lucide-react'
 import { Button } from '../../../shared/ui/Button'
 import { AsyncState } from '../../../shared/ui/AsyncState'
 import { useAuth, accessErrorMessage } from './auth-context'
 import { safeReturnTo } from './loaders'
 import './access.css'
+
+const commerceEnabled = import.meta.env.VITE_VITAFARMA_COMERCIO === '1'
 
 export function LoginPage({ brand }: { brand: ReactNode }) {
   const { state, notice, configured, signIn, refresh } = useAuth()
@@ -18,7 +20,7 @@ export function LoginPage({ brand }: { brand: ReactNode }) {
   const [checked, setChecked] = useState(false)
   const errorRef = useRef<HTMLParagraphElement>(null)
   const submitting = useRef(false)
-  useEffect(() => { document.title = 'Iniciar sesión · VitaFarma' }, [])
+  useEffect(() => { document.title = commerceEnabled ? 'Acceso del personal · VitaFarma' : 'Iniciar sesión · VitaFarma' }, [])
   useEffect(() => {
     let active = true
     void refresh().then(() => { if (active) setChecked(true) })
@@ -37,10 +39,15 @@ export function LoginPage({ brand }: { brand: ReactNode }) {
     finally { setPassword(''); setBusy(false); submitting.current = false }
   }
 
-  if (checked && state.ready && state.user) return <Navigate to={safeReturnTo(params.get('siguiente'))} replace />
+  if (checked && state.ready && state.user) {
+    const destination = params.get('siguiente') ?? (commerceEnabled ? '/operaciones' : null)
+    return <Navigate to={safeReturnTo(destination)} replace />
+  }
 
-  return <main className="login-layout">
-    <section className="login-story" aria-label="Bienvenida a VitaFarma">
+  return <main className={commerceEnabled ? 'staff-access' : 'login-layout'}>
+    {commerceEnabled ? <header className="staff-access-header">
+      <Link to="/" aria-label="VitaFarma, inicio">{brand}</Link><span>Portal del personal</span>
+    </header> : <section className="login-story" aria-label="Bienvenida a VitaFarma">
       <div className="login-brand">{brand}</div>
       <div className="login-story__body">
         <span className="login-eyebrow">TU ESPACIO DE TRABAJO</span>
@@ -49,12 +56,18 @@ export function LoginPage({ brand }: { brand: ReactNode }) {
         <div className="login-emblem" aria-hidden="true"><Sprout size={76} strokeWidth={1} /><span /></div>
       </div>
       <p className="login-story__footer">VitaFarma · Cerca de tu equipo.</p>
-    </section>
+    </section>}
     <section className="login-panel" aria-labelledby="login-title">
       <div className="login-card">
-        <span className="login-section-label"><ShieldCheck size={17} aria-hidden="true" /> Acceso del equipo</span>
-        <h2 id="login-title">Qué bueno verte.</h2>
-        <p className="login-intro">Inicia sesión con el correo de tu cuenta.</p>
+        {commerceEnabled ? <>
+          <ShieldCheck className="staff-access-icon" size={32} aria-hidden />
+          <h1 id="login-title">Acceso del personal</h1>
+          <p className="login-intro">Ingresa con tu cuenta de trabajo para abrir las operaciones de tu sucursal.</p>
+        </> : <>
+          <span className="login-section-label"><ShieldCheck size={17} aria-hidden="true" /> Acceso del equipo</span>
+          <h2 id="login-title">Qué bueno verte.</h2>
+          <p className="login-intro">Inicia sesión con el correo de tu cuenta.</p>
+        </>}
         {notice && <p className="login-notice" role="status">{notice}</p>}
         {(!checked || !state.ready) && !busy ? <AsyncState kind="loading" title="Comprobando tu sesión…" description="Preparando tu acceso." /> : <form onSubmit={(event) => void submit(event)} aria-busy={busy}>
           <div className="login-field"><label htmlFor="login-email">Correo electrónico</label><input id="login-email" name="email" type="email" autoComplete="username" autoCapitalize="none" spellCheck={false} required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} disabled={busy || !configured} /></div>
@@ -64,8 +77,12 @@ export function LoginPage({ brand }: { brand: ReactNode }) {
           <Button className="login-submit" type="submit" disabled={busy || !configured}>{busy ? 'Ingresando…' : 'Iniciar sesión'}{!busy && <ArrowRight size={18} aria-hidden="true" />}</Button>
           <span className="sr-only" role="status">{busy ? 'Verificando correo y contraseña…' : ''}</span>
         </form>}
-        <p className="login-help">Si necesitas una cuenta o recuperar tu acceso, contacta a administración.</p>
-        <p className="login-note">Cada cuenta puede consultar las sucursales que tiene asignadas.</p>
+        {commerceEnabled ? <div className="staff-access-request">
+          <p>¿Te incorporas a una sucursal?</p><Link to="/equipo/solicitar">Solicitar ingreso</Link>
+        </div> : <>
+          <p className="login-help">Si necesitas una cuenta o recuperar tu acceso, contacta a administración.</p>
+          <p className="login-note">Cada cuenta puede consultar las sucursales que tiene asignadas.</p>
+        </>}
       </div>
     </section>
   </main>

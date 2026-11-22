@@ -1,0 +1,33 @@
+.customer-access { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); min-height: 100dvh; background: #fff; }
+.customer-access-story { display: flex; flex-direction: column; justify-content: space-between; background: var(--brand); color: white; overflow: hidden; }
+.customer-access-copy { width: min(100%, 660px); margin-inline: auto; padding: clamp(32px, 5vw, 74px); }
+.customer-wordmark { display: inline-flex; align-items: center; gap: 9px; color: white; text-decoration: none; font: 800 28px/1 var(--font-heading); letter-spacing: -.04em; }
+.customer-wordmark span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px 9px 9px 2px; background: #d8efac; color: var(--brand); font: 24px/1 system-ui; }
+.customer-access h1 { max-width: 10ch; margin: clamp(42px, 10vh, 110px) 0 15px; font: 700 clamp(44px, 5vw, 78px)/.98 var(--font-heading); letter-spacing: -.045em; }
+.customer-access-story p { max-width: 34ch; font-size: clamp(16px, 1.4vw, 20px); line-height: 1.5; color: #deecde; }
+.customer-access-story img { width: 100%; height: clamp(180px, 35vh, 420px); object-fit: cover; object-position: 38% 53%; }
+.customer-access-panel { min-width: 0; align-self: center; width: min(100%, 520px); margin-inline: auto; padding: 32px clamp(22px, 4vw, 46px); }
+.customer-access-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 24px; }
+.customer-access-nav .commerce-back { min-height: 44px; margin: 0; }
+.customer-access .commerce-auth { border: 0; padding: 0; background: transparent; margin: 0; }
+.customer-access .commerce-auth-head > svg { display: none; }
+.customer-access .commerce-auth-head h2 { font: 700 clamp(28px, 3vw, 36px)/1.12 var(--font-heading); letter-spacing: -.035em; }
+.customer-access .commerce-auth-head { margin-bottom: 24px; }
+.customer-access .commerce-form { gap: 16px; }
+.customer-access .commerce-form button[type=submit] { justify-self: stretch; min-height: 47px; }
+.customer-access .commerce-text-button { min-height: 44px; }
+.account-password-field { display: grid; gap: 5px; }
+.account-password-field > div { position: relative; }
+.account-password-field input { width: 100%; padding-right: 47px; }
+.account-password-field button { position: absolute; right: 1px; top: 1px; bottom: 1px; width: 43px; display: grid; place-items: center; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--brand); }
+@media (max-width: 700px) {
+  .customer-access { display: block; }
+  .customer-access-copy { padding: 20px 24px 24px; margin-inline: 0; }
+  .customer-wordmark { font-size: 22px; }
+  .customer-wordmark span { width: 27px; height: 27px; font-size: 18px; }
+  .customer-access h1 { max-width: none; margin: 20px 0 6px; font-size: 34px; }
+  .customer-access-story p { font-size: 14px; }
+  .customer-access-story img { display: none; }
+  .customer-access-panel { padding-block: 14px 30px; }
+  .customer-access-nav { margin-bottom: 12px; }
+}

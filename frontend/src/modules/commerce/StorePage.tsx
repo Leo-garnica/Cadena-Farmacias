@@ -138,17 +138,14 @@ export function StorePage() {
   const total = subtotal + (zone?.envioCentavos ?? 0)
   const unavailable = useMemo(() => currentItems.some(item => item.disponible < item.cantidad), [currentItems])
 
-  const persistedDraft = useMemo(
-    () => (userId && identity.data?.tipo === 'cliente' && draft.owner === null && draft.items.length
-      ? { ...draft, owner: userId }
-      : draft),
-    [draft, identity.data?.tipo, userId],
-  )
+  if (userId && identity.data?.tipo === 'cliente' && draft.owner === null && draft.items.length) {
+    setDraft({ ...draft, owner: userId })
+  }
 
   useEffect(() => { document.title = 'VitaFarma · Farmacia en línea' }, [])
   useEffect(() => {
-    try { sessionStorage.setItem(basketKey, JSON.stringify(persistedDraft)) } catch { /* El carrito de esta página sigue disponible. */ }
-  }, [persistedDraft])
+    try { sessionStorage.setItem(basketKey, JSON.stringify(draft)) } catch { /* El carrito de esta página sigue disponible. */ }
+  }, [draft])
 
   const showCart = useCallback((open: boolean) => {
     setParams(previous => {

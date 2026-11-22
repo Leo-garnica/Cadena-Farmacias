@@ -406,6 +406,44 @@ test('checkout completo: ingreso, envío con tarifa, reintento idempotente, comp
   await expect(card.getByText('Pago de prueba revertido')).toBeVisible()
 })
 
+test('el carrito de invitado queda vinculado al cliente al volver del acceso', async ({ page, context }) => {
+  await mockCommerceApi(context)
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Agregar Cinta médica' }).click()
+  const cart = page.getByRole('button', { name: /^Carrito/ })
+  await cart.click()
+  await page.getByRole('link', { name: 'Ingresar para comprar' }).click()
+  await expect(page.getByRole('heading', { name: 'Tu cuenta VitaFarma' })).toBeVisible()
+  await page.getByRole('button', { name: 'Crear una cuenta' }).click()
+  await expect(page.getByLabel('Contraseña', { exact: true })).toHaveAttribute('autocomplete', 'new-password')
+  await page.getByRole('button', { name: 'Ya tengo cuenta' }).click()
+  await page.getByLabel('Correo electrónico').fill(testEmail)
+  await page.getByLabel('Contraseña', { exact: true }).fill(testPassword)
+  await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click()
+  await expect(page.getByRole('button', { name: /Pagar · simulación/ })).toBeEnabled()
+  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await expect(page.getByRole('link', { name: 'Mi cuenta' })).toBeVisible()
+  await expect(cart).toHaveText(/Carrito\s*0/)
+  await page.reload()
+  await expect(cart).toHaveText(/Carrito\s*0/)
+})
+
+test('el enlace interno permite solicitar ingreso o abrir operaciones con una cuenta de personal', async ({ page, context }) => {
+  await mockCommerceApi(context, { identity: { tipo: 'personal', nombre: 'Caja Centro',
+    sucursales: [{ id: 1, nombre: 'Sucursal Centro', departamento: 'Cochabamba', rol: 'empleado' }] } })
+  await page.goto('/equipo/entrar')
+  await expect(page.getByRole('heading', { name: 'Acceso del personal' })).toBeVisible()
+  await page.getByRole('link', { name: 'Solicitar ingreso' }).click()
+  await expect(page.getByRole('heading', { name: 'Solicitar acceso a una sucursal' })).toBeVisible()
+  await page.goto('/equipo/entrar')
+  await page.getByLabel('Correo electrónico').fill(testEmail)
+  await page.getByLabel('Contraseña', { exact: true }).fill(testPassword)
+  await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click()
+  await expect(page).toHaveURL(/\/operaciones$/)
+  await expect(page.getByRole('button', { name: 'Caja presencial' })).toBeVisible()
+})
+
 test('operaciones de caja y pedidos: tomar, preparar, entregar y venta presencial', async ({ page, context }) => {
   await seedAuth(page)
   const api = await mockCommerceApi(context, {
