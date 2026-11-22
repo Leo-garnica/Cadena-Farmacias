@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { AuthRepository } from '../application/auth.repository'
 import { AuthContext, accessErrorMessage, type AuthState } from './auth-context'
 
@@ -49,25 +49,25 @@ export function AuthProvider({ repository, children }: { repository: AuthReposit
     return () => { generation.current++; clearTimeout(initialTimer); clearTimeout(timer); unsubscribe() }
   }, [repository, refresh])
 
-  function startSession(user: NonNullable<AuthState['user']>) {
+  const startSession = useCallback((user: NonNullable<AuthState['user']>) => {
     setNotice(null)
     revision.current++
     userId.current = user.id
     setState({ ready: true, user, error: null })
-  }
+  }, [])
 
-  async function signIn(email: string, password: string) {
+  const signIn = useCallback(async (email: string, password: string) => {
     startSession(await repository.signIn(email, password))
-  }
+  }, [repository, startSession])
 
-  async function register(email: string, password: string): Promise<'session' | 'confirmation'> {
+  const register = useCallback(async (email: string, password: string): Promise<'session' | 'confirmation'> => {
     const user = await repository.register(email, password)
     if (!user) return 'confirmation'
     startSession(user)
     return 'session'
-  }
+  }, [repository, startSession])
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     endingSession.current = true
     revision.current++
     setState({ ready: false, user: null, error: null })
@@ -80,7 +80,12 @@ export function AuthProvider({ repository, children }: { repository: AuthReposit
       setState({ ready: true, user: null, error: 'No pudimos cerrar la sesión. Revisa tu conexión y vuelve a intentarlo.' })
       throw error
     } finally { endingSession.current = false }
-  }
+  }, [repository])
 
-  return <AuthContext value={{ state, notice, configured: repository.configured, refresh, signIn, register, signOut }}>{children}</AuthContext>
+  const value = useMemo(
+    () => ({ state, notice, configured: repository.configured, refresh, signIn, register, signOut }),
+    [state, notice, repository.configured, refresh, signIn, register, signOut],
+  )
+
+  return <AuthContext value={value}>{children}</AuthContext>
 }

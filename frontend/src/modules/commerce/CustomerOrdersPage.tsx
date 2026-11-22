@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { useAuth } from '../access/public'
 import { Button } from '../../shared/ui/Button'
@@ -46,6 +46,7 @@ export function CustomerOrdersPage() {
   const [receipt, setReceipt] = useState<Sale | null>(null)
   const orders = useResource<Order[]>(identity.data?.tipo === 'cliente' ? '/pedidos' + query({ offset }) : null, { scope: userId, poll: 7000 })
   const branches = useResource<Branch[]>('/sucursales', { public: true })
+  const branchById = useMemo(() => new Map(branches.data?.map(branch => [branch.id, branch])), [branches.data])
   useEffect(() => { document.title = 'Mis pedidos · VitaFarma' }, [])
   return <CommerceFrame area="Mis pedidos" actions={<><Link to={storePath}>Tienda</Link>{userId && <SignOut />}</>}>
     <Back to={storePath}>Volver a la tienda</Back>
@@ -58,7 +59,7 @@ export function CustomerOrdersPage() {
     {orders.error && <Message type="error" retry={orders.refresh}>{orders.error}</Message>}
     {orders.data?.length === 0 && <Message>Todavía no tienes pedidos en esta página.</Message>}
     <div className="commerce-order-grid">
-      {orders.data?.map(order => <CustomerOrder key={order.id} order={order} branch={branches.data?.find(branch => branch.id === order.farmacia)} refresh={orders.refresh} showReceipt={setReceipt} />)}
+      {orders.data?.map(order => <CustomerOrder key={order.id} order={order} branch={branchById.get(order.farmacia)} refresh={orders.refresh} showReceipt={setReceipt} />)}
     </div>
     {(offset > 0 || (orders.data?.length ?? 0) >= 60) && <div className="commerce-pagination">
       <Button variant="secondary" disabled={!offset} onClick={() => setOffset(value => Math.max(0, value - 60))}>Anterior</Button>

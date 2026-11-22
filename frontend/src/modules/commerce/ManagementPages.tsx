@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { Button } from '../../shared/ui/Button'
 import { dateLabel, money, query, roles, send, useAction, useOperationId, useResource, type SalesHistory, type Sale, type StaffApplication, type StaffBranch, type StaffMember, type StockMovement } from './api'
 import { Message } from './shared'
@@ -10,9 +10,20 @@ export function AccessDesk({ branch, userId }: { branch: StaffBranch; userId: st
   const action = useAction()
   const [status, setStatus] = useState('')
   const [deactivate, setDeactivate] = useState<StaffMember | null>(null)
-  const pending = applications.data?.solicitudes.filter(item => item.sucursal === branch.id && item.estado === 'pendiente')
-  const activeEmployees = team.data?.personal.filter(person => person.activo && person.rol === 'empleado').length
-  const activeManagers = team.data?.personal.filter(person => person.activo && person.rol === 'jefe').length
+  const pending = useMemo(
+    () => applications.data?.solicitudes.filter(item => item.sucursal === branch.id && item.estado === 'pendiente'),
+    [applications.data, branch.id],
+  )
+  const { activeEmployees, activeManagers } = useMemo(() => {
+    let employees = 0
+    let managers = 0
+    for (const person of team.data?.personal ?? []) {
+      if (!person.activo) continue
+      if (person.rol === 'empleado') employees++
+      else if (person.rol === 'jefe') managers++
+    }
+    return { activeEmployees: employees, activeManagers: managers }
+  }, [team.data])
 
   function resolve(id: number, estado: 'aprobada' | 'rechazada') {
     void action.run(async () => {
@@ -168,6 +179,7 @@ export function HistoryDesk({ branches, userId }: { branches: StaffBranch[]; use
   const [filters, setFilters] = useState({ farmacia: '', desde: '', hasta: '', canal: '', estado: '' })
   const [offset, setOffset] = useState(0)
   const [receipt, setReceipt] = useState<Sale | null>(null)
+  const branchNames = useMemo(() => new Map(branches.map(branch => [branch.id, branch.nombre])), [branches])
   const history = useResource<SalesHistory>('/historial' + query({ ...filters, offset }), { scope: userId })
   return <section aria-label="Historial y reportes">
     <header className="commerce-desk-heading"><div><h2>Historial de ventas</h2><p>Compara el total vendido por sucursal en el periodo que elijas.</p></div></header>
@@ -203,7 +215,7 @@ export function HistoryDesk({ branches, userId }: { branches: StaffBranch[]; use
         {history.data.ventas.length > 0 && <div className="commerce-table-scroll" tabIndex={0} role="region" aria-label="Tabla de ventas">
           <table className="commerce-table"><thead><tr><th>Venta</th><th>Fecha</th><th>Sucursal</th><th>Canal</th><th>Empleado</th><th>Total</th><th>Comprobante</th></tr></thead>
             <tbody>{history.data.ventas.map(sale => <tr key={sale.id}>
-              <th scope="row">#{sale.id}</th><td>{dateLabel(sale.fecha)}</td><td>{branches.find(branch => branch.id === sale.farmacia)?.nombre ?? sale.farmacia}</td>
+              <th scope="row">#{sale.id}</th><td>{dateLabel(sale.fecha)}</td><td>{branchNames.get(sale.farmacia) ?? sale.farmacia}</td>
               <td>{sale.canal === 'online' ? 'Online' : 'Presencial'}</td><td>{sale.empleadoNombre ?? 'Sin registro'}</td>
               <td>{money(sale.totalCentavos)}{sale.revertida && <small> · Revertida</small>}</td>
               <td><Button variant="ghost" onClick={() => setReceipt(sale)}>Ver comprobante #{sale.id}</Button></td>

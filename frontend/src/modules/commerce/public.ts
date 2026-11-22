@@ -1,4 +1,5 @@
-export { CustomerLoginPage, StaffRequestPage } from './AccountPages'
-export { CustomerOrdersPage } from './CustomerOrdersPage'
-export { OperationsPage } from './OperationsPage'
-export { StorePage } from './StorePage'
+export const loadStorePage = () => import('./StorePage').then(module => ({ Component: module.StorePage }))
+export const loadCustomerLoginPage = () => import('./AccountPages').then(module => ({ Component: module.CustomerLoginPage }))
+export const loadStaffRequestPage = () => import('./AccountPages').then(module => ({ Component: module.StaffRequestPage }))
+export const loadCustomerOrdersPage = () => import('./CustomerOrdersPage').then(module => ({ Component: module.CustomerOrdersPage }))
+export const loadOperationsPage = () => import('./OperationsPage').then(module => ({ Component: module.OperationsPage }))

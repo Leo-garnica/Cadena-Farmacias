@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { apiRequest } from '../access/public'
 
 export interface Branch { id: number; nombre: string; ciudad: string | null; direccion: string | null }
@@ -116,8 +116,13 @@ export function useResource<T>(path: string | null, options: { public?: boolean;
     const controller = new AbortController()
     const { signal } = controller
     let timeout: number | undefined
+    function schedule() {
+      window.clearTimeout(timeout)
+      if (!poll || signal.aborted || document.visibilityState === 'hidden') return
+      timeout = window.setTimeout(() => void request(), poll)
+    }
     async function request() {
-      if (!path || !key) return
+      if (!path || !key || signal.aborted) return
       try {
         const data = anonymous ? await readPublic<T>(path, signal) : await apiRequest<T>(base + path, { signal })
         if (!signal.aborted) setSnapshot({ key, data })
@@ -128,10 +133,23 @@ export function useResource<T>(path: string | null, options: { public?: boolean;
           setSnapshot(previous => ({ key, data: poll && transient && previous?.key === key ? previous.data : undefined, error: message }))
         }
       }
-      if (poll && !signal.aborted) timeout = window.setTimeout(() => void request(), poll)
+      schedule()
     }
+    function handleVisibility() {
+      if (document.visibilityState === 'hidden') {
+        window.clearTimeout(timeout)
+      } else if (poll && !signal.aborted) {
+        window.clearTimeout(timeout)
+        void request()
+      }
+    }
+    if (poll) document.addEventListener('visibilitychange', handleVisibility)
     void request()
-    return () => { controller.abort(); window.clearTimeout(timeout) }
+    return () => {
+      controller.abort()
+      window.clearTimeout(timeout)
+      if (poll) document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [anonymous, key, path, poll, revision])
   const current = key && snapshot?.key === key ? snapshot : null
   return { data: current?.data, error: current?.error, loading: !!key && !current, refresh }
@@ -141,7 +159,7 @@ export function useAction() {
   const active = useRef(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  async function run(task: () => Promise<void>, conflict = 'Los datos cambiaron. Revisa la operación y vuelve a intentarlo.') {
+  const run = useCallback(async (task: () => Promise<void>, conflict = 'Los datos cambiaron. Revisa la operación y vuelve a intentarlo.') => {
     if (active.current) return
     active.current = true
     setBusy(true)
@@ -149,20 +167,21 @@ export function useAction() {
     try { await task() }
     catch (failure) { setError(apiMessage(failure, conflict)) }
     finally { active.current = false; setBusy(false) }
-  }
-  return { busy, error, run, clear: () => setError(null) }
+  }, [])
+  const clear = useCallback(() => setError(null), [])
+  return useMemo(() => ({ busy, error, run, clear }), [busy, error, run, clear])
 }
 
 export function useOperationId() {
   const last = useRef<{ signature: string; id: string } | null>(null)
-  return {
+  return useMemo(() => ({
     idFor(payload: unknown) {
       const signature = JSON.stringify(payload)
       if (last.current?.signature !== signature) last.current = { signature, id: crypto.randomUUID() }
       return last.current.id
     },
     finish() { last.current = null },
-  }
+  }), [])
 }
 
 // An ambiguous response can follow a successful commit. Retrying the exact body
@@ -170,10 +189,11 @@ export function useOperationId() {
 export function useCheckout<T, Payload extends object>(path: string) {
   const action = useAction()
   const [pending, setPending] = useState<(Payload & { operacionId: string }) | null>(null)
-  function confirm(payload: Payload | undefined, done: (data: T) => void, refresh: () => void) {
+  const { run } = action
+  const confirm = useCallback((payload: Payload | undefined, done: (data: T) => void, refresh: () => void) => {
     const request = pending ?? (payload && { ...payload, operacionId: crypto.randomUUID() })
     if (!request) return
-    void action.run(async () => {
+    void run(async () => {
       try {
         const response = await send<T>(path, request)
         setPending(null)
@@ -184,6 +204,6 @@ export function useCheckout<T, Payload extends object>(path: string) {
         throw failure
       } finally { refresh() }
     }, 'Cambió la disponibilidad o el precio. Revisa las cantidades y el total antes de confirmar.')
-  }
-  return { ...action, pending: pending !== null, confirm }
+  }, [path, pending, run])
+  return useMemo(() => ({ ...action, pending: pending !== null, confirm }), [action, pending, confirm])
 }
