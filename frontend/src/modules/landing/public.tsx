@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ArrowDown, ArrowRight, ArrowUp, Boxes, CalendarDays, PackageSearch } from 'lucide-react'
+import { ArrowDown, ArrowRight, ArrowUp, Boxes, CalendarDays, MapPin, PackageSearch, ShoppingBag, Truck } from 'lucide-react'
 import './landing.css'
 
 const topics = [
@@ -9,23 +9,36 @@ const topics = [
   { Icon: CalendarDays, title: 'Lotes', detail: 'Consulta el lote asociado y su fecha de vencimiento cuando estén disponibles.' },
 ]
 
-export function LandingPage({ brand, loginPath }: { brand: ReactNode; loginPath: string }) {
+const shopTopics = [
+  { Icon: MapPin, title: 'Elige una sucursal', detail: 'Consulta precios y disponibilidad antes de preparar tu carrito.' },
+  { Icon: ShoppingBag, title: 'Retira tu pedido', detail: 'Revisa el estado y dirígete a la farmacia cuando esté listo.' },
+  { Icon: Truck, title: 'Recibe tu compra', detail: 'Las zonas habilitadas muestran el costo de entrega antes del pago.' },
+]
+
+export function LandingPage({ brand, loginPath, commerce = false }: { brand: ReactNode; loginPath: string; commerce?: boolean }) {
   useEffect(() => { document.title = 'VitaFarma · Mostrador' }, [])
+  const staffLogin = loginPath + '?siguiente=%2Foperaciones'
 
   return <div className="mostrador" id="inicio">
     <a className="skip-link" href="#presentacion">Saltar al contenido</a>
     <header className="mostrador-header">
       <div className="mostrador-frame mostrador-masthead">
         {brand}
-        <nav aria-label="Portada"><a href="#consultas">Qué puedes consultar <ArrowDown size={15} aria-hidden="true" /></a></nav>
+        {commerce ? <nav aria-label="Accesos de VitaFarma" className="mostrador-access">
+          <Link to="/tienda/entrar">Mi cuenta</Link>
+          <Link to={staffLogin}>Iniciar sesión <span className="mostrador-staff-label"> · Personal</span></Link>
+          <Link to="/equipo/solicitar" className="mostrador-request">Solicitar ingreso</Link>
+        </nav> : <nav aria-label="Portada"><a href="#consultas">Qué puedes consultar <ArrowDown size={15} aria-hidden="true" /></a></nav>}
       </div>
     </header>
     <main id="presentacion" tabIndex={-1}>
       <div className="mostrador-frame mostrador-hero">
         <div className="mostrador-intro">
-          <h1>El inventario, desde el mostrador.</h1>
-          <p>Un espacio para el equipo de farmacia. Encuentra productos y revisa sus existencias y lotes por sucursal.</p>
-          <Link className="mostrador-enter" to={loginPath}>Acceso del personal <ArrowRight size={20} aria-hidden="true" /></Link>
+          <h1>{commerce ? 'Tu farmacia, más cerca.' : 'El inventario, desde el mostrador.'}</h1>
+          <p>{commerce ? 'Encuentra productos en tu sucursal, pide para retirar o consulta si puedes recibir tu compra en casa.' : 'Un espacio para el equipo de farmacia. Encuentra productos y revisa sus existencias y lotes por sucursal.'}</p>
+          <Link className="mostrador-enter" to={commerce ? '/tienda' : loginPath}>
+            {commerce ? 'Explorar la tienda' : 'Acceso del personal'} <ArrowRight size={20} aria-hidden="true" />
+          </Link>
         </div>
         <div className="mostrador-photo">
           <img src="/images/mostrador.jpg" alt="" fetchPriority="high" width="1200" height="900" />
@@ -34,11 +47,11 @@ export function LandingPage({ brand, loginPath }: { brand: ReactNode; loginPath:
       <section className="mostrador-guide" aria-labelledby="consultas">
         <div className="mostrador-frame mostrador-guide-layout">
           <div className="mostrador-guide-intro">
-            <h2 id="consultas" tabIndex={-1}>Qué puedes consultar</h2>
-            <p>Ingresa con tu cuenta de personal y selecciona la sucursal que necesitas revisar.</p>
+            <h2 id="consultas" tabIndex={-1}>{commerce ? 'Cómo comprar' : 'Qué puedes consultar'}</h2>
+            <p>{commerce ? 'Puedes recorrer el catálogo sin iniciar sesión. Elige cómo recibir tu pedido antes de confirmar.' : 'Ingresa con tu cuenta de personal y selecciona la sucursal que necesitas revisar.'}</p>
           </div>
           <dl className="mostrador-topics">
-            {topics.map(({ Icon, title, detail }) => <div className="mostrador-topic" key={title}>
+            {(commerce ? shopTopics : topics).map(({ Icon, title, detail }) => <div className="mostrador-topic" key={title}>
               <dt><Icon size={23} strokeWidth={1.6} aria-hidden="true" />{title}</dt>
               <dd>{detail}</dd>
             </div>)}

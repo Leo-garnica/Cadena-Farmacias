@@ -102,6 +102,20 @@ class SupabaseAuthRepository implements AuthRepository {
     throw new AccessError('unavailable')
   }
 
+  async register(email: string, password: string): Promise<AuthIdentity | null> {
+    const client = this.requireClient()
+    try {
+      const { data, error } = await client.auth.signUp({ email, password })
+      if (error?.status === 429) throw new AccessError('rate-limit')
+      if (error?.status && error.status < 500) throw new AccessError('registration')
+      if (error) throw new AccessError('unavailable')
+      return data.session ? identity(data.session.user) : null
+    } catch (error) {
+      if (error instanceof AccessError) throw error
+      throw new AccessError('unavailable')
+    }
+  }
+
   subscribe(listener: (userId: string | null) => void) {
     if (!this.client) return () => {}
     const { data } = this.client.auth.onAuthStateChange((_event, session) => listener(session?.user.id ?? null))

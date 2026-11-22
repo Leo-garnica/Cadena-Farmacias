@@ -123,17 +123,23 @@ interface HistoryFilters {
   from: string | null
   to: string | null
   channel: Channel | null
+  status: 'vigente' | 'revertida' | null
   first?: string
 }
 
 export async function history(db: PoolClient, filters: HistoryFilters) {
-  const { branches, from, to, channel, first } = filters
+  const { branches, from, to, channel, status, first } = filters
   const params = [branches, from, to, channel]
   const slice = `v.farmacia=ANY($1::integer[]) AND ($2::date IS NULL OR v.fecha >= ($2::date::timestamp AT TIME ZONE 'America/La_Paz'))
     AND ($3::date IS NULL OR v.fecha < (($3::date + 1)::timestamp AT TIME ZONE 'America/La_Paz'))
     AND ($4::text IS NULL OR v.canal=$4)`
-  const sales = (await db.query(`SELECT ${saleProjection} FROM commerce.ventas v WHERE ${slice}
-    ORDER BY v.fecha DESC, v.id DESC LIMIT $5 OFFSET $6`, [...params, pageSize, offset(first)])).rows
+  const sales = (await db.query(`SELECT ${saleProjection}, e.nombre_completo AS "empleadoNombre"
+    FROM commerce.ventas v JOIN public.venta a ON a.id_venta=v.id
+    LEFT JOIN public.empleado e ON e.id_empleado=a.id_empleado
+    WHERE ${slice} AND ($5::boolean IS NULL OR (v.revertida IS NOT NULL) = $5)
+    ORDER BY v.fecha DESC, v.id DESC LIMIT $6 OFFSET $7`, [
+    ...params, status === null ? null : status === 'revertida', pageSize, offset(first),
+  ])).rows
   const ranking = (await db.query(`SELECT f.id_farmacia AS farmacia, f.nombre,
     COALESCE(sum(v.total_centavos),0)::text AS "totalCentavos", COUNT(v.id)::int AS ventas,
     COALESCE(sum(u.cantidad),0)::text AS unidades

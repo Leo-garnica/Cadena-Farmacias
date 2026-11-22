@@ -75,8 +75,8 @@ export class CommerceController {
 
   @Get('historial')
   history(@CurrentIdentity() sub: string, @Query('farmacia') branch?: string, @Query('desde') from?: string,
-    @Query('hasta') to?: string, @Query('canal') channel?: string, @Query('offset') first?: string) {
-    return this.commerce.history(sub, branch, from, to, channel, first)
+    @Query('hasta') to?: string, @Query('canal') channel?: string, @Query('estado') status?: string, @Query('offset') first?: string) {
+    return this.commerce.history(sub, branch, from, to, channel, status, first)
   }
 
   @Get('movimientos')

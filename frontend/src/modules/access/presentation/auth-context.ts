@@ -13,6 +13,7 @@ export const AuthContext = createContext<{
   configured: boolean
   refresh(): Promise<void>
   signIn(email: string, password: string): Promise<void>
+  register(email: string, password: string): Promise<'session' | 'confirmation'>
   signOut(): Promise<void>
 } | null>(null)
 
@@ -26,6 +27,7 @@ export function accessErrorMessage(error: unknown): string {
   if (error instanceof AccessError) {
     if (error.code === 'configuration') return 'El acceso todavía no está configurado. Contacta a la persona responsable del sistema.'
     if (error.code === 'credentials') return 'No pudimos iniciar sesión. Revisa tu correo y contraseña y confirma que tu cuenta esté habilitada.'
+    if (error.code === 'registration') return 'No pudimos crear la cuenta. Revisa el correo y usa una contraseña de al menos ocho caracteres. Si ya tienes cuenta, inicia sesión.'
     if (error.code === 'rate-limit') return 'Se hicieron demasiados intentos. Espera unos minutos antes de volver a intentar.'
   }
   return 'No pudimos conectar con el servicio de acceso. Revisa tu conexión e inténtalo de nuevo.'

@@ -121,18 +121,20 @@ export class CommerceService {
     })
   }
 
-  history(sub: string, branch?: string, fromDate?: string, toDate?: string, channelName?: string, first?: string) {
+  history(sub: string, branch?: string, fromDate?: string, toDate?: string, channelName?: string, statusName?: string, first?: string) {
     const from = civilDate(fromDate)
     const to = civilDate(toDate)
     if (from && to && from > to) throw new BadRequestException()
     const channel = channelName || null
     if (channel !== null && channel !== 'online' && channel !== 'presencial') throw new BadRequestException()
+    const status = statusName || null
+    if (status !== null && status !== 'vigente' && status !== 'revertida') throw new BadRequestException()
     return this.database.transaction(async db => {
       const available = (await this.access.branches(db, sub)).filter(member => member.rol === 'supervisor').map(member => member.id)
       const requested = branch ? id(branch) : null
       if (!available.length || (requested !== null && !available.includes(requested))) throw new ForbiddenException()
       const branches = requested === null ? available : [requested]
-      return history(db, { branches, from, to, channel, first })
+      return history(db, { branches, from, to, channel, status, first })
     })
   }
 
