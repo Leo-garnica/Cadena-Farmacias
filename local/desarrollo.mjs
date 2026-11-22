@@ -7,23 +7,26 @@ import { parseEnv } from 'node:util'
 import concurrently from 'concurrently'
 
 const gestion = process.argv[2] === 'gestion'
+const commerce = process.argv[2] === 'comercio'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const practica = join(homedir(), '.vitafarma', 'practica-v1')
 const preparar = join(root, 'local', 'practica.mjs')
-for (const paso of gestion ? ['up', 'gestion'] : ['up']) {
-  const resultado = spawnSync(process.execPath, [preparar, paso], { cwd: root, stdio: 'inherit' })
+const pasos = commerce ? [['up', '--comercio'], ['comercio']] : gestion ? [['up'], ['gestion']] : [['up']]
+for (const paso of pasos) {
+  const resultado = spawnSync(process.execPath, [preparar, ...paso], { cwd: root, stdio: 'inherit' })
   if (resultado.status !== 0) process.exit(resultado.status ?? 1)
 }
 
 const leer = nombre => parseEnv(readFileSync(join(practica, nombre), 'utf8'))
-const api = leer(gestion ? 'backend.gestion.env.local' : 'backend.env.local')
-const web = leer('frontend.env.local')
+const api = leer(commerce ? 'backend.comercio.env.local' : gestion ? 'backend.gestion.env.local' : 'backend.env.local')
+const web = leer(commerce ? 'frontend.comercio.env.local' : 'frontend.env.local')
 if (api.SUPABASE_URL !== 'http://127.0.0.1:55433' || api.SUPABASE_URL !== web.VITE_SUPABASE_URL ||
     new URL(api.DATABASE_URL).host !== '127.0.0.1:55432') {
   throw new Error('El entorno de práctica requiere Auth y PostgreSQL en los puertos locales documentados.')
 }
 // Do not pass private database credentials to the Vite process or inherit a remote writer.
-for (const clave of ['DATABASE_URL', 'SUPABASE_URL', 'VITAFARMA_ACCESS_MAP', 'VITAFARMA_PRACTICA_WRITE_URL']) {
+for (const clave of ['DATABASE_URL', 'SUPABASE_URL', 'VITAFARMA_ACCESS_MAP', 'VITAFARMA_PRACTICA_WRITE_URL',
+  'VITAFARMA_COMERCIO_LOCAL', 'VITE_VITAFARMA_COMERCIO']) {
   delete process.env[clave]
 }
 try {

@@ -1,4 +1,4 @@
-import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, randomBytes, randomUUID, sign, verify } from 'node:crypto'
+import { createHash, createHmac, createPrivateKey, createPublicKey, generateKeyPairSync, randomBytes, randomUUID, sign, verify } from 'node:crypto'
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { prepareManagement } from './gestion.mjs'
 import { homedir } from 'node:os'
@@ -16,6 +16,17 @@ const accounts = [
   { id: '00000000-0000-4000-8000-000000000001', email: 'operador@vitafarma.test', perfil: 'consulta', sucursales: [1] },
   { id: '00000000-0000-4000-8000-000000000002', email: 'supervisor@vitafarma.test', perfil: 'responsable', sucursales: [1, 2] },
   { id: '00000000-0000-4000-8000-000000000003', email: 'sinacceso@vitafarma.test' },
+]
+const commerceAccounts = [
+  { id: '00000000-0000-4000-8000-000000000004', email: 'jefe.centro@vitafarma.test' },
+  { id: '00000000-0000-4000-8000-000000000005', email: 'caja.centro@vitafarma.test' },
+  { id: '00000000-0000-4000-8000-000000000006', email: 'cliente@vitafarma.test' },
+  { id: '00000000-0000-4000-8000-000000000007', email: 'solicitante@vitafarma.test' },
+  { id: '00000000-0000-4000-8000-000000000008', email: 'supervisor.sucre@vitafarma.test' },
+  { id: '00000000-0000-4000-8000-000000000009', email: 'jefe.norte@vitafarma.test' },
+  { id: '00000000-0000-4000-8000-000000000010', email: 'caja.norte@vitafarma.test' },
+  { id: '00000000-0000-4000-8000-000000000011', email: 'jefe.sur@vitafarma.test' },
+  { id: '00000000-0000-4000-8000-000000000012', email: 'caja.sur@vitafarma.test' },
 ]
 
 let localEngine
@@ -76,7 +87,7 @@ function schemaSql() {
   return ddl.join('\n')
 }
 
-function prepare(config) {
+function prepare(config, commerce) {
   const grants = Object.fromEntries(accounts.filter(account => account.perfil)
     .map(({ id, perfil, sucursales }) => [id, { perfil, sucursales }]))
   const database = 'postgresql://vf_lector:' + config.readPassword + '@127.0.0.1:55432/vitafarma_practica'
@@ -84,8 +95,14 @@ function prepare(config) {
     'DATABASE_URL=' + database, 'SUPABASE_URL=' + url,
     "VITAFARMA_ACCESS_MAP='" + JSON.stringify(grants) + "'", '',
   ].join('\n'))
-  secretFile('frontend.env.local', 'VITE_SUPABASE_URL=' + url + '\nVITE_SUPABASE_PUBLISHABLE_KEY=' + config.publicKey + '\n')
-  secretFile('cuentas.json', JSON.stringify(config.passwords, null, 2))
+  const frontend = 'VITE_SUPABASE_URL=' + url + '\nVITE_SUPABASE_PUBLISHABLE_KEY=' + config.publicKey + '\n'
+  secretFile('frontend.env.local', frontend)
+  secretFile('cuentas.json', JSON.stringify(Object.fromEntries(accounts.map(({ email }) => [email, config.passwords[email]])), null, 2))
+  if (commerce) {
+    secretFile('frontend.comercio.env.local', frontend + 'VITE_VITAFARMA_COMERCIO=1\n')
+    const emails = [accounts[1], ...commerceAccounts].map(({ email }) => [email, config.passwords[email]])
+    secretFile('cuentas.comercio.json', JSON.stringify(Object.fromEntries(emails), null, 2))
+  }
   secretFile('init.sql', [
     '\\getenv read_password VF_PRACTICA_READ', '\\getenv auth_password VF_PRACTICA_AUTH_DB', 'BEGIN;', schemaSql(),
     'REVOKE ALL ON DATABASE vitafarma_practica FROM PUBLIC;',
@@ -132,9 +149,9 @@ async function request(config, path, { method = 'GET', body, bearer } = {}) {
   return fetch(issuer + path, { method, headers, body: body && JSON.stringify(body), redirect: 'error', signal: AbortSignal.timeout(10000) })
 }
 
-async function provisionAccounts(config) {
+async function provisionAccounts(config, identities) {
   const admin = adminToken(config)
-  for (const account of accounts) {
+  for (const account of identities) {
     const existing = await request(config, '/admin/users/' + account.id, { bearer: admin })
     if (existing.ok && (await existing.json()).email === account.email) continue
     if (existing.status !== 404) throw new Error('No se pudo comprobar la identidad local (' + existing.status + ').')
@@ -186,15 +203,21 @@ async function review(config) {
 
 async function main() {
   const command = process.argv[2]
-  if (!['up', 'verify', 'stop', 'gestion'].includes(command)) throw new Error('Uso: node local/practica.mjs up | verify | stop | gestion')
+  if (!['up', 'verify', 'stop', 'gestion', 'comercio'].includes(command)) throw new Error('Uso: node local/practica.mjs up | verify | stop | gestion | comercio')
+  const commerce = command === 'comercio' || process.argv[3] === '--comercio'
   checkDocker()
   const config = loadConfig(command)
-  if (command === 'gestion') return prepareManagement({ config, compose, schemaSql, secretFile, state })
+  if (command === 'gestion' || command === 'comercio') return prepareManagement({ config, compose, schemaSql, secretFile, state, commerce })
   if (command === 'stop') return compose(config, ['stop'])
   if (command === 'up') {
-    prepare(config)
-    compose(config, ['up', '-d', '--wait', '--wait-timeout', '120'])
-    await provisionAccounts(config)
+    if (commerce) {
+      for (const { email } of commerceAccounts) {
+        config.passwords[email] ??= createHmac('sha256', config.ownerPassword).update('vitafarma-comercio:' + email).digest('base64url')
+      }
+    }
+    prepare(config, commerce)
+    compose(config, ['up', '-d', '--wait', '--wait-timeout', '120'], { env: { VF_PRACTICA_DISABLE_SIGNUP: commerce ? 'false' : 'true' } })
+    await provisionAccounts(config, commerce ? [...accounts, ...commerceAccounts] : accounts)
   }
   await review(config)
   console.log('Configuración y cuentas de práctica en ' + state)

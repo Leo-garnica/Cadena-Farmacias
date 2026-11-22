@@ -2,16 +2,24 @@ import { createParamDecorator, ForbiddenException, Inject, Injectable, ServiceUn
 import { Reflector } from '@nestjs/core'
 import type { AccessGrant } from '@vitafarma/contracts/common'
 import { createRemoteJWKSet, errors, jwtVerify } from 'jose'
+import { localCommerceWriter } from './local-commerce.js'
 
 const publicRoute = Symbol('public route')
+const verifiedIdentityRoute = Symbol('verified commerce identity')
 export const PublicEndpoint = () => SetMetadata(publicRoute, true)
+export const VerifiedIdentity = () => SetMetadata(verifiedIdentityRoute, true)
 export type { AccessGrant } from '@vitafarma/contracts/common'
 export interface AccessRequest {
   headers: { authorization?: string }
   access: AccessGrant
+  identity?: { sub: string; email: string | null }
 }
 export const CurrentAccess = createParamDecorator((_data: unknown, ctx: ExecutionContext) =>
   ctx.switchToHttp().getRequest<AccessRequest>().access)
+export const CurrentIdentity = createParamDecorator((_data: unknown, ctx: ExecutionContext) =>
+  ctx.switchToHttp().getRequest<AccessRequest>().identity?.sub)
+export const CurrentIdentityEmail = createParamDecorator((_data: unknown, ctx: ExecutionContext) =>
+  ctx.switchToHttp().getRequest<AccessRequest>().identity?.email)
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu
 
@@ -47,13 +55,16 @@ export class AccessGuard implements CanActivate {
   constructor(@Inject(Reflector) private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext) {
-    if (this.reflector.getAllAndOverride<boolean>(publicRoute, [context.getHandler(), context.getClass()])) return true
+    const targets = [context.getHandler(), context.getClass()]
+    if (this.reflector.getAllAndOverride<boolean>(publicRoute, targets)) return true
+    const commerceIdentity = this.reflector.getAllAndOverride<boolean>(verifiedIdentityRoute, targets)
+    if (commerceIdentity && !localCommerceWriter(process.env)) throw new ServiceUnavailableException()
     const request = context.switchToHttp().getRequest<AccessRequest>()
     const bearer = /^Bearer ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i.exec(request.headers.authorization ?? '')?.[1]
     if (!bearer || bearer.length > 8192) throw new UnauthorizedException()
     if (!this.auth) throw new ServiceUnavailableException()
     const { issuer, jwks, grants } = this.auth
-    let subject: string
+    let identity: NonNullable<AccessRequest['identity']>
     try {
       const { payload } = await jwtVerify(bearer, jwks, {
         algorithms: ['ES256', 'RS256'], issuer, audience: 'authenticated', requiredClaims: ['exp', 'sub'],
@@ -61,7 +72,7 @@ export class AccessGuard implements CanActivate {
       if (typeof payload.sub !== 'string' || !uuid.test(payload.sub) || payload.role !== 'authenticated' || payload.is_anonymous === true) {
         throw new UnauthorizedException()
       }
-      subject = payload.sub
+      identity = { sub: payload.sub, email: typeof payload.email === 'string' ? payload.email : null }
     } catch (error) {
       if (error instanceof UnauthorizedException) throw error
       if (error instanceof errors.JWTExpired || error instanceof errors.JWTClaimValidationFailed
@@ -69,7 +80,9 @@ export class AccessGuard implements CanActivate {
         || error instanceof errors.JWSSignatureVerificationFailed || error instanceof errors.JWKSNoMatchingKey) throw new UnauthorizedException()
       throw new ServiceUnavailableException()
     }
-    const grant = grants.get(subject)
+    request.identity = identity
+    if (commerceIdentity) return true
+    const grant = grants.get(identity.sub)
     if (!grant) throw new ForbiddenException()
     request.access = grant
     return true
