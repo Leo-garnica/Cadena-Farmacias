@@ -18,8 +18,9 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [
-    { name: 'chromium', testIgnore: '**/access-config.spec.ts', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } } },
+    { name: 'chromium', testIgnore: ['**/access-config.spec.ts', '**/commerce.spec.ts'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } } },
     { name: 'missing-auth-config', testMatch: '**/access-config.spec.ts', use: { ...devices['Desktop Chrome'], baseURL: 'http://127.0.0.1:5175' } },
+    { name: 'commerce', testMatch: '**/commerce.spec.ts', use: { ...devices['Desktop Chrome'], baseURL: 'http://127.0.0.1:5176', viewport: { width: 1280, height: 900 } } },
   ],
   // Isolated servers always override .env.local; tests never use real project keys.
   webServer: [
@@ -30,6 +31,10 @@ export default defineConfig({
     {
       command: 'npm run dev -- --port 5175', url: 'http://127.0.0.1:5175', reuseExistingServer: false, timeout: 60_000,
       env: { VITE_SUPABASE_URL: '', VITE_SUPABASE_PUBLISHABLE_KEY: '' },
+    },
+    {
+      command: 'npm run dev -- --port 5176', url: 'http://127.0.0.1:5176', reuseExistingServer: false, timeout: 60_000,
+      env: { VITE_SUPABASE_URL: 'https://auth.vitafarma.test', VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_local-tests-only', VITE_VITAFARMA_COMERCIO: '1' },
     },
   ],
 })
