@@ -1,27 +1,37 @@
 import { createBrowserRouter } from 'react-router'
 import { Brand } from './Brand'
 import { InitialLoading, NotFound } from './RouteStates'
-import { LandingPage } from '../modules/landing/public'
 import { LOGIN_PATH } from '../shared/lib/paths'
 
+const session = () => import('./SessionRoutes')
 const workspace = () => import('./AccessRoutes')
 const loaders = () => import('./workspaceLoaders')
 const commerce = () => import('../modules/commerce/public')
 const commerceEnabled = import.meta.env.VITE_VITAFARMA_COMERCIO === '1'
 
+const loadLanding = async () => {
+  const { LandingPage } = await import('../modules/landing/public')
+  return {
+    Component: function PublicLanding() {
+      return <LandingPage brand={<Brand />} loginPath={LOGIN_PATH} />
+    },
+  }
+}
+
 export const router = createBrowserRouter([
-  { path: '/', element: <LandingPage brand={<Brand />} loginPath={LOGIN_PATH} commerce={commerceEnabled} /> },
+  ...(!commerceEnabled ? [{ path: '/', lazy: loadLanding, HydrateFallback: InitialLoading }] : []),
   {
-    lazy: async () => ({ Component: (await workspace()).SessionLayout }),
+    lazy: async () => ({ Component: (await session()).SessionLayout }),
     HydrateFallback: InitialLoading,
     children: [
-      { path: LOGIN_PATH, lazy: async () => ({ Component: (await workspace()).LoginRoute }) },
+      { path: LOGIN_PATH, lazy: async () => ({ Component: (await session()).LoginRoute }) },
       ...(commerceEnabled ? [
-        { path: '/tienda', lazy: async () => ({ Component: (await commerce()).StorePage }) },
-        { path: '/tienda/entrar', lazy: async () => ({ Component: (await commerce()).CustomerLoginPage }) },
-        { path: '/tienda/pedidos', lazy: async () => ({ Component: (await commerce()).CustomerOrdersPage }) },
-        { path: '/equipo/solicitar', lazy: async () => ({ Component: (await commerce()).StaffRequestPage }) },
-        { path: '/operaciones', lazy: async () => ({ Component: (await commerce()).OperationsPage }) },
+        { path: '/', lazy: async () => (await commerce()).loadStorePage() },
+        { path: '/tienda', lazy: async () => (await commerce()).loadStorePage() },
+        { path: '/tienda/entrar', lazy: async () => (await commerce()).loadCustomerLoginPage() },
+        { path: '/tienda/pedidos', lazy: async () => (await commerce()).loadCustomerOrdersPage() },
+        { path: '/equipo/solicitar', lazy: async () => (await commerce()).loadStaffRequestPage() },
+        { path: '/operaciones', lazy: async () => (await commerce()).loadOperationsPage() },
       ] : []),
       {
         id: 'app',

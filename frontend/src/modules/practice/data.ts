@@ -16,7 +16,8 @@ export type Row = Record<string, string | number | null>
 export interface Entries<T> { filas: T[]; total: number }
 export type Option = { id: number; nombre: string | null }
 export const pageSize = 30
-export const money = (value: number | string | null) => value == null ? 'Sin registrar' : new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB' }).format(Number(value))
+const bobFormat = new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB' })
+export const money = (value: number | string | null) => value == null ? 'Sin registrar' : bobFormat.format(Number(value))
 export function civilDate(value: string) {
   const [year, month, day] = value.slice(0, 10).split('-')
   return day && month && year ? `${day}/${month}/${year}` : value

@@ -65,19 +65,33 @@ async function reserved(db: PoolClient, farmacia: number, codigo: number, exclud
 }
 
 export async function lockInventory(db: PoolClient, farmacia: number, items: Item[], exclude?: number): Promise<Line[]> {
-  const lines: Line[] = []
-  for (const item of items) {
-    const { rows } = await db.query(`SELECT s.cantidad, s.id_lote AS lote, COALESCE(p.nombre, 'Producto ' || p.codigo_producto) AS nombre,
-      ${price} AS precio, ${sellable} AS vendible FROM public.stock s JOIN public.producto p USING (codigo_producto)
-      LEFT JOIN public.lote l ON l.id_lote=s.id_lote
-      WHERE s.id_farmacia=$1 AND s.codigo_producto=$2 AND p.precio_venta > 0
-      FOR UPDATE OF s FOR SHARE OF p`, [farmacia, item.codigo])
-    const row = rows[0]
+  const codes = items.map(item => item.codigo)
+  const { rows } = await db.query<{
+    codigo: number; cantidad: number | null; lote: number | null; nombre: string; precio: string; vendible: boolean
+  }>(`SELECT s.codigo_producto AS codigo, s.cantidad, s.id_lote AS lote,
+    COALESCE(p.nombre, 'Producto ' || p.codigo_producto) AS nombre,
+    ${price} AS precio, ${sellable} AS vendible
+    FROM public.stock s JOIN public.producto p USING (codigo_producto)
+    LEFT JOIN public.lote l ON l.id_lote=s.id_lote
+    WHERE s.id_farmacia=$1 AND s.codigo_producto = ANY($2::integer[]) AND p.precio_venta > 0
+    ORDER BY s.codigo_producto
+    FOR UPDATE OF s FOR SHARE OF p`, [farmacia, codes])
+  if (rows.length !== items.length) throw new ConflictException()
+  // Read active reservations in a separate statement after all stock locks are acquired so READ COMMITTED sees newly committed holds.
+  const reservedRows = (await db.query<{ codigo: number; cantidad: number }>(`
+    SELECT i.codigo, COALESCE(sum(i.cantidad), 0)::integer AS cantidad
+    FROM commerce.pedidos p JOIN commerce.pedido_lineas i ON i.pedido=p.id
+    WHERE p.farmacia=$1 AND i.codigo = ANY($2::integer[]) AND p.estado IN ${activeStates} AND p.vence > clock_timestamp()
+      AND ($3::integer IS NULL OR p.id <> $3::integer)
+    GROUP BY i.codigo`, [farmacia, codes, exclude ?? null])).rows
+  const reservedByCode = new Map(reservedRows.map(row => [row.codigo, row.cantidad]))
+  const stockByCode = new Map(rows.map(row => [row.codigo, row]))
+  return items.map(item => {
+    const row = stockByCode.get(item.codigo)
     if (!row?.vendible || row.cantidad === null ||
-        row.cantidad - await reserved(db, farmacia, item.codigo, exclude) < item.cantidad) throw new ConflictException()
-    lines.push({ ...item, nombre: row.nombre, precioCentavos: Number(row.precio), lote: row.lote })
-  }
-  return lines
+        row.cantidad - (reservedByCode.get(item.codigo) ?? 0) < item.cantidad) throw new ConflictException()
+    return { ...item, nombre: row.nombre, precioCentavos: Number(row.precio), lote: row.lote }
+  })
 }
 
 export async function stockMovements(db: PoolClient, farmacia: number, first?: string) {

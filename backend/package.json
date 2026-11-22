@@ -12,7 +12,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --max-warnings 0",
-    "test": "npm run build && node --test test/http.test.mjs test/inventory.test.mjs"
+    "test": "npm run build && node --test test/http.test.mjs test/inventory.test.mjs test/commerce.test.mjs"
   },
   "dependencies": {
     "@nestjs/common": "12.3.2",

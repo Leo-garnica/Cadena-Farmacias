@@ -41,7 +41,10 @@ export function LandingPage({ brand, loginPath, commerce = false }: { brand: Rea
           </Link>
         </div>
         <div className="mostrador-photo">
-          <img src="/images/mostrador.jpg" alt="" fetchPriority="high" width="1200" height="900" />
+          <picture>
+            <source srcSet="/images/mostrador.webp" type="image/webp" />
+            <img src="/images/mostrador.jpg" alt="" fetchPriority="high" decoding="async" width="1448" height="1086" />
+          </picture>
         </div>
       </div>
       <section className="mostrador-guide" aria-labelledby="consultas">

@@ -49,6 +49,8 @@ test('liveness, database readiness and cache controls have separate meanings', a
     const r = await get(route)
     assert.equal(r.headers.get('cache-control'), 'no-store')
     assert.equal(r.headers.get('x-content-type-options'), 'nosniff')
+    assert.equal(r.headers.get('x-powered-by'), null)
+    assert.equal(r.headers.get('etag'), null)
     await r.arrayBuffer()
   }
 })

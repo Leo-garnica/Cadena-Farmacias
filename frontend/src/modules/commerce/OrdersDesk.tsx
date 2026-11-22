@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { Inbox } from 'lucide-react'
 import { Button } from '../../shared/ui/Button'
 import { query, send, useAction, useResource, type Order, type OrderAction, type StaffMember, type StaffRole } from './api'
@@ -79,10 +79,17 @@ export function OrdersDesk({ branch, userId, staffRole }: { branch: number; user
   const [offset, setOffset] = useState(0)
   const [outgoing, setOutgoing] = useState(false)
   const orders = useResource<Order[]>('/cola' + query({ farmacia: branch, offset, finalizados: outgoing ? 1 : undefined }), { scope: userId, poll: 5000 })
-  const [seen, setSeen] = useState<number[]>([])
-  const feed = orders.data ?? []
-  const newest = feed.filter(order => order.estado === 'confirmado' && !seen.includes(order.id)).length
-  const visible = feed.filter(order => (!ownOnly || order.asignado === userId) && (!search || String(order.id).includes(search)))
+  const [seen, setSeen] = useState<Set<number>>(() => new Set())
+  const feed = orders.data
+  const newest = useMemo(
+    () => (feed ?? []).filter(order => order.estado === 'confirmado' && !seen.has(order.id)).length,
+    [feed, seen],
+  )
+  const visible = useMemo(
+    () => (feed ?? []).filter(order => (!ownOnly || order.asignado === userId) && (!search || String(order.id).includes(search))),
+    [feed, ownOnly, userId, search],
+  )
+  const feedLength = feed?.length ?? 0
   return <section aria-label="Bandeja de pedidos">
     <header className="commerce-desk-heading">
       <div><h2>Pedidos de la sucursal</h2><p>Revisa los pedidos más antiguos y toma el que vas a preparar.</p></div>
@@ -90,7 +97,11 @@ export function OrdersDesk({ branch, userId, staffRole }: { branch: number; user
     </header>
     {newest > 0 && <Message><span className="commerce-inbox"><Inbox size={18} aria-hidden />
       {newest === 1 ? '1 pedido pendiente de tomar' : `${newest} pedidos pendientes de tomar`}
-      <button className="commerce-text-button" onClick={() => setSeen(previous => [...previous, ...feed.filter(order => order.estado === 'confirmado').map(order => order.id)])}>Marcar como visto</button>
+      <button className="commerce-text-button" onClick={() => setSeen(previous => {
+        const next = new Set(previous)
+        for (const order of feed ?? []) if (order.estado === 'confirmado') next.add(order.id)
+        return next
+      })}>Marcar como visto</button>
     </span></Message>}
     <div className="commerce-inline commerce-list-filters">
       <label>Buscar número de pedido<input type="search" value={search} onChange={event => setSearch(event.target.value.trim())} /></label>
@@ -105,9 +116,9 @@ export function OrdersDesk({ branch, userId, staffRole }: { branch: number; user
     <div className="commerce-order-grid">
       {visible.map(order => <WorkOrder key={order.id} order={order} userId={userId} staffRole={staffRole} refresh={orders.refresh} />)}
     </div>
-    {(offset > 0 || feed.length >= 60) && <div className="commerce-pagination">
+    {(offset > 0 || feedLength >= 60) && <div className="commerce-pagination">
       <Button variant="secondary" disabled={!offset} onClick={() => setOffset(value => Math.max(0, value - 60))}>Anterior</Button>
-      <Button variant="secondary" disabled={feed.length < 60} onClick={() => setOffset(value => value + 60)}>Siguiente</Button>
+      <Button variant="secondary" disabled={feedLength < 60} onClick={() => setOffset(value => value + 60)}>Siguiente</Button>
     </div>}
   </section>
 }

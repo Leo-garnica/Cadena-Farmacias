@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { ReceiptText, Search } from 'lucide-react'
 import { Button } from '../../shared/ui/Button'
 import { money, query, send, useAction, useCheckout, useResource, type Line, type Product, type Sale } from './api'
@@ -23,13 +23,17 @@ export function CashDesk({ branch, userId }: { branch: number; userId: string })
   const creation = useAction()
   const products = useResource<Product[]>('/catalogo' + query({ farmacia: branch, q: productSearch, offset }), { public: true, poll: 10000 })
   const clients = useResource<Client[]>(clientSearch ? '/caja/clientes' + query({ farmacia: branch, q: clientSearch }) : null, { scope: userId })
-  const latest = new Map(products.data?.map(product => [product.codigo, product]))
-  const reviewed = lines.map(line => ({ ...line, ...latest.get(line.codigo) }))
-  const invalid = reviewed.some(line => !Number.isInteger(line.cantidad) || line.cantidad > Math.min(99, line.disponible) || line.cantidad < 1)
-  const total = reviewed.reduce((sum, line) => sum + line.precioCentavos * line.cantidad, 0)
+  const latest = useMemo(() => new Map(products.data?.map(product => [product.codigo, product])), [products.data])
+  const lineQuantities = useMemo(() => new Map(lines.map(line => [line.codigo, line.cantidad])), [lines])
+  const reviewed = useMemo(() => lines.map(line => ({ ...line, ...latest.get(line.codigo) })), [lines, latest])
+  const invalid = useMemo(
+    () => reviewed.some(line => !Number.isInteger(line.cantidad) || line.cantidad > Math.min(99, line.disponible) || line.cantidad < 1),
+    [reviewed],
+  )
+  const total = useMemo(() => reviewed.reduce((sum, line) => sum + line.precioCentavos * line.cantidad, 0), [reviewed])
 
   function add(product: Product) {
-    const quantity = lines.find(line => line.codigo === product.codigo)?.cantidad ?? 0
+    const quantity = lineQuantities.get(product.codigo) ?? 0
     if (!product.disponible || quantity >= product.disponible || quantity >= 99 || (!quantity && lines.length >= 50)) return
     setLines(previous => quantity ? previous.map(line => line.codigo === product.codigo ? { ...product, cantidad: quantity + 1 } : line) : [...previous, { ...product, cantidad: 1 }])
     purchase.clear()
@@ -84,7 +88,7 @@ export function CashDesk({ branch, userId }: { branch: number; userId: string })
         <ul className="commerce-lines">
           {products.data?.map(product => <li key={product.codigo}>
             <div><strong>{product.nombre}</strong><small>{money(product.precioCentavos)} · {product.disponible} disponibles</small></div>
-            <Button variant="secondary" disabled={locked || !product.disponible || (lines.find(line => line.codigo === product.codigo)?.cantidad ?? 0) >= Math.min(99, product.disponible)} onClick={() => add(product)} aria-label={`Agregar ${product.nombre}`}>Agregar</Button>
+            <Button variant="secondary" disabled={locked || !product.disponible || (lineQuantities.get(product.codigo) ?? 0) >= Math.min(99, product.disponible)} onClick={() => add(product)} aria-label={`Agregar ${product.nombre}`}>Agregar</Button>
           </li>)}
         </ul>
         {(offset > 0 || (products.data?.length ?? 0) >= 60) && <div className="commerce-pagination">

@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useMemo, useRef, useState, type FormEvent } from 'react'
 import { ArrowLeft, Check, Plus, Search, Trash2 } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { apiRequest } from '../access/public'
@@ -8,12 +8,12 @@ import './practice.css'
 
 type Editor = { action: 'create' } | { action: 'edit' | 'delete'; row: Row }
 
-function labelFor(resource: Resource, key: string) {
-  return resource.campos.find(field => field.clave === key)?.etiqueta ?? (key === resource.id ? 'ID' : key === 'total_cobrar' ? 'Total a cobrar' : key.replaceAll('_', ' '))
+function labelFor(fieldsByKey: ReadonlyMap<string, Field>, resource: Resource, key: string) {
+  return fieldsByKey.get(key)?.etiqueta ?? (key === resource.id ? 'ID' : key === 'total_cobrar' ? 'Total a cobrar' : key.replaceAll('_', ' '))
 }
-function display(resource: Resource, key: string, value: Row[string]) {
+function display(fieldsByKey: ReadonlyMap<string, Field>, key: string, value: Row[string]) {
   if (value === null || value === '') return 'Sin registrar'
-  const field = resource.campos.find(f => f.clave === key)
+  const field = fieldsByKey.get(key)
   if (field?.tipo === 'fecha') return civilDate(String(value))
   if (field?.tipo === 'importe' || key === 'total_cobrar') return key === 'porcentaje' ? `${value} %` : money(value)
   return String(value)
@@ -77,6 +77,7 @@ function Records({ resource }: { resource: Resource }) {
   const [term, setTerm] = useState('')
   const [offset, setOffset] = useState(0)
   const [notice, setNotice] = useState('')
+  const fieldsByKey = useMemo(() => new Map(resource.campos.map(field => [field.clave, field])), [resource.campos])
   const result = useQuery<Entries<Row>>(`/practica/registros/${resource.clave}?${new URLSearchParams({ q: term, offset: String(offset) })}`)
   function start(next: Editor) { setNotice(''); setEditor(next) }
   if (editor) return <RecordEditor resource={resource} editor={editor} cancel={() => setEditor(null)} finish={message => {
@@ -90,8 +91,8 @@ function Records({ resource }: { resource: Resource }) {
     {notice && <p className="practice-success" role="status">{notice}</p>}
     {result.error ? <Status message={result.error} retry={result.refresh} /> : result.loading ? <Status message="Cargando registros…" /> : result.data && <>
       {result.data.filas.length ? <div className="practice-table-wrap" role="region" aria-label={`Registros de ${resource.titulo}`} tabIndex={0}>
-        <table><thead><tr><th scope="col">Acciones</th>{resource.columnas.map(key => <th scope="col" key={key}>{labelFor(resource,key)}</th>)}</tr></thead>
-          <tbody>{result.data.filas.map(row => <tr key={row[resource.id]}><td className="practice-row-actions"><button type="button" className="practice-text" aria-label={`Editar registro ${row[resource.id]}`} onClick={() => start({ action: 'edit', row })}>Editar</button><button type="button" className="practice-text is-danger-text" aria-label={`Eliminar registro ${row[resource.id]}`} onClick={() => start({ action: 'delete', row })}>Eliminar</button></td>{resource.columnas.map(key => <td key={key}>{display(resource,key,row[key])}</td>)}</tr>)}</tbody>
+        <table><thead><tr><th scope="col">Acciones</th>{resource.columnas.map(key => <th scope="col" key={key}>{labelFor(fieldsByKey, resource, key)}</th>)}</tr></thead>
+          <tbody>{result.data.filas.map(row => <tr key={row[resource.id]}><td className="practice-row-actions"><button type="button" className="practice-text" aria-label={`Editar registro ${row[resource.id]}`} onClick={() => start({ action: 'edit', row })}>Editar</button><button type="button" className="practice-text is-danger-text" aria-label={`Eliminar registro ${row[resource.id]}`} onClick={() => start({ action: 'delete', row })}>Eliminar</button></td>{resource.columnas.map(key => <td key={key}>{display(fieldsByKey, key, row[key])}</td>)}</tr>)}</tbody>
         </table></div> : <div className="practice-empty"><Search size={20} aria-hidden="true" /><p>{term ? 'No hay coincidencias con esta búsqueda.' : 'Todavía no hay registros.'}</p></div>}
       <Pager offset={offset} length={result.data.filas.length} total={result.data.total} change={setOffset} />
     </>}

@@ -52,14 +52,16 @@ function Credentials({ staff = false }: { staff?: boolean }) {
 export function CustomerLoginPage() {
   const auth = useAuth()
   const [params] = useSearchParams()
-  const destination = params.get('volver') === 'pedidos' ? customerOrdersPath : storePath
+  const returningTo = params.get('volver')
+  const destination = returningTo === 'pedidos' ? customerOrdersPath
+    : returningTo === 'carrito' ? storePath + '?carrito=1' : storePath
   const identity = useResource<Identity>(auth.state.user ? '/identidad' : null, { scope: auth.state.user?.id })
   const action = useAction()
   useEffect(() => { document.title = 'Cuenta de la tienda · VitaFarma' }, [])
 
   if (identity.data?.tipo === 'cliente') return <Navigate to={destination} replace />
   return <CommerceFrame area="Cuenta de la tienda" actions={auth.state.user && <SignOut />}>
-    <Back to={storePath}>Volver a la tienda</Back>
+    <Back to={returningTo === 'carrito' ? destination : storePath}>{returningTo === 'carrito' ? 'Volver al carrito' : 'Volver a la tienda'}</Back>
     <Heading title="Tu cuenta VitaFarma" />
     {!auth.state.ready || identity.loading ? <Message>Estamos comprobando tu cuenta…</Message> : !auth.state.user ? <Credentials />
       : identity.error ? <Message type="error" retry={identity.refresh}>{identity.error}</Message>
