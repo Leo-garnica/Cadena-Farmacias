@@ -2,7 +2,7 @@ import { randomInt } from 'node:crypto'
 import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common'
 import type { PoolClient } from 'pg'
 import type { CommerceAccess } from '../../staff/public.js'
-import { registerSale, returnSale, sale } from './sales.js'
+import { registerSale, returnSale, sale, salesByIds } from './sales.js'
 import { deliveryFee, lockInventory, lockOperation } from './stock.js'
 import { amount, offset, pageSize, type Item, type Line } from './validation.js'
 
@@ -17,7 +17,7 @@ const projection = `p.id, p.farmacia, p.modalidad, p.estado, p.fecha, p.vence, p
     'cantidad', i.cantidad, 'precioCentavos', i.precio_centavos) ORDER BY i.codigo)
     FROM commerce.pedido_lineas i WHERE i.pedido=p.id) AS items`
 
-async function orderView(db: PoolClient, sub: string, row: Record<string, unknown>) {
+function formatOrder(sub: string, row: Record<string, unknown>, saleRecord?: Record<string, unknown>) {
   const { cliente_sub, direccion, codigo_retiro, venta, vence, asignado, ...data } = row
   const owner = sub === cliente_sub
   return {
@@ -25,8 +25,20 @@ async function orderView(db: PoolClient, sub: string, row: Record<string, unknow
     ...(vence ? { vence } : {}), ...(!owner && asignado ? { asignado } : {}),
     ...(owner && codigo_retiro ? { codigoRetiro: codigo_retiro } : {}),
     ...((owner || sub === asignado) && direccion ? { direccion } : {}),
-    ...(typeof venta === 'number' ? { venta: await sale(db, venta, owner) } : {}),
+    ...(typeof venta === 'number' && saleRecord ? { venta: saleRecord } : {}),
   }
+}
+
+async function orderView(db: PoolClient, sub: string, row: Record<string, unknown>) {
+  const saleId = typeof row.venta === 'number' ? row.venta : null
+  const saleRecord = saleId === null ? undefined : await sale(db, saleId, sub === row.cliente_sub)
+  return formatOrder(sub, row, saleRecord)
+}
+
+async function orderViews(db: PoolClient, sub: string, rows: Record<string, unknown>[], customerView: boolean) {
+  const saleIds = rows.map(row => row.venta).filter((value): value is number => typeof value === 'number')
+  const sales = await salesByIds(db, saleIds, customerView)
+  return rows.map(row => formatOrder(sub, row, typeof row.venta === 'number' ? sales.get(row.venta) : undefined))
 }
 
 async function orderById(db: PoolClient, sub: string, orderId: number) {
@@ -71,10 +83,15 @@ export async function payOrder(db: PoolClient, sub: string, client: number, data
     VALUES ($1,$2,$3,$4,$5,$6,'confirmado', clock_timestamp() + interval '24 hours',$7,$8,$9,$10,$11)
     RETURNING id`, [operacion, solicitud, sub, client, farmacia, modalidad, total, shipping, zona, direccion, code])
   const order = result.rows[0].id
-  for (const line of lines) {
-    await db.query('INSERT INTO commerce.pedido_lineas(pedido,codigo,nombre,cantidad,precio_centavos) VALUES ($1,$2,$3,$4,$5)',
-      [order, line.codigo, line.nombre, line.cantidad, line.precioCentavos])
-  }
+  await db.query(`INSERT INTO commerce.pedido_lineas(pedido,codigo,nombre,cantidad,precio_centavos)
+    SELECT $1, codigo, nombre, cantidad, precio
+    FROM unnest($2::integer[], $3::text[], $4::integer[], $5::bigint[]) AS line(codigo, nombre, cantidad, precio)`, [
+    order,
+    lines.map(line => line.codigo),
+    lines.map(line => line.nombre),
+    lines.map(line => line.cantidad),
+    lines.map(line => line.precioCentavos),
+  ])
   await event(db, order, sub, 'pagar')
   return orderById(db, sub, order)
 }
@@ -92,9 +109,7 @@ export async function ownOrders(db: PoolClient, sub: string, first?: string) {
   await expire(db, sub, null)
   const { rows } = await db.query(`SELECT ${projection} FROM commerce.pedidos p WHERE p.cliente_sub=$1
     ORDER BY p.fecha DESC, p.id DESC LIMIT $2 OFFSET $3`, [sub, pageSize, offset(first)])
-  const result = []
-  for (const row of rows) result.push(await orderView(db, sub, row))
-  return result
+  return orderViews(db, sub, rows, true)
 }
 
 export async function branchQueue(db: PoolClient, sub: string, branch: number, finalizados: boolean, first?: string) {
@@ -104,9 +119,7 @@ export async function branchQueue(db: PoolClient, sub: string, branch: number, f
     WHERE p.farmacia=$1 AND p.estado = ANY($2::text[])
     ORDER BY CASE WHEN $3 THEN p.fecha END DESC, p.fecha, p.id
     LIMIT $4 OFFSET $5`, [branch, estados, finalizados, pageSize, offset(first)])
-  const result = []
-  for (const row of rows) result.push(await orderView(db, sub, row))
-  return result
+  return orderViews(db, sub, rows, false)
 }
 
 interface Change { accion: Action; codigoRetiro: string | null; motivo: string | null; empleadoSub: string | null }

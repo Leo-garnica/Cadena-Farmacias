@@ -5,6 +5,9 @@ import { ApiExceptionFilter } from './api-exception.filter.js'
 
 export async function createApplication() {
   const app = await NestFactory.create(AppModule, { logger: false })
+  const server = app.getHttpAdapter().getInstance() as { disable?: (setting: string) => void }
+  server.disable?.('x-powered-by')
+  server.disable?.('etag')
   app.setGlobalPrefix('api/v1')
   app.useGlobalFilters(new ApiExceptionFilter())
   app.use((_request: unknown, response: { setHeader(name: string, value: string): void }, next: () => void) => {

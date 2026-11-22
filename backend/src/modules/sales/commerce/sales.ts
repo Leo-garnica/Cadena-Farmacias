@@ -28,11 +28,24 @@ function saleResponse(row: Record<string, unknown>) {
   return { ...sale, totalCentavos: Number(sale.totalCentavos), ...(pedido ? { pedido } : {}) }
 }
 
+function formatSale(row: Record<string, unknown>, customerView: boolean) {
+  const result = saleResponse(row)
+  return customerView ? Object.fromEntries(Object.entries(result).filter(([key]) => key !== 'empleado')) : result
+}
+
 export async function sale(db: PoolClient, id: number, customerView = false) {
   const { rows } = await db.query(`SELECT ${saleProjection} FROM commerce.ventas v WHERE v.id=$1`, [id])
   if (!rows.length) throw new NotFoundException()
-  const result = saleResponse(rows[0])
-  return customerView ? Object.fromEntries(Object.entries(result).filter(([key]) => key !== 'empleado')) : result
+  return formatSale(rows[0], customerView)
+}
+
+export async function salesByIds(db: PoolClient, ids: number[], customerView = false) {
+  const unique = [...new Set(ids)]
+  const result = new Map<number, Record<string, unknown>>()
+  if (!unique.length) return result
+  const { rows } = await db.query(`SELECT ${saleProjection} FROM commerce.ventas v WHERE v.id = ANY($1::integer[])`, [unique])
+  for (const row of rows) result.set(Number(row.id), formatSale(row, customerView))
+  return result
 }
 
 export async function registerSale(db: PoolClient, data: SaleData) {
