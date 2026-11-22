@@ -13,6 +13,7 @@
     "dev:backend": "npm run build:contracts && npm run dev --workspace @vitafarma/backend",
     "dev:practica": "npm run build:contracts && node local/desarrollo.mjs lectura",
     "dev:gestion": "npm run build:contracts && node local/desarrollo.mjs gestion",
+    "dev:comercio": "npm run build:contracts && node local/desarrollo.mjs comercio",
     "typecheck": "npm run build:contracts && npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "build": "npm run build:contracts && npm run build --workspace @vitafarma/backend && npm run build --workspace @vitafarma/frontend",

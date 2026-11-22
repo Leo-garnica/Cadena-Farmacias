@@ -49,12 +49,22 @@ export function AuthProvider({ repository, children }: { repository: AuthReposit
     return () => { generation.current++; clearTimeout(initialTimer); clearTimeout(timer); unsubscribe() }
   }, [repository, refresh])
 
-  async function signIn(email: string, password: string) {
-    const user = await repository.signIn(email, password)
+  function startSession(user: NonNullable<AuthState['user']>) {
     setNotice(null)
     revision.current++
     userId.current = user.id
     setState({ ready: true, user, error: null })
+  }
+
+  async function signIn(email: string, password: string) {
+    startSession(await repository.signIn(email, password))
+  }
+
+  async function register(email: string, password: string): Promise<'session' | 'confirmation'> {
+    const user = await repository.register(email, password)
+    if (!user) return 'confirmation'
+    startSession(user)
+    return 'session'
   }
 
   async function signOut() {
@@ -72,5 +82,5 @@ export function AuthProvider({ repository, children }: { repository: AuthReposit
     } finally { endingSession.current = false }
   }
 
-  return <AuthContext value={{ state, notice, configured: repository.configured, refresh, signIn, signOut }}>{children}</AuthContext>
+  return <AuthContext value={{ state, notice, configured: repository.configured, refresh, signIn, register, signOut }}>{children}</AuthContext>
 }

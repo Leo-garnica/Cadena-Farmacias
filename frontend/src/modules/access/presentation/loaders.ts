@@ -10,7 +10,7 @@ export function safeReturnTo(value: string | null) {
   const origin = 'https://vitafarma.invalid'
   try {
     const url = new URL(value, origin)
-    if (url.origin !== origin || !/^\/(?:inventario(?:\/[1-9]\d*\/[1-9]\d*)?|indicadores|practica(?:\/(?:farmacias|empleados|productos|medicamentos|clientes|descuentos|planillas|usuarios|ventas))?)\/?$/.test(url.pathname)) return '/inventario'
+    if (url.origin !== origin || !/^\/(?:inventario(?:\/[1-9]\d*\/[1-9]\d*)?|indicadores|operaciones|practica(?:\/(?:farmacias|empleados|productos|medicamentos|clientes|descuentos|planillas|usuarios|ventas))?)\/?$/.test(url.pathname)) return '/inventario'
     return `${url.pathname}${url.search}`
   } catch { return '/inventario' }
 }

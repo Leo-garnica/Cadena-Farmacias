@@ -16,6 +16,9 @@
 .mostrador-masthead a, .mostrador-footer a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--brand); font-size: 14px; font-weight: 500; text-underline-offset: 4px; }
 .mostrador-masthead a { text-decoration: none; }
 .mostrador-masthead a:hover { text-decoration: underline; }
+.mostrador-access { display: flex; flex-wrap: wrap; justify-content: end; gap: 2px 16px; }
+.mostrador-access .mostrador-request { padding-inline: 12px; border: 1px solid #a4b9a8; border-radius: var(--radius-control); }
+.mostrador-staff-label { color: #385648; }
 .mostrador-hero { display: grid; grid-template-columns: minmax(0, 0.93fr) minmax(0, 1.07fr); align-items: center; column-gap: clamp(24px, 5vw, 84px); padding-block: clamp(36px, 4.9vw, 78px); }
 .mostrador h1, .mostrador h2 { font-family: var(--font-heading); font-weight: 700; }
 .mostrador h1 { font-size: clamp(58px, 6.5vw, 102px); line-height: .99; letter-spacing: -.055em; max-width: 10.5ch; text-wrap: initial; }
@@ -49,6 +52,10 @@
   .mostrador .brand { font-size: 24px; gap: 6px; }
   .mostrador .brand__symbol { height: 28px; width: 28px; border-radius: 7px; }
   .mostrador-masthead a { font-size: 13px; gap: 4px; }
+  .mostrador-masthead:has(.mostrador-access) { align-items: flex-start; flex-direction: column; padding-block: 14px 6px; gap: 6px; }
+  .mostrador-access { justify-content: flex-start; gap: 2px 12px; }
+  .mostrador-access .mostrador-request { padding-inline: 8px; }
+  .mostrador-staff-label { display: none; }
   .mostrador-hero { grid-template-columns: 1fr; gap: 24px; padding-block: 35px 26px; }
   .mostrador h1 { font-size: clamp(46px, 10vw, 62px); max-width: 14ch; }
   .mostrador-intro p { max-width: 38ch; margin-block: 14px 18px; }

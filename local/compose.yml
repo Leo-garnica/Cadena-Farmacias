@@ -38,9 +38,10 @@ services:
       GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${VF_PRACTICA_AUTH_DB:?}@db:5432/vitafarma_practica?sslmode=disable
       GOTRUE_DB_NAMESPACE: auth
       GOTRUE_SITE_URL: http://127.0.0.1:5173
-      GOTRUE_DISABLE_SIGNUP: "true"
+      GOTRUE_DISABLE_SIGNUP: ${VF_PRACTICA_DISABLE_SIGNUP:-true}
       GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
       GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_PASSWORD_MIN_LENGTH: "8"
       GOTRUE_JWT_ISSUER: http://127.0.0.1:55433/auth/v1
       GOTRUE_JWT_AUD: authenticated
       GOTRUE_JWT_ADMIN_ROLES: service_role
