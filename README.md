@@ -16,6 +16,7 @@ Arranca **uno** de los dos modos. Cada comando prepara sus servicios, carga la c
 | --- | --- | --- |
 | `npm run dev:practica` | `vitafarma_practica` | Consultar el dataset de control VF-PRACTICA-1 y contrastar sus indicadores. |
 | `npm run dev:gestion` | `vitafarma_gestion` | Consultar y administrar datos sintéticos persistentes para el Trabajo 4. El inventario refleja las ventas de esta copia. |
+| `npm run dev:comercio` | `vitafarma_comercio` | Probar tienda, pago simulado, retiro, envío, caja y supervisión por departamento. [Cuentas y recorrido de comercio](docs/planning/COMERCIO-LOCAL.md) |
 
 Abre [VitaFarma en tu equipo](http://127.0.0.1:5173/). Desde la portada entra al espacio del equipo. Para consultar usa `operador@vitafarma.test`; para las operaciones de gestión usa `supervisor@vitafarma.test`. El arranque guarda las contraseñas aleatorias en `.vitafarma/practica-v1/cuentas.json`, dentro de tu carpeta personal. [Acceso y perfiles](docs/SUPABASE-LOGIN.md)
 
