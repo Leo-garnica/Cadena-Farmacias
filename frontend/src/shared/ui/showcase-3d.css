@@ -1,0 +1,266 @@
+.vf-stage3d {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
+  user-select: none;
+}
+
+.vf-stage3d-viewport {
+  --rx: 0deg;
+  --ry: 0deg;
+  --gx: 50%;
+  --gy: 38%;
+  --tx: 0px;
+  --ty: 0px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: clamp(250px, 28vw, 370px);
+  padding: 20px;
+  border-radius: 20px;
+  overflow: hidden;
+  perspective: 1100px;
+  background:
+    radial-gradient(circle at var(--gx) var(--gy), rgb(201 242 123 / 18%), transparent 56%),
+    radial-gradient(circle at 80% 90%, rgb(25 118 88 / 32%), transparent 60%),
+    linear-gradient(145deg, #062119 0%, #0A3C2D 58%, #07271E 100%);
+  border: 1px solid rgb(201 242 123 / 22%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%), 0 22px 46px rgb(4 22 17 / 36%);
+  cursor: grab;
+}
+
+.vf-stage3d-viewport:active {
+  cursor: grabbing;
+}
+
+.vf-stage3d--ambient .vf-stage3d-viewport {
+  min-height: clamp(220px, 28vh, 300px);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at var(--gx) var(--gy), rgb(201 242 123 / 20%), transparent 58%),
+    linear-gradient(155deg, rgb(14 68 52 / 65%) 0%, rgb(6 31 24 / 92%) 100%);
+}
+
+.vf-stage3d-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(360px circle at var(--gx) var(--gy), rgb(255 255 255 / 12%), transparent 62%);
+  transition: opacity var(--motion-content) var(--ease-out);
+}
+
+.vf-stage3d-scene {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.vf-stage3d[data-tilt-active='true'] .vf-stage3d-scene {
+  transition: transform 70ms linear;
+}
+
+.vf-stage3d-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.vf-stage3d-ring--outer {
+  width: clamp(200px, 24vw, 300px);
+  aspect-ratio: 1;
+  border: 1px solid rgb(201 242 123 / 18%);
+  transform: translateZ(-26px);
+}
+
+.vf-stage3d-ring--inner {
+  width: clamp(146px, 18vw, 224px);
+  aspect-ratio: 1;
+  border: 1px dashed rgb(201 242 123 / 26%);
+  transform: translateZ(-10px);
+}
+
+.vf-stage3d-pedestal {
+  position: absolute;
+  bottom: 18px;
+  width: clamp(140px, 18vw, 220px);
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgb(0 0 0 / 55%) 0%, transparent 72%);
+  transform: translateZ(-32px) translateX(calc(var(--tx) * -0.55));
+  pointer-events: none;
+}
+
+.vf-stage3d-object {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(84%, 300px);
+  height: clamp(156px, 18vw, 224px);
+  margin: 14px 0 54px;
+  transform: translateZ(46px) translate3d(var(--tx), var(--ty), 0);
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.vf-stage3d--ambient .vf-stage3d-object {
+  width: min(84%, 270px);
+  height: clamp(170px, 22vh, 230px);
+  margin: 0;
+}
+
+.vf-stage3d[data-tilt-active='true'] .vf-stage3d-object {
+  transition: transform 70ms linear;
+}
+
+.vf-stage3d-object img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 24px 28px rgb(2 14 10 / 58%)) drop-shadow(0 6px 12px rgb(201 242 123 / 10%));
+  animation: vf-stage3d-float 5.2s ease-in-out infinite, vf-stage3d-enter 280ms var(--ease-out);
+}
+
+@keyframes vf-stage3d-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes vf-stage3d-enter {
+  from { opacity: 0; scale: 0.94; }
+  to { opacity: 1; scale: 1; }
+}
+
+.vf-stage3d-badge {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  max-width: min(230px, calc(100% - 28px));
+  padding: 10px 13px;
+  border-radius: 12px;
+  background: rgb(5 27 21 / 84%);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgb(201 242 123 / 24%);
+  color: #FFFFFF;
+  transform: translateZ(64px);
+  pointer-events: none;
+}
+
+.vf-stage3d-eyebrow {
+  display: block;
+  color: var(--accent-lime);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.vf-stage3d-badge strong {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.vf-stage3d-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #CFE2D7;
+}
+
+.vf-stage3d-price {
+  color: var(--accent-lime);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.vf-stage3d-hint {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgb(5 27 21 / 78%);
+  border: 1px solid rgb(201 242 123 / 24%);
+  color: #D7E9DE;
+  font-size: 11px;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.vf-stage3d-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.vf-stage3d-tab {
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgb(201 242 123 / 24%);
+  background: rgb(255 255 255 / 6%);
+  color: #DCECE2;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.vf-stage3d-tab:hover {
+  background: rgb(201 242 123 / 15%);
+  border-color: rgb(201 242 123 / 44%);
+}
+
+.vf-stage3d-tab[aria-pressed='true'] {
+  background: var(--accent-lime);
+  border-color: var(--accent-lime);
+  color: var(--brand-deep);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vf-stage3d-scene,
+  .vf-stage3d-object,
+  .vf-stage3d-pedestal,
+  .vf-stage3d-badge,
+  .vf-stage3d-object img {
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .vf-stage3d-viewport {
+    min-height: 230px;
+    padding: 14px;
+  }
+  .vf-stage3d-hint span {
+    display: none;
+  }
+  .vf-stage3d-badge {
+    left: 10px;
+    bottom: 10px;
+    padding: 8px 10px;
+  }
+  .vf-stage3d-tab {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}
