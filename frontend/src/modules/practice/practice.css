@@ -1,29 +1,29 @@
 .practice { max-width: 1280px; color: var(--text); }
 .practice-heading { margin-bottom: 22px; }
-.practice-heading h1 { font: 700 clamp(33px, 4vw, 49px)/1.1 var(--font-heading); letter-spacing: -.045em; }
+.practice-heading h1 { font: 800 clamp(32px, 4vw, 48px)/1.08 var(--font-heading); letter-spacing: -.045em; color: var(--brand-deep); }
 .practice-heading p, .practice-help { margin-top: 8px; color: var(--muted); }
-.practice-nav { display: flex; margin: 0 0 18px; border-block: 1px solid var(--border); flex-wrap: wrap; gap: 4px; padding-block: 7px; }
-.practice-nav a { border-radius: 6px; padding: 10px 12px; color: var(--brand); font-weight: 500; text-decoration: none; }
-.practice-nav a:hover, .practice-nav a[aria-current] { background: var(--selection); }
-.practice-nav a[aria-current] { font-weight: 600; }
-.practice-panel { margin-top: 14px; padding: clamp(17px, 2.1vw, 32px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); }
-.practice-panel h2 { font: 700 clamp(24px, 3vw, 33px)/1.2 var(--font-heading); letter-spacing: -.035em; }
+.practice-nav { display: flex; margin: 0 0 20px; padding: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; flex-wrap: wrap; gap: 6px; box-shadow: var(--shadow-soft); }
+.practice-nav a { border-radius: 9px; padding: 9px 14px; color: var(--text); font-weight: 600; text-decoration: none; }
+.practice-nav a:hover { background: var(--surface-tint); color: var(--brand-deep); }
+.practice-nav a[aria-current] { background: var(--brand-deep); color: var(--accent-lime); font-weight: 700; }
+.practice-panel { margin-top: 16px; padding: clamp(18px, 2.2vw, 32px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-panel); box-shadow: var(--shadow-soft); }
+.practice-panel h2 { font: 800 clamp(24px, 3vw, 32px)/1.18 var(--font-heading); letter-spacing: -.035em; color: var(--brand-deep); }
 .practice-panel > .practice-text:first-child { margin-bottom: 12px; }
 .practice-panel-head, .practice-actions, .practice-pager, .practice-status { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
 .practice-panel-head, .practice-pager { justify-content: space-between; }
 .practice-panel form { margin-top: 18px; }
-.practice-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; background: var(--surface); color: var(--brand); border: 1px solid #9eafa2; border-radius: var(--radius-control); padding: 8px 14px; font-weight: 600; }
+.practice-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; background: var(--surface); color: var(--brand-deep); border: 1px solid var(--border-strong); border-radius: var(--radius-control); padding: 8px 16px; font-weight: 600; }
 .practice-button:hover:enabled { background: var(--selection); }
-.practice-button.is-primary { background: var(--brand); color: white; border-color: var(--brand); }
+.practice-button.is-primary { background: var(--brand); color: #FFFFFF; border-color: var(--brand); }
 .practice-button.is-primary:hover:enabled { background: var(--brand-hover); }
-.practice-button.is-danger { color: white; background: #932832; border-color: #932832; }
+.practice-button.is-danger { color: #FFFFFF; background: #932832; border-color: #932832; }
 .practice-button.is-danger:hover:enabled { background: #76222a; }
 .practice button:disabled { opacity: .56; }
-.practice-text { display: inline-flex; align-items: center; gap: 5px; background: none; color: var(--brand); border: 0; padding: 5px 0; min-height: 34px; text-decoration: underline; text-underline-offset: 3px; font-weight: 500; text-align: start; }
+.practice-text { display: inline-flex; align-items: center; gap: 5px; background: none; color: var(--brand); border: 0; padding: 5px 0; min-height: 34px; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; text-align: start; }
 .practice .is-danger-text { color: var(--error); }
 .practice-search { max-width: 460px; }
-.practice-search > div { display: flex; gap: 6px; }
-.practice label { display: block; margin: 0 0 5px; font-weight: 600; }
+.practice-search > div { display: flex; gap: 8px; }
+.practice label { display: block; margin: 0 0 5px; font-weight: 600; font-size: 13px; }
 .practice input, .practice select { width: 100%; }
 .practice-fields, .practice-sale-lines { border: 0; padding: 0; margin: 16px 0; min-width: 0; }
 .practice-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 235px), 1fr)); gap: 17px; }
@@ -32,36 +32,37 @@
 .practice-pager { margin-top: 14px; }
 .practice-pager span, .practice-ref-tools .practice-text { font-size: 13px; }
 .practice-ref-tools .practice-pager .practice-button { padding: 5px 7px; font-size: 12px; }
-.practice-table-wrap { overflow: auto; max-width: 100%; border: 1px solid var(--border); border-radius: 7px; margin-top: 20px; }
+.practice-table-wrap { overflow: auto; max-width: 100%; border: 1px solid var(--border); border-radius: 12px; margin-top: 20px; }
 .practice table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; text-align: left; }
-.practice table th { background: var(--background); font-size: 13px; font-weight: 600; white-space: nowrap; }
-.practice th, .practice td { border-bottom: 1px solid var(--border); padding: 10px 14px; vertical-align: middle; }
+.practice table th { background: var(--surface-tint); font-size: 12px; font-weight: 700; color: var(--brand-deep); white-space: nowrap; }
+.practice th, .practice td { border-bottom: 1px solid #EAF0EB; padding: 11px 14px; vertical-align: middle; }
 .practice tr:last-child td { border: 0; }
+.practice tbody tr:hover { background: var(--background); }
 .practice td { min-width: 78px; }
 .practice .practice-row-actions { white-space: nowrap; }
 .practice-row-actions button + button { margin-left: 14px; }
 .practice-empty, .practice-status, .practice-error, .practice-success { margin-block: 16px; }
-.practice-empty { display: flex; gap: 10px; align-items: center; padding: 16px; color: var(--muted); background: var(--background); }
+.practice-empty { display: flex; gap: 10px; align-items: center; padding: 16px; color: var(--muted); background: var(--surface-tint); border-radius: 10px; }
 .practice-status { color: var(--muted); }
-.practice-error, .practice-success { border-inline-start: 3px solid; padding: 10px 12px; }
+.practice-error, .practice-success { border-inline-start: 4px solid; padding: 11px 14px; border-radius: 8px; }
 .practice-error, .practice-status[role=alert] { color: var(--error); }
 .practice-error { background: var(--error-bg); }
-.practice-success { background: var(--selection); color: var(--brand); }
+.practice-success { background: var(--selection); color: var(--brand-deep); }
 .practice-sale-lines { border-block-start: 1px solid var(--border); margin-top: 25px; }
-.practice-sale-lines legend { padding: 0 12px 0 0; font-size: 18px; font-weight: 600; }
+.practice-sale-lines legend { padding: 0 12px 0 0; font-family: var(--font-heading); font-size: 19px; font-weight: 700; color: var(--brand-deep); }
 .practice-line-form { display: grid; grid-template-columns: minmax(170px,1fr) minmax(82px,.3fr) auto; align-items: end; gap: 10px; margin-top: 10px; }
 .practice-cart { list-style: none; margin: 17px 0; padding: 0; }
 .practice-cart li { display: flex; gap: 16px; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-block: 11px; }
 .practice-cart li > div { flex: 1; }
 .practice-cart li span { display: block; color: var(--muted); }
-.practice-total { color: var(--brand); font-variant-numeric: tabular-nums; font-size: 18px; }
+.practice-total { color: var(--brand-deep); font-variant-numeric: tabular-nums; font-size: 19px; font-family: var(--font-heading); }
 .practice-total strong { margin-left: 7px; }
 .practice-receipt { display: flex; gap: 18px 40px; flex-wrap: wrap; }
 .practice-receipt dt { color: var(--muted); }
 .practice-receipt dd { margin: 2px 0; font-weight: 600; }
 @media (max-width: 620px) {
-  .practice-nav { gap: 0; }
-  .practice-nav a { padding: 9px 7px; font-size: 13px; }
+  .practice-nav { gap: 4px; }
+  .practice-nav a { padding: 8px 10px; font-size: 13px; }
   .practice-line-form { grid-template-columns: 1fr 95px; }
   .practice-line-form > button { grid-column: 1 / -1; }
   .practice-cart li { flex-wrap: wrap; }

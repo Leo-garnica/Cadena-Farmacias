@@ -1,9 +1,10 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import * as Dialog from '@radix-ui/react-dialog'
-import { ArrowDown, Box, Check, ChevronDown, CircleDot, CreditCard, Grid2X2, MapPin, Milk, Package, Plus, Search, ShoppingBag, SlidersHorizontal, Trash2, UserRound, X } from 'lucide-react'
+import { ArrowDown, Box, Check, ChevronDown, CircleDot, CreditCard, Grid2X2, MapPin, Milk, Package, PackageCheck, Plus, Search, ShieldCheck, ShoppingBag, SlidersHorizontal, Trash2, Truck, UserRound, X } from 'lucide-react'
 import { useAuth } from '../access/public'
 import { Button } from '../../shared/ui/Button'
+import { Showcase3D, type ShowcaseItem } from '../../shared/ui/Showcase3D'
 import { customerLoginPath, customerOrdersPath, money, query, useCheckout, useResource, type Branch, type Identity, type Line, type Modality, type Order, type Product, type Zone } from './api'
 import { productMedia } from './product-media'
 import { Message, SignOut } from './shared'
@@ -23,6 +24,19 @@ const quickSearches = [
   { label: 'Rollos', term: 'Rollo', Icon: CircleDot },
 ] as const
 
+const trustPillars = [
+  { Icon: ShieldCheck, title: 'Stock real por sucursal', detail: 'Precios y existencias verificados en la farmacia que eliges.' },
+  { Icon: PackageCheck, title: 'Retiro rápido con código', detail: 'Preparamos tu pedido y te damos un código de 6 dígitos.' },
+  { Icon: Truck, title: 'Envío y seguimiento', detail: 'Consulta zonas habilitadas, tarifas claras y tu comprobante.' },
+] as const
+
+const showcaseTemplates = [
+  { id: 'frasco', src: '/images/hero-3d/frasco-tabletas.webp', label: 'Analgésicos', eyebrow: 'DESTACADO EN SUCURSAL', keyword: 'paracetamol', fallbackTitle: 'Tabletas y botiquín' },
+  { id: 'capsulas', src: '/images/hero-3d/capsulas-3d.webp', label: 'Cápsulas 3D', eyebrow: 'FÓRMULAS CLÍNICAS', keyword: 'protector', fallbackTitle: 'Cuidado y protección' },
+  { id: 'pro', src: '/images/hero-3d/capsulas-pro.webp', label: 'Cuidado diario', eyebrow: 'DISPONIBLE HOY', keyword: 'crema', fallbackTitle: 'Tratamiento diario' },
+  { id: 'gel', src: '/images/hero-3d/capsulas-gel.webp', label: 'Esenciales', eyebrow: 'BOTICA VITAFARMA', keyword: 'termómetro', fallbackTitle: 'Esenciales de hogar' },
+] as const
+
 const ProductCard = memo(function ProductCard({
   product, quantity, locked, priority, onAdd,
 }: {
@@ -36,6 +50,7 @@ const ProductCard = memo(function ProductCard({
   const limitReached = !product.disponible || quantity >= Math.min(99, product.disponible) || locked
   return <article className="vf-product">
     <div className="vf-product-media">
+      <div className="vf-product-halo" aria-hidden="true" />
       <img
         src={media.src}
         alt=""
@@ -47,11 +62,13 @@ const ProductCard = memo(function ProductCard({
       />
     </div>
     <div className="vf-product-body">
-      <span className="vf-presentation">{product.presentacion ?? 'Producto'}</span>
+      <div className="vf-product-meta-row">
+        <span className="vf-presentation">{product.presentacion ?? 'Producto'}</span>
+        <span className={'vf-stock' + (!product.disponible ? ' vf-sold-out' : '')}>
+          {product.disponible ? `${product.disponible} disp.` : 'Agotado'}
+        </span>
+      </div>
       <h3>{product.nombre}</h3>
-      <span className={'vf-stock' + (!product.disponible ? ' vf-sold-out' : '')}>
-        {product.disponible ? `${product.disponible} disponible${product.disponible === 1 ? '' : 's'}` : 'Agotado'}
-      </span>
       <div className="vf-buy">
         <strong>{money(product.precioCentavos)}</strong>
         <Button
@@ -130,6 +147,31 @@ export function StorePage() {
     () => catalog.data?.slice().sort((a, b) => Number(b.disponible > 0) - Number(a.disponible > 0)),
     [catalog.data],
   )
+  const showcaseItems = useMemo<ShowcaseItem[]>(() => {
+    const list = products ?? []
+    return showcaseTemplates.map((template, index) => {
+      const matched = list.find(item => item.nombre.toLowerCase().includes(template.keyword)) ?? list[index]
+      if (!matched) {
+        return {
+          id: template.id,
+          src: template.src,
+          label: template.label,
+          eyebrow: template.eyebrow,
+          title: template.fallbackTitle,
+          meta: branch?.nombre ?? 'Sucursales VitaFarma',
+        }
+      }
+      return {
+        id: template.id,
+        src: template.src,
+        label: template.label,
+        eyebrow: template.eyebrow,
+        title: matched.nombre,
+        price: money(matched.precioCentavos),
+        meta: matched.disponible ? `${matched.disponible} en stock` : 'Consultar sucursal',
+      }
+    })
+  }, [products, branch?.nombre])
   const currentItems = useMemo(
     () => items.map(item => ({ ...item, ...availableProducts.get(item.codigo) })),
     [items, availableProducts],
@@ -216,19 +258,19 @@ export function StorePage() {
         <Link to="/" className="vf-brand" aria-label="VitaFarma, inicio"><span aria-hidden="true">✚</span>VitaFarma</Link>
         <form role="search" className="vf-search" onSubmit={event => { event.preventDefault(); findProducts(searchInput, true) }}>
           <label className="sr-only" htmlFor="store-search">Buscar productos</label>
-          <input id="store-search" type="search" placeholder="Busca por nombre o código" maxLength={100}
+          <input id="store-search" type="search" placeholder="Busca medicamentos por nombre o código" maxLength={100}
             value={searchInput} onChange={event => setSearchInput(event.target.value)} />
-          <button type="submit" aria-label="Buscar productos"><Search size={21} aria-hidden /></button>
+          <button type="submit" aria-label="Buscar productos"><Search size={20} aria-hidden /></button>
         </form>
         <nav aria-label="Cuenta y compras" className="vf-actions">
-          <Link to={userId ? customerOrdersPath : customerLoginPath}><UserRound size={20} aria-hidden /><span>{userId ? 'Mis pedidos' : 'Mi cuenta'}</span></Link>
+          <Link to={userId ? customerOrdersPath : customerLoginPath}><UserRound size={19} aria-hidden /><span>{userId ? 'Mis pedidos' : 'Mi cuenta'}</span></Link>
           <Dialog.Trigger className="vf-cart-trigger">
-            <ShoppingBag size={19} aria-hidden /><span>Carrito</span><strong>{units}</strong>
+            <ShoppingBag size={18} aria-hidden /><span>Carrito</span><strong>{units}</strong>
           </Dialog.Trigger>
         </nav>
       </div>
       <div className="vf-location"><div className="vf-wrap vf-location-row">
-        <label className="vf-branch"><MapPin size={17} aria-hidden /><span className="sr-only">Sucursal de compra</span>
+        <label className="vf-branch"><MapPin size={16} aria-hidden /><span className="sr-only">Sucursal de compra</span>
           <select value={branch?.id ?? ''} disabled={!branches.data?.length || locked} onChange={event => {
             const id = Number(event.target.value)
             if (items.length) setNextBranch(id)
@@ -250,14 +292,31 @@ export function StorePage() {
         <Button variant="ghost" onClick={() => setNextBranch(0)}>Mantener sucursal</Button>
       </div>}
       <section className="vf-hero" aria-labelledby="vf-title">
-        <div className="vf-hero-copy"><h1 id="vf-title">Tu farmacia<br />en línea.</h1>
-          <p>Elige tus productos para retirar en sucursal o recibir en casa.</p>
-          <a href="#store-products">Ver productos <ArrowDown size={16} aria-hidden /></a>
+        <div className="vf-hero-copy">
+          <span className="vf-hero-eyebrow">{branch ? `${branch.nombre}${branch.ciudad ? ` · ${branch.ciudad}` : ''}` : 'FARMACIA VITAFARMA'}</span>
+          <h1 id="vf-title">Tu farmacia<br />en línea.</h1>
+          <p>Elige tus productos con precios reales por sucursal para retirar con código o recibir en casa.</p>
+          <div className="vf-hero-cta">
+            <a className="vf-hero-primary" href="#store-products">Ver productos <ArrowDown size={16} aria-hidden /></a>
+            <Link className="vf-hero-secondary" to={userId ? customerOrdersPath : customerLoginPath}>
+              {userId ? 'Mis pedidos' : 'Iniciar sesión'}
+            </Link>
+          </div>
         </div>
-        <picture className="vf-hero-picture">
-          <source srcSet="/images/mostrador.webp" type="image/webp" />
-          <img src="/images/mostrador.jpg" alt="" width="1448" height="1086" fetchPriority="high" decoding="async" />
-        </picture>
+        <div className="vf-hero-stage">
+          <Showcase3D items={showcaseItems} variant="hero" />
+        </div>
+      </section>
+      <section className="vf-trust" aria-label="Beneficios de VitaFarma">
+        {trustPillars.map(({ Icon, title, detail }) => (
+          <div key={title} className="vf-trust-item">
+            <span className="vf-trust-icon" aria-hidden="true"><Icon size={19} strokeWidth={1.8} /></span>
+            <div>
+              <strong>{title}</strong>
+              <p>{detail}</p>
+            </div>
+          </div>
+        ))}
       </section>
       <section aria-labelledby="store-products" className="vf-catalog">
         <div className="vf-catalog-head">

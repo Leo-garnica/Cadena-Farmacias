@@ -33,10 +33,13 @@ function Workspace({ branches, userId }: { branches: StaffBranch[]; userId: stri
     || (item.id === 'historial' && branch.rol === 'supervisor') || (item.id !== 'caja' && item.id !== 'historial' && branch.rol !== 'empleado'))
   const current = allowed.some(item => item.id === section) ? section : 'pedidos'
   return <>
-    <Heading title="Operaciones de sucursal" detail={roles[branch.rol]}>
-      <label className="commerce-branch-select">Sucursal activa<select value={branch.id} onChange={event => setSelected(Number(event.target.value))}>
-        {branches.map(item => <option key={item.id} value={item.id}>{item.nombre} · {item.departamento}</option>)}
-      </select></label>
+    <Heading title="Operaciones de sucursal" detail={`${branch.nombre} · ${branch.departamento}`}>
+      <div className="commerce-inline">
+        <span className="commerce-role-pill">{roles[branch.rol]}</span>
+        <label className="commerce-branch-select">Sucursal activa<select value={branch.id} onChange={event => setSelected(Number(event.target.value))}>
+          {branches.map(item => <option key={item.id} value={item.id}>{item.nombre} · {item.departamento}</option>)}
+        </select></label>
+      </div>
     </Heading>
     <nav className="commerce-section-nav" aria-label="Operaciones">
       {allowed.map(({ id, label, Icon }) => <button key={id} className="commerce-section-link" aria-current={current === id ? 'page' : undefined} onClick={() => setSection(id)}><Icon size={18} aria-hidden /> {label}</button>)}

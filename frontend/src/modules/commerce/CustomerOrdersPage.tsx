@@ -2,16 +2,35 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { useAuth } from '../access/public'
 import { Button } from '../../shared/ui/Button'
-import { customerLoginPath, dateLabel, query, send, storePath, useAction, useResource, type Branch, type Identity, type Order, type Sale } from './api'
+import { customerLoginPath, dateLabel, query, send, storePath, useAction, useResource, type Branch, type Identity, type Order, type OrderStatus, type Sale } from './api'
 import { Back, CommerceFrame, Heading, Message, OrderAmounts, OrderHeader, SignOut } from './shared'
 import { Receipt } from './Receipt'
+
+const stepIndex: Partial<Record<OrderStatus, number>> = {
+  confirmado: 0,
+  en_preparacion: 1,
+  listo: 2,
+  en_camino: 2,
+  entregado: 3,
+}
 
 function CustomerOrder({ order, branch, refresh, showReceipt }: { order: Order; branch?: Branch; refresh: () => void; showReceipt: (sale: Sale) => void }) {
   const action = useAction()
   const [confirming, setConfirming] = useState(false)
   const canCancel = order.estado === 'confirmado' || order.estado === 'en_preparacion' || order.estado === 'listo'
-  return <article id={`pedido-${order.id}`} className="commerce-panel commerce-order">
+  const progress = stepIndex[order.estado]
+  const steps = ['Confirmado', 'Preparando', order.modalidad === 'envio' ? 'En camino' : 'Listo', 'Entregado']
+  return <article id={`pedido-${order.id}`} className={`commerce-panel commerce-order commerce-order--${order.estado}`}>
     <OrderHeader order={order} />
+    {progress !== undefined && (
+      <ol className="commerce-progress" aria-label="Avance del pedido">
+        {steps.map((label, idx) => (
+          <li key={label} className={idx < progress ? 'is-done' : idx === progress ? 'is-current' : undefined}>
+            {label}
+          </li>
+        ))}
+      </ol>
+    )}
     <p className="commerce-order-branch">{branch?.nombre ?? `Sucursal ${order.farmacia}`}{branch?.direccion && order.modalidad === 'retiro' ? ` · ${branch.direccion}` : ''}</p>
     {order.direccion && <p className="commerce-helper">Dirección de entrega: {order.direccion}</p>}
     {order.estado === 'listo' && order.modalidad === 'retiro' && order.codigoRetiro && <div className="commerce-pickup-code">

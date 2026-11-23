@@ -1,33 +1,202 @@
-.customer-access { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); min-height: 100dvh; background: #fff; }
-.customer-access-story { display: flex; flex-direction: column; justify-content: space-between; background: var(--brand); color: white; overflow: hidden; }
-.customer-access-copy { width: min(100%, 660px); margin-inline: auto; padding: clamp(32px, 5vw, 74px); }
-.customer-wordmark { display: inline-flex; align-items: center; gap: 9px; color: white; text-decoration: none; font: 800 28px/1 var(--font-heading); letter-spacing: -.04em; }
-.customer-wordmark span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px 9px 9px 2px; background: #d8efac; color: var(--brand); font: 24px/1 system-ui; }
-.customer-access h1 { max-width: 10ch; margin: clamp(42px, 10vh, 110px) 0 15px; font: 700 clamp(44px, 5vw, 78px)/.98 var(--font-heading); letter-spacing: -.045em; }
-.customer-access-story p { max-width: 34ch; font-size: clamp(16px, 1.4vw, 20px); line-height: 1.5; color: #deecde; }
-.customer-access-story img { width: 100%; height: clamp(180px, 35vh, 420px); object-fit: cover; object-position: 38% 53%; }
-.customer-access-panel { min-width: 0; align-self: center; width: min(100%, 520px); margin-inline: auto; padding: 32px clamp(22px, 4vw, 46px); }
-.customer-access-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 24px; }
-.customer-access-nav .commerce-back { min-height: 44px; margin: 0; }
-.customer-access .commerce-auth { border: 0; padding: 0; background: transparent; margin: 0; }
-.customer-access .commerce-auth-head > svg { display: none; }
-.customer-access .commerce-auth-head h2 { font: 700 clamp(28px, 3vw, 36px)/1.12 var(--font-heading); letter-spacing: -.035em; }
-.customer-access .commerce-auth-head { margin-bottom: 24px; }
+.customer-access {
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+  min-height: 100dvh;
+  background: var(--background);
+}
+
+.customer-access-story {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(28px, 4.5vw, 60px);
+  background:
+    radial-gradient(640px circle at 15% 12%, rgb(201 242 123 / 12%), transparent 56%),
+    radial-gradient(520px circle at 88% 82%, rgb(24 114 86 / 34%), transparent 60%),
+    linear-gradient(148deg, #051B14 0%, #07271E 50%, #0B4937 100%);
+  color: #FFFFFF;
+  overflow: hidden;
+}
+
+.customer-access-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: min(100%, 560px);
+  margin-inline: auto;
+}
+
+.customer-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #FFFFFF;
+  text-decoration: none;
+  font: 800 26px/1 var(--font-heading);
+  letter-spacing: -.045em;
+}
+.customer-wordmark span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px 10px 10px 3px;
+  background: var(--accent-lime);
+  color: var(--brand-deep);
+  font: 22px/1 system-ui;
+}
+
+.customer-access-pill {
+  display: inline-block;
+  margin-top: clamp(24px, 4.5vh, 42px);
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgb(201 242 123 / 14%);
+  border: 1px solid rgb(201 242 123 / 28%);
+  color: var(--accent-lime);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.customer-access h1 {
+  max-width: 11ch;
+  margin: 14px 0 14px;
+  font: 800 clamp(40px, 4.4vw, 66px)/.97 var(--font-heading);
+  letter-spacing: -.045em;
+  color: #FFFFFF;
+}
+
+.customer-access-story > .customer-access-copy > p {
+  max-width: 38ch;
+  font-size: clamp(15px, 1.25vw, 18px);
+  line-height: 1.55;
+  color: #D2E4DA;
+}
+
+.customer-benefits {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.customer-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #E5F1EA;
+}
+.customer-benefits svg {
+  color: var(--accent-lime);
+}
+
+.customer-access-stage {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 560px);
+  margin-inline: auto;
+}
+
+.customer-access-panel {
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(24px, 4vw, 48px) clamp(18px, 4vw, 42px);
+  background:
+    radial-gradient(500px circle at 85% 15%, rgb(201 242 123 / 14%), transparent 58%),
+    var(--background);
+}
+
+.customer-access-card {
+  width: min(100%, 468px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: clamp(22px, 3.2vw, 36px);
+  box-shadow: var(--shadow-elevated);
+}
+
+.customer-access-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #EAF0EB;
+}
+.customer-access-nav .commerce-back { min-height: 40px; margin: 0; font-size: 13px; font-weight: 600; }
+
+.customer-access .commerce-auth { border: 0; padding: 0; background: transparent; margin: 0; box-shadow: none; }
+
+.account-mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 22px;
+  border-radius: 12px;
+  background: var(--surface-tint);
+  border: 1px solid var(--border);
+}
+.account-mode-switch button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.account-mode-switch button:hover:not([aria-pressed='true']) {
+  color: var(--brand-deep);
+}
+.account-mode-switch button[aria-pressed='true'] {
+  background: var(--brand-deep);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgb(7 39 30 / 20%);
+}
+
+.account-auth-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--surface-tint);
+  color: var(--brand-deep);
+  margin-bottom: 12px;
+}
+
+.customer-access .commerce-auth-head { margin-bottom: 20px; }
+.customer-access .commerce-auth-head h2 { font: 800 clamp(26px, 2.8vw, 34px)/1.1 var(--font-heading); letter-spacing: -.035em; color: var(--brand-deep); }
 .customer-access .commerce-form { gap: 16px; }
-.customer-access .commerce-form button[type=submit] { justify-self: stretch; min-height: 47px; }
+.customer-access .commerce-form button[type=submit] { justify-self: stretch; min-height: 48px; border-radius: 11px; }
 .customer-access .commerce-text-button { min-height: 44px; }
+
 .account-password-field { display: grid; gap: 5px; }
 .account-password-field > div { position: relative; }
 .account-password-field input { width: 100%; padding-right: 47px; }
-.account-password-field button { position: absolute; right: 1px; top: 1px; bottom: 1px; width: 43px; display: grid; place-items: center; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--brand); }
-@media (max-width: 700px) {
-  .customer-access { display: block; }
-  .customer-access-copy { padding: 20px 24px 24px; margin-inline: 0; }
+.account-password-field button { position: absolute; right: 2px; top: 2px; bottom: 2px; width: 42px; display: grid; place-items: center; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--brand); }
+.account-password-field button:hover { background: var(--selection); }
+
+@media (max-width: 860px) {
+  .customer-access { grid-template-columns: 1fr; }
+  .customer-access-story { padding: 24px 20px 28px; }
+  .customer-access-copy { margin-inline: 0; }
   .customer-wordmark { font-size: 22px; }
-  .customer-wordmark span { width: 27px; height: 27px; font-size: 18px; }
-  .customer-access h1 { max-width: none; margin: 20px 0 6px; font-size: 34px; }
-  .customer-access-story p { font-size: 14px; }
-  .customer-access-story img { display: none; }
-  .customer-access-panel { padding-block: 14px 30px; }
-  .customer-access-nav { margin-bottom: 12px; }
+  .customer-wordmark span { width: 28px; height: 28px; font-size: 18px; }
+  .customer-access-pill { margin-top: 18px; }
+  .customer-access h1 { max-width: none; margin: 10px 0 8px; font-size: 36px; }
+  .customer-benefits { display: none; }
+  .customer-access-stage { display: none; }
+  .customer-access-panel { padding: 20px 16px 36px; align-items: start; }
 }
