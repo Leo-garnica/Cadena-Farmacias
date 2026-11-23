@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowDown, ArrowRight, ArrowUp, Boxes, CalendarDays, MapPin, PackageSearch, ShoppingBag, Truck } from 'lucide-react'
+import { Showcase3D } from '../../shared/ui/Showcase3D'
 import './landing.css'
 
 const topics = [
@@ -32,21 +33,21 @@ export function LandingPage({ brand, loginPath, commerce = false }: { brand: Rea
       </div>
     </header>
     <main id="presentacion" tabIndex={-1}>
-      <div className="mostrador-frame mostrador-hero">
-        <div className="mostrador-intro">
-          <h1>{commerce ? 'Tu farmacia, más cerca.' : 'El inventario, desde el mostrador.'}</h1>
-          <p>{commerce ? 'Encuentra productos en tu sucursal, pide para retirar o consulta si puedes recibir tu compra en casa.' : 'Un espacio para el equipo de farmacia. Encuentra productos y revisa sus existencias y lotes por sucursal.'}</p>
-          <Link className="mostrador-enter" to={commerce ? '/tienda' : loginPath}>
-            {commerce ? 'Explorar la tienda' : 'Acceso del personal'} <ArrowRight size={20} aria-hidden="true" />
-          </Link>
+      <section className="mostrador-hero-band">
+        <div className="mostrador-frame mostrador-hero">
+          <div className="mostrador-intro">
+            <span className="mostrador-eyebrow">{commerce ? 'FARMACIA VITAFARMA' : 'SISTEMA DE MOSTRADOR'}</span>
+            <h1>{commerce ? 'Tu farmacia, más cerca.' : 'El inventario, desde el mostrador.'}</h1>
+            <p>{commerce ? 'Encuentra productos en tu sucursal, pide para retirar o consulta si puedes recibir tu compra en casa.' : 'Un espacio para el equipo de farmacia. Encuentra productos y revisa sus existencias y lotes por sucursal.'}</p>
+            <Link className="mostrador-enter" to={commerce ? '/tienda' : loginPath}>
+              {commerce ? 'Explorar la tienda' : 'Acceso del personal'} <ArrowRight size={20} aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="mostrador-photo">
+            <Showcase3D variant="hero" />
+          </div>
         </div>
-        <div className="mostrador-photo">
-          <picture>
-            <source srcSet="/images/mostrador.webp" type="image/webp" />
-            <img src="/images/mostrador.jpg" alt="" fetchPriority="high" decoding="async" width="1448" height="1086" />
-          </picture>
-        </div>
-      </div>
+      </section>
       <section className="mostrador-guide" aria-labelledby="consultas">
         <div className="mostrador-frame mostrador-guide-layout">
           <div className="mostrador-guide-intro">
@@ -55,13 +56,13 @@ export function LandingPage({ brand, loginPath, commerce = false }: { brand: Rea
           </div>
           <dl className="mostrador-topics">
             {(commerce ? shopTopics : topics).map(({ Icon, title, detail }) => <div className="mostrador-topic" key={title}>
-              <dt><Icon size={23} strokeWidth={1.6} aria-hidden="true" />{title}</dt>
+              <dt><span className="mostrador-topic-icon" aria-hidden="true"><Icon size={20} strokeWidth={1.7} /></span>{title}</dt>
               <dd>{detail}</dd>
             </div>)}
           </dl>
         </div>
       </section>
     </main>
-    <footer className="mostrador-frame mostrador-footer"><span>VitaFarma</span><a href="#inicio">Volver al inicio <ArrowUp size={14} aria-hidden="true" /></a></footer>
+    <footer className="mostrador-footer-band"><div className="mostrador-frame mostrador-footer"><span>VitaFarma</span><a href="#inicio">Volver al inicio <ArrowUp size={14} aria-hidden="true" /></a></div></footer>
   </div>
 }

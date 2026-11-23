@@ -1,5 +1,5 @@
 .brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-heading); font-size: 25px; font-weight: 800; letter-spacing: -.7px; }
-.brand__period { color: #B8D7A9; }
-.brand__symbol { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid rgb(255 255 255 / 36%); border-radius: 10px; }
-.brand__symbol span { position: relative; width: 18px; height: 7px; background: #DCE9DC; border-radius: 1px; }
-.brand__symbol span::after { content: ''; position: absolute; width: 7px; height: 18px; top: -5.5px; left: 5.5px; background: #DCE9DC; border-radius: 1px; }
+.brand__period { color: var(--accent-lime); }
+.brand__symbol { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid rgb(201 242 123 / 36%); background: rgb(201 242 123 / 12%); border-radius: 10px 10px 10px 3px; }
+.brand__symbol span { position: relative; width: 16px; height: 6px; background: var(--accent-lime); border-radius: 1.5px; }
+.brand__symbol span::after { content: ''; position: absolute; width: 6px; height: 16px; top: -5px; left: 5px; background: var(--accent-lime); border-radius: 1.5px; }
