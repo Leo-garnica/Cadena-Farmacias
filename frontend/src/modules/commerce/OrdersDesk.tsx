@@ -34,7 +34,7 @@ function WorkOrder({ order, userId, staffRole, refresh }: { order: Order; userId
     apply(dialog, fields)
   }
 
-  return <article className="commerce-order commerce-panel">
+  return <article className={`commerce-order commerce-panel commerce-order--${order.estado}`}>
     <OrderHeader order={order} />
     {order.asignado && <p className="commerce-helper">{mine ? 'A tu cargo' : 'Asignado a otra persona'}</p>}
     {order.direccion && <p className="commerce-helper">Dirección de entrega: {order.direccion}</p>}

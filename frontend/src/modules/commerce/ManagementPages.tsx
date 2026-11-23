@@ -203,11 +203,20 @@ export function HistoryDesk({ branches, userId }: { branches: StaffBranch[]; use
     {history.data && <>
       <section className="commerce-panel" aria-label="Comparación de sucursales">
         <h3>Ventas por sucursal</h3>
-        {history.data.ranking.length ? <ol className="commerce-lines commerce-ranking">
-          {history.data.ranking.map(branch => <li key={branch.farmacia}>
-            <div><strong>{branch.nombre}</strong><small>{branch.ventas} ventas · {branch.unidades} unidades</small></div><strong>{money(branch.totalCentavos)}</strong>
-          </li>)}
-        </ol> : <Message>El periodo seleccionado no tiene ventas.</Message>}
+        {history.data.ranking.length ? (() => {
+          const topTotal = Math.max(1, ...history.data.ranking.map(item => item.totalCentavos))
+          return <ol className="commerce-lines commerce-ranking">
+            {history.data.ranking.map(branch => <li key={branch.farmacia}>
+              <div className="commerce-rank-row">
+                <div><strong>{branch.nombre}</strong><small>{branch.ventas} ventas · {branch.unidades} unidades</small></div>
+                <strong>{money(branch.totalCentavos)}</strong>
+              </div>
+              <div className="commerce-rank-track" aria-hidden="true">
+                <div className="commerce-rank-fill" style={{ width: `${Math.max(8, Math.round((branch.totalCentavos / topTotal) * 100))}%` }} />
+              </div>
+            </li>)}
+          </ol>
+        })() : <Message>El periodo seleccionado no tiene ventas.</Message>}
       </section>
       <section className="commerce-panel commerce-table-panel" aria-label="Listado de ventas">
         <h3>Operaciones registradas</h3>
