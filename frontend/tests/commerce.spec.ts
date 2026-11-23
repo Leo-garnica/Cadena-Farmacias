@@ -268,9 +268,9 @@ test('catálogo renderiza imágenes reales sin fondo para cada medicamento y eli
   await expect(page.locator('.commerce-preview')).toHaveCount(0)
   await expect(page.locator('.commerce-model')).toHaveCount(0)
 
-  // Decodificar y validar todas las imágenes de productos y el hero WebP
+  // Decodificar y validar todas las imágenes de productos y el showcase 3D sin fondo
   const imageReport = await page.evaluate(async () => {
-    const hero = document.querySelector<HTMLImageElement>('.vf-hero img')!
+    const hero = document.querySelector<HTMLImageElement>('.vf-hero-stage img')!
     await hero.decode()
     const productImgs = [...document.querySelectorAll<HTMLImageElement>('.vf-product-media img')]
     for (const img of productImgs) {
@@ -278,7 +278,7 @@ test('catálogo renderiza imágenes reales sin fondo para cada medicamento y eli
       await img.decode()
     }
     return {
-      heroLoaded: hero.complete && hero.naturalWidth > 0,
+      heroLoaded: hero.complete && hero.naturalWidth === 640 && hero.naturalHeight === 520,
       heroCurrentSrc: hero.currentSrc,
       productCount: productImgs.length,
       allLoaded: productImgs.every(img => img.complete && img.naturalWidth === 440 && img.naturalHeight === 340),
@@ -288,11 +288,25 @@ test('catálogo renderiza imágenes reales sin fondo para cada medicamento y eli
   })
 
   expect(imageReport.heroLoaded).toBe(true)
-  expect(imageReport.heroCurrentSrc).toContain('/images/mostrador.webp')
+  expect(imageReport.heroCurrentSrc).toContain('/images/hero-3d/frasco-tabletas.webp')
   expect(imageReport.productCount).toBe(12)
   expect(imageReport.allLoaded).toBe(true)
   expect(imageReport.uniqueSources).toBe(12)
   expect(imageReport.allUnderProductsDir).toBe(true)
+
+  // Interacción 3D con cursor y cambio de medicamento en la vitrina del hero
+  const stage = page.locator('.vf-hero-stage .vf-stage3d')
+  const viewport = page.locator('.vf-hero-stage .vf-stage3d-viewport')
+  const box = (await viewport.boundingBox())!
+  await page.mouse.move(box.x + box.width * 0.8, box.y + box.height * 0.25)
+  await expect(stage).toHaveAttribute('data-tilt-active', 'true')
+  const rx = await viewport.evaluate(el => getComputedStyle(el).getPropertyValue('--rx').trim())
+  expect(rx).not.toBe('0deg')
+
+  const capsulesTab = page.locator('.vf-hero-stage').getByRole('button', { name: 'Cápsulas 3D' })
+  await capsulesTab.click()
+  await expect(capsulesTab).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('.vf-hero-stage img')).toHaveAttribute('src', '/images/hero-3d/capsulas-3d.webp')
   expect(errors).toEqual([])
 })
 
@@ -521,8 +535,16 @@ for (const width of [360, 768, 1280]) {
     })
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
     const copyBox = await page.locator('.vf-hero-copy').boundingBox()
-    const photoBox = await page.locator('.vf-hero-picture').boundingBox()
-    expect(photoBox!.x).toBeGreaterThanOrEqual(copyBox!.x + copyBox!.width - 2)
+    const stageBox = await page.locator('.vf-hero-stage').boundingBox()
+    if (width >= 768) {
+      expect(stageBox!.x).toBeGreaterThanOrEqual(copyBox!.x + copyBox!.width - 2)
+    } else {
+      expect(stageBox!.y).toBeGreaterThanOrEqual(copyBox!.y + copyBox!.height - 2)
+    }
+    // Movimiento reducido mantiene la vitrina 3D fija ante el puntero
+    const vp = (await page.locator('.vf-hero-stage .vf-stage3d-viewport').boundingBox())!
+    await page.mouse.move(vp.x + vp.width * 0.75, vp.y + vp.height * 0.3)
+    await expect(page.locator('.vf-hero-stage .vf-stage3d')).toHaveAttribute('data-tilt-active', 'false')
     await page.screenshot({ path: info.outputPath(`tienda-${width}.png`), fullPage: true })
 
     await page.keyboard.press('Tab')
@@ -531,3 +553,55 @@ for (const width of [360, 768, 1280]) {
     await expect(page.locator('#store-products')).toBeFocused()
   })
 }
+
+test('capturas visuales de acceso cliente, portal personal, pedidos y operaciones', async ({ page, context }, info) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  const api = await mockCommerceApi(context, {
+    identity: {
+      tipo: 'personal',
+      nombre: 'Supervisión Cochabamba',
+      sucursales: [
+        { id: 1, nombre: 'Sucursal Centro', departamento: 'Cochabamba', rol: 'supervisor' },
+        { id: 2, nombre: 'Sucursal Norte', departamento: 'Sucre', rol: 'jefe' },
+      ],
+    },
+  })
+  api.orders.push(
+    {
+      id: 601, farmacia: 1, modalidad: 'retiro', estado: 'listo', fecha: '2026-11-22T15:30:00Z',
+      vence: '2026-11-25T15:30:00Z', totalCentavos: 1900, envioCentavos: 0, codigoRetiro: '654321', pago: 'simulado',
+      items: [
+        { codigo: 101, nombre: 'Paracetamol', cantidad: 2, precioCentavos: 600 },
+        { codigo: 106, nombre: 'Guantes', cantidad: 1, precioCentavos: 700 },
+      ],
+    },
+    {
+      id: 602, farmacia: 1, modalidad: 'envio', estado: 'en_preparacion', fecha: '2026-11-22T16:10:00Z',
+      totalCentavos: 1600, envioCentavos: 800, direccion: 'Av. América #420', pago: 'simulado',
+      items: [{ codigo: 111, nombre: 'Protector solar', cantidad: 1, precioCentavos: 800 }],
+    },
+  )
+
+  await page.goto('/tienda/entrar')
+  await expect(page.getByRole('heading', { name: 'Tu cuenta VitaFarma' })).toBeVisible()
+  await page.evaluate(async () => {
+    await document.fonts.ready
+    for (const img of document.querySelectorAll<HTMLImageElement>('img')) { img.loading = 'eager'; await img.decode() }
+  })
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await page.screenshot({ path: info.outputPath('login-cliente-1280.png'), fullPage: true })
+
+  await page.goto('/equipo/entrar')
+  await expect(page.getByRole('heading', { name: 'Acceso del personal' })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await page.screenshot({ path: info.outputPath('login-personal-1280.png'), fullPage: true })
+
+  await seedAuth(page)
+  await page.goto(`${commerceOrigin}/operaciones`)
+  await expect(page.getByRole('heading', { name: 'Operaciones de sucursal' })).toBeVisible()
+  await page.screenshot({ path: info.outputPath('operaciones-pedidos-1280.png'), fullPage: true })
+
+  await page.getByRole('button', { name: 'Historial de ventas' }).click()
+  await expect(page.getByRole('heading', { name: 'Historial de ventas' })).toBeVisible()
+  await page.screenshot({ path: info.outputPath('operaciones-historial-1280.png'), fullPage: true })
+})
